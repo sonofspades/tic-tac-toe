@@ -45,6 +45,11 @@ auto main() -> int
     {
         glfwPollEvents();
 
+        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        {
+            glfwSetWindowShouldClose(window, true);
+        }
+
         glClear(GL_COLOR_BUFFER_BIT);
 
         glDrawElements(GL_POINTS, elements.size(), GL_UNSIGNED_INT, nullptr);
