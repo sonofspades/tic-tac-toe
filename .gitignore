@@ -1,2 +1,6 @@
+build
 cmake
-.idea
+
+*.idea
+*.exe
+*.pdb
