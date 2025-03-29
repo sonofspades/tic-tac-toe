@@ -55,5 +55,9 @@ auto main() -> int
     glfwDestroyWindow(window);
     glfwTerminate();
 
+    glDeleteVertexArrays(1, &vao);
+    glDeleteBuffers(1, &vbo);
+    glDeleteBuffers(1, &ebo);
+
     return 0;
 }
