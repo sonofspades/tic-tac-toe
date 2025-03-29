@@ -2400,9 +2400,6 @@ GLAPI PFNGLDELETEVERTEXARRAYSPROC glad_glDeleteVertexArrays;
 typedef void (APIENTRYP PFNGLGENVERTEXARRAYSPROC)(GLsizei n, GLuint *arrays);
 GLAPI PFNGLGENVERTEXARRAYSPROC glad_glGenVertexArrays;
 #define glGenVertexArrays glad_glGenVertexArrays
-typedef GLboolean (APIENTRYP PFNGLISVERTEXARRAYPROC)(GLuint array);
-GLAPI PFNGLISVERTEXARRAYPROC glad_glIsVertexArray;
-#define glIsVertexArray glad_glIsVertexArray
 #endif
 #ifndef GL_VERSION_3_1
 #define GL_VERSION_3_1 1

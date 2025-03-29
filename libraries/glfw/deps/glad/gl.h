@@ -2231,7 +2231,6 @@ typedef GLboolean (GLAD_API_PTR *PFNGLISSAMPLERPROC)(GLuint sampler);
 typedef GLboolean (GLAD_API_PTR *PFNGLISSHADERPROC)(GLuint shader);
 typedef GLboolean (GLAD_API_PTR *PFNGLISSYNCPROC)(GLsync sync);
 typedef GLboolean (GLAD_API_PTR *PFNGLISTEXTUREPROC)(GLuint texture);
-typedef GLboolean (GLAD_API_PTR *PFNGLISVERTEXARRAYPROC)(GLuint array);
 typedef void (GLAD_API_PTR *PFNGLLIGHTMODELFPROC)(GLenum pname, GLfloat param);
 typedef void (GLAD_API_PTR *PFNGLLIGHTMODELFVPROC)(GLenum pname, const GLfloat * params);
 typedef void (GLAD_API_PTR *PFNGLLIGHTMODELIPROC)(GLenum pname, GLint param);
@@ -3310,8 +3309,6 @@ GLAD_API_CALL PFNGLISSYNCPROC glad_glIsSync;
 #define glIsSync glad_glIsSync
 GLAD_API_CALL PFNGLISTEXTUREPROC glad_glIsTexture;
 #define glIsTexture glad_glIsTexture
-GLAD_API_CALL PFNGLISVERTEXARRAYPROC glad_glIsVertexArray;
-#define glIsVertexArray glad_glIsVertexArray
 GLAD_API_CALL PFNGLLIGHTMODELFPROC glad_glLightModelf;
 #define glLightModelf glad_glLightModelf
 GLAD_API_CALL PFNGLLIGHTMODELFVPROC glad_glLightModelfv;
@@ -4553,7 +4550,6 @@ PFNGLISSAMPLERPROC glad_glIsSampler = NULL;
 PFNGLISSHADERPROC glad_glIsShader = NULL;
 PFNGLISSYNCPROC glad_glIsSync = NULL;
 PFNGLISTEXTUREPROC glad_glIsTexture = NULL;
-PFNGLISVERTEXARRAYPROC glad_glIsVertexArray = NULL;
 PFNGLLIGHTMODELFPROC glad_glLightModelf = NULL;
 PFNGLLIGHTMODELFVPROC glad_glLightModelfv = NULL;
 PFNGLLIGHTMODELIPROC glad_glLightModeli = NULL;
@@ -5612,7 +5608,6 @@ static void glad_gl_load_GL_VERSION_3_0( GLADuserptrloadfunc load, void* userptr
     glad_glIsEnabledi = (PFNGLISENABLEDIPROC) load(userptr, "glIsEnabledi");
     glad_glIsFramebuffer = (PFNGLISFRAMEBUFFERPROC) load(userptr, "glIsFramebuffer");
     glad_glIsRenderbuffer = (PFNGLISRENDERBUFFERPROC) load(userptr, "glIsRenderbuffer");
-    glad_glIsVertexArray = (PFNGLISVERTEXARRAYPROC) load(userptr, "glIsVertexArray");
     glad_glMapBufferRange = (PFNGLMAPBUFFERRANGEPROC) load(userptr, "glMapBufferRange");
     glad_glRenderbufferStorage = (PFNGLRENDERBUFFERSTORAGEPROC) load(userptr, "glRenderbufferStorage");
     glad_glRenderbufferStorageMultisample = (PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC) load(userptr, "glRenderbufferStorageMultisample");
