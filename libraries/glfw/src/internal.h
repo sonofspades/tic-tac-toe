@@ -658,11 +658,6 @@ struct _GLFWplatform
     int (*getKeyScancode)(int);
     void (*setClipboardString)(const char*);
     const char* (*getClipboardString)(void);
-    GLFWbool (*initJoysticks)(void);
-    void (*terminateJoysticks)(void);
-    GLFWbool (*pollJoystick)(_GLFWjoystick*,int);
-    const char* (*getMappingName)(void);
-    void (*updateGamepadGUID)(char*);
     // monitor
     void (*freeMonitor)(_GLFWmonitor*);
     void (*getMonitorPos)(_GLFWmonitor*,int*,int*);
@@ -831,7 +826,6 @@ struct _GLFWlibrary
 
     struct {
         GLFWmonitorfun  monitor;
-        GLFWjoystickfun joystick;
     } callbacks;
 
     // These are defined in platform.h
@@ -842,7 +836,6 @@ struct _GLFWlibrary
 // Global state shared between compilation units of GLFW
 //
 extern _GLFWlibrary _glfw;
-
 
 //////////////////////////////////////////////////////////////////////////
 //////                       GLFW platform API                      //////
@@ -865,7 +858,6 @@ void _glfwPlatformUnlockMutex(_GLFWmutex* mutex);
 void* _glfwPlatformLoadModule(const char* path);
 void _glfwPlatformFreeModule(void* module);
 GLFWproc _glfwPlatformGetModuleSymbol(void* module, const char* name);
-
 
 //////////////////////////////////////////////////////////////////////////
 //////                         GLFW event API                       //////
@@ -906,7 +898,6 @@ void _glfwInputError(int code, const char* format, ...)
 #else
 void _glfwInputError(int code, const char* format, ...);
 #endif
-
 
 //////////////////////////////////////////////////////////////////////////
 //////                       GLFW internal API                      //////
@@ -972,4 +963,3 @@ int _glfw_max(int a, int b);
 void* _glfw_calloc(size_t count, size_t size);
 void* _glfw_realloc(void* pointer, size_t size);
 void _glfw_free(void* pointer);
-

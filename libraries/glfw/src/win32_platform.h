@@ -613,12 +613,6 @@ GLFWbool _glfwGetVideoModeWin32(_GLFWmonitor* monitor, GLFWvidmode* mode);
 GLFWbool _glfwGetGammaRampWin32(_GLFWmonitor* monitor, GLFWgammaramp* ramp);
 void _glfwSetGammaRampWin32(_GLFWmonitor* monitor, const GLFWgammaramp* ramp);
 
-GLFWbool _glfwInitJoysticksWin32(void);
-void _glfwTerminateJoysticksWin32(void);
-GLFWbool _glfwPollJoystickWin32(_GLFWjoystick* js, int mode);
-const char* _glfwGetMappingNameWin32(void);
-void _glfwUpdateGamepadGUIDWin32(char* guid);
-
 GLFWbool _glfwInitWGL(void);
 void _glfwTerminateWGL(void);
 GLFWbool _glfwCreateContextWGL(_GLFWwindow* window,

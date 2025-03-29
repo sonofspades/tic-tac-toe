@@ -1990,27 +1990,6 @@ typedef void (* GLFWdropfun)(GLFWwindow* window, int path_count, const char* pat
  */
 typedef void (* GLFWmonitorfun)(GLFWmonitor* monitor, int event);
 
-/*! @brief The function pointer type for joystick configuration callbacks.
- *
- *  This is the function pointer type for joystick configuration callbacks.
- *  A joystick configuration callback function has the following signature:
- *  @code
- *  void function_name(int jid, int event)
- *  @endcode
- *
- *  @param[in] jid The joystick that was connected or disconnected.
- *  @param[in] event One of `GLFW_CONNECTED` or `GLFW_DISCONNECTED`.  Future
- *  releases may add more events.
- *
- *  @sa @ref joystick_event
- *  @sa @ref glfwSetJoystickCallback
- *
- *  @since Added in version 3.2.
- *
- *  @ingroup input
- */
-typedef void (* GLFWjoystickfun)(int jid, int event);
-
 /*! @brief Video mode type.
  *
  *  This describes a single video mode.
@@ -5769,42 +5748,6 @@ GLFWAPI void* glfwGetJoystickUserPointer(int jid);
  *  @ingroup input
  */
 GLFWAPI int glfwJoystickIsGamepad(int jid);
-
-/*! @brief Sets the joystick configuration callback.
- *
- *  This function sets the joystick configuration callback, or removes the
- *  currently set callback.  This is called when a joystick is connected to or
- *  disconnected from the system.
- *
- *  For joystick connection and disconnection events to be delivered on all
- *  platforms, you need to call one of the [event processing](@ref events)
- *  functions.  Joystick disconnection may also be detected and the callback
- *  called by joystick functions.  The function will then return whatever it
- *  returns if the joystick is not present.
- *
- *  @param[in] callback The new callback, or `NULL` to remove the currently set
- *  callback.
- *  @return The previously set callback, or `NULL` if no callback was set or the
- *  library had not been [initialized](@ref intro_init).
- *
- *  @callback_signature
- *  @code
- *  void function_name(int jid, int event)
- *  @endcode
- *  For more information about the callback parameters, see the
- *  [function pointer type](@ref GLFWjoystickfun).
- *
- *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED.
- *
- *  @thread_safety This function must only be called from the main thread.
- *
- *  @sa @ref joystick_event
- *
- *  @since Added in version 3.2.
- *
- *  @ingroup input
- */
-GLFWAPI GLFWjoystickfun glfwSetJoystickCallback(GLFWjoystickfun callback);
 
 /*! @brief Adds the specified SDL_GameControllerDB gamepad mappings.
  *

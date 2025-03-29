@@ -115,12 +115,7 @@ static void terminate(void)
     _glfw.monitors = NULL;
     _glfw.monitorCount = 0;
 
-    _glfw_free(_glfw.mappings);
-    _glfw.mappings = NULL;
-    _glfw.mappingCount = 0;
-
     _glfwTerminateVulkan();
-    _glfw.platform.terminateJoysticks();
     _glfw.platform.terminate();
 
     _glfw.initialized = GLFW_FALSE;
@@ -417,8 +412,6 @@ GLFWAPI int glfwInit(void)
     }
 
     _glfwPlatformSetTls(&_glfw.errorSlot, &_glfwMainThreadError);
-
-    _glfwInitGamepadMappings();
 
     _glfwPlatformInitTimer();
     _glfw.timer.offset = _glfwPlatformGetTimerValue();

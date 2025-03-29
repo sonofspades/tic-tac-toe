@@ -74,31 +74,6 @@ GLFWbool _glfwSelectPlatform(int desiredID, _GLFWplatform* platform)
         return GLFW_FALSE;
     }
 
-    // Only allow the Null platform if specifically requested
-    if (desiredID == GLFW_PLATFORM_NULL)
-        return _glfwConnectNull(desiredID, platform);
-    else if (count == 0)
-    {
-        _glfwInputError(GLFW_PLATFORM_UNAVAILABLE, "This binary only supports the Null platform");
-        return GLFW_FALSE;
-    }
-
-#if defined(_GLFW_WAYLAND) && defined(_GLFW_X11)
-    if (desiredID == GLFW_ANY_PLATFORM)
-    {
-        const char* const session = getenv("XDG_SESSION_TYPE");
-        if (session)
-        {
-            // Only follow XDG_SESSION_TYPE if it is set correctly and the
-            // environment looks plausble; otherwise fall back to detection
-            if (strcmp(session, "wayland") == 0 && getenv("WAYLAND_DISPLAY"))
-                desiredID = GLFW_PLATFORM_WAYLAND;
-            else if (strcmp(session, "x11") == 0 && getenv("DISPLAY"))
-                desiredID = GLFW_PLATFORM_X11;
-        }
-    }
-#endif
-
     if (desiredID == GLFW_ANY_PLATFORM)
     {
         // If there is exactly one platform available for auto-selection, let it emit the

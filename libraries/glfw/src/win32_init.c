@@ -340,27 +340,6 @@ static LRESULT CALLBACK helperWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LP
         case WM_DISPLAYCHANGE:
             _glfwPollMonitorsWin32();
             break;
-
-        case WM_DEVICECHANGE:
-        {
-            if (!_glfw.joysticksInitialized)
-                break;
-
-            if (wParam == DBT_DEVICEARRIVAL)
-            {
-                DEV_BROADCAST_HDR* dbh = (DEV_BROADCAST_HDR*) lParam;
-                if (dbh && dbh->dbch_devicetype == DBT_DEVTYP_DEVICEINTERFACE)
-                    _glfwDetectJoystickConnectionWin32();
-            }
-            else if (wParam == DBT_DEVICEREMOVECOMPLETE)
-            {
-                DEV_BROADCAST_HDR* dbh = (DEV_BROADCAST_HDR*) lParam;
-                if (dbh && dbh->dbch_devicetype == DBT_DEVTYP_DEVICEINTERFACE)
-                    _glfwDetectJoystickDisconnectionWin32();
-            }
-
-            break;
-        }
     }
 
     return DefWindowProcW(hWnd, uMsg, wParam, lParam);
@@ -618,11 +597,6 @@ GLFWbool _glfwConnectWin32(int platformID, _GLFWplatform* platform)
         .getKeyScancode = _glfwGetKeyScancodeWin32,
         .setClipboardString = _glfwSetClipboardStringWin32,
         .getClipboardString = _glfwGetClipboardStringWin32,
-        .initJoysticks = _glfwInitJoysticksWin32,
-        .terminateJoysticks = _glfwTerminateJoysticksWin32,
-        .pollJoystick = _glfwPollJoystickWin32,
-        .getMappingName = _glfwGetMappingNameWin32,
-        .updateGamepadGUID = _glfwUpdateGamepadGUIDWin32,
         .freeMonitor = _glfwFreeMonitorWin32,
         .getMonitorPos = _glfwGetMonitorPosWin32,
         .getMonitorContentScale = _glfwGetMonitorContentScaleWin32,
@@ -721,11 +695,8 @@ void _glfwTerminateWin32(void)
     _glfw_free(_glfw.win32.rawInput);
 
     _glfwTerminateWGL();
-    _glfwTerminateEGL();
-    _glfwTerminateOSMesa();
 
     freeLibraries();
 }
 
 #endif // _GLFW_WIN32
-
