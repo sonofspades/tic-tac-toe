@@ -56,6 +56,7 @@ auto main() -> int
     glfwTerminate();
 
     glDeleteVertexArrays(1, &vao);
+
     glDeleteBuffers(1, &vbo);
     glDeleteBuffers(1, &ebo);
 
