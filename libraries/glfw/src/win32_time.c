@@ -51,4 +51,3 @@ uint64_t _glfwPlatformGetTimerFrequency(void)
 }
 
 #endif // GLFW_BUILD_WIN32_TIMER
-

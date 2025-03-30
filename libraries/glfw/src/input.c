@@ -280,10 +280,8 @@ GLFWAPI void glfwSetInputMode(GLFWwindow* handle, int mode, int value)
 
             if (!value)
             {
-                int i;
-
                 // Release all sticky keys
-                for (i = 0;  i <= GLFW_KEY_LAST;  i++)
+                for (int i = 0;  i <= GLFW_KEY_LAST;  i++)
                 {
                     if (window->keys[i] == _GLFW_STICK)
                         window->keys[i] = GLFW_RELEASE;
@@ -302,10 +300,8 @@ GLFWAPI void glfwSetInputMode(GLFWwindow* handle, int mode, int value)
 
             if (!value)
             {
-                int i;
-
                 // Release all sticky mouse buttons
-                for (i = 0;  i <= GLFW_MOUSE_BUTTON_LAST;  i++)
+                for (int i = 0;  i <= GLFW_MOUSE_BUTTON_LAST;  i++)
                 {
                     if (window->mouseButtons[i] == _GLFW_STICK)
                         window->mouseButtons[i] = GLFW_RELEASE;
@@ -743,4 +739,3 @@ GLFWAPI uint64_t glfwGetTimerFrequency(void)
     _GLFW_REQUIRE_INIT_OR_RETURN(0);
     return _glfwPlatformGetTimerFrequency();
 }
-

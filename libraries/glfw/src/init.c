@@ -48,8 +48,6 @@ static GLFWerrorfun _glfwErrorCallback;
 static GLFWallocator _glfwInitAllocator;
 static _GLFWinitconfig _glfwInitHints =
 {
-    .hatButtons = GLFW_TRUE,
-    .angleType = GLFW_ANGLE_PLATFORM_TYPE_NONE,
     .platformID = GLFW_ANY_PLATFORM,
     .vulkanLoader = NULL
 };
@@ -359,7 +357,6 @@ void _glfwInputError(int code, const char* format, ...)
         _glfwErrorCallback(code, description);
 }
 
-
 //////////////////////////////////////////////////////////////////////////
 //////                        GLFW public API                       //////
 //////////////////////////////////////////////////////////////////////////
@@ -420,19 +417,12 @@ GLFWAPI void glfwInitHint(int hint, int value)
 {
     switch (hint)
     {
-        case GLFW_JOYSTICK_HAT_BUTTONS:
-            _glfwInitHints.hatButtons = value;
-            return;
-        case GLFW_ANGLE_PLATFORM_TYPE:
-            _glfwInitHints.angleType = value;
-            return;
         case GLFW_PLATFORM:
             _glfwInitHints.platformID = value;
             return;
     }
 
-    _glfwInputError(GLFW_INVALID_ENUM,
-                    "Invalid init hint 0x%08X", hint);
+    _glfwInputError(GLFW_INVALID_ENUM, "Invalid init hint 0x%08X", hint);
 }
 
 GLFWAPI void glfwInitAllocator(const GLFWallocator* allocator)
@@ -451,16 +441,6 @@ GLFWAPI void glfwInitAllocator(const GLFWallocator* allocator)
 GLFWAPI void glfwInitVulkanLoader(PFN_vkGetInstanceProcAddr loader)
 {
     _glfwInitHints.vulkanLoader = loader;
-}
-
-GLFWAPI void glfwGetVersion(int* major, int* minor, int* rev)
-{
-    if (major != NULL)
-        *major = GLFW_VERSION_MAJOR;
-    if (minor != NULL)
-        *minor = GLFW_VERSION_MINOR;
-    if (rev != NULL)
-        *rev = GLFW_VERSION_REVISION;
 }
 
 GLFWAPI int glfwGetError(const char** description)

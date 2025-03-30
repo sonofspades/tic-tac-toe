@@ -50,4 +50,3 @@ typedef struct _GLFWmutexWin32
     GLFWbool            allocated;
     CRITICAL_SECTION    section;
 } _GLFWmutexWin32;
-

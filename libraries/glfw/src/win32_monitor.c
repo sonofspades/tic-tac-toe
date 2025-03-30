@@ -29,12 +29,9 @@
 
 #if defined(_GLFW_WIN32)
 
-#include <stdlib.h>
-#include <string.h>
-#include <limits.h>
-#include <wchar.h>
 #include <assert.h>
-
+#include <string.h>
+#include <wchar.h>
 
 // Callback for EnumDisplayMonitors in createMonitor
 //
@@ -62,7 +59,6 @@ static BOOL CALLBACK monitorCallback(HMONITOR handle,
 static _GLFWmonitor* createMonitor(DISPLAY_DEVICEW* adapter,
                                    DISPLAY_DEVICEW* display)
 {
-    _GLFWmonitor* monitor;
     int widthMM, heightMM;
     char* name;
     HDC dc;
@@ -95,7 +91,7 @@ static _GLFWmonitor* createMonitor(DISPLAY_DEVICEW* adapter,
 
     DeleteDC(dc);
 
-    monitor = _glfwAllocMonitor(name, widthMM, heightMM);
+    _GLFWmonitor* monitor = _glfwAllocMonitor(name, widthMM, heightMM);
     _glfw_free(name);
 
     if (adapter->StateFlags & DISPLAY_DEVICE_MODESPRUNED)
@@ -136,13 +132,13 @@ static _GLFWmonitor* createMonitor(DISPLAY_DEVICEW* adapter,
 //
 void _glfwPollMonitorsWin32(void)
 {
-    int i, disconnectedCount;
+    int i;
     _GLFWmonitor** disconnected = NULL;
-    DWORD adapterIndex, displayIndex;
+    DWORD displayIndex;
     DISPLAY_DEVICEW adapter, display;
     _GLFWmonitor* monitor;
 
-    disconnectedCount = _glfw.monitorCount;
+    const int disconnectedCount = _glfw.monitorCount;
     if (disconnectedCount)
     {
         disconnected = _glfw_calloc(_glfw.monitorCount, sizeof(_GLFWmonitor*));
@@ -151,7 +147,7 @@ void _glfwPollMonitorsWin32(void)
                _glfw.monitorCount * sizeof(_GLFWmonitor*));
     }
 
-    for (adapterIndex = 0;  ;  adapterIndex++)
+    for (DWORD adapterIndex = 0;  ;  adapterIndex++)
     {
         int type = _GLFW_INSERT_LAST;
 
@@ -249,11 +245,9 @@ void _glfwPollMonitorsWin32(void)
 void _glfwSetVideoModeWin32(_GLFWmonitor* monitor, const GLFWvidmode* desired)
 {
     GLFWvidmode current;
-    const GLFWvidmode* best;
     DEVMODEW dm;
-    LONG result;
 
-    best = _glfwChooseVideoMode(monitor, desired);
+    const GLFWvidmode* best = _glfwChooseVideoMode(monitor, desired);
     _glfwGetVideoModeWin32(monitor, &current);
     if (_glfwCompareVideoModes(&current, best) == 0)
         return;
@@ -270,11 +264,7 @@ void _glfwSetVideoModeWin32(_GLFWmonitor* monitor, const GLFWvidmode* desired)
     if (dm.dmBitsPerPel < 15 || dm.dmBitsPerPel >= 24)
         dm.dmBitsPerPel = 32;
 
-    result = ChangeDisplaySettingsExW(monitor->win32.adapterName,
-                                      &dm,
-                                      NULL,
-                                      CDS_FULLSCREEN,
-                                      NULL);
+    const LONG result = ChangeDisplaySettingsExW(monitor->win32.adapterName, &dm, NULL, CDS_FULLSCREEN, NULL);
     if (result == DISP_CHANGE_SUCCESSFUL)
         monitor->win32.modeChanged = GLFW_TRUE;
     else

@@ -27,13 +27,7 @@
 
 #if defined(GLFW_BUILD_WIN32_TIMER) || \
     defined(GLFW_BUILD_WIN32_MODULE) || \
-    defined(GLFW_BUILD_WIN32_THREAD) || \
-    defined(GLFW_BUILD_COCOA_TIMER) || \
-    defined(GLFW_BUILD_POSIX_TIMER) || \
-    defined(GLFW_BUILD_POSIX_MODULE) || \
-    defined(GLFW_BUILD_POSIX_THREAD) || \
-    defined(GLFW_BUILD_POSIX_POLL) || \
-    defined(GLFW_BUILD_LINUX_JOYSTICK)
+    defined(GLFW_BUILD_WIN32_THREAD)
  #error "You must not define these; define zero or more _GLFW_<platform> macros instead"
 #endif
 
@@ -119,8 +113,3 @@
 #else
  #define GLFW_BUILD_POSIX_MODULE
 #endif
-
-#if defined(_GLFW_WAYLAND) || defined(_GLFW_X11)
- #define GLFW_BUILD_POSIX_POLL
-#endif
-

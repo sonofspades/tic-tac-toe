@@ -61,13 +61,9 @@ static const struct
 GLFWbool _glfwSelectPlatform(int desiredID, _GLFWplatform* platform)
 {
     const size_t count = sizeof(supportedPlatforms) / sizeof(supportedPlatforms[0]);
-    size_t i;
 
     if (desiredID != GLFW_ANY_PLATFORM &&
         desiredID != GLFW_PLATFORM_WIN32 &&
-        desiredID != GLFW_PLATFORM_COCOA &&
-        desiredID != GLFW_PLATFORM_WAYLAND &&
-        desiredID != GLFW_PLATFORM_X11 &&
         desiredID != GLFW_PLATFORM_NULL)
     {
         _glfwInputError(GLFW_INVALID_ENUM, "Invalid platform ID 0x%08X", desiredID);
@@ -80,25 +76,15 @@ GLFWbool _glfwSelectPlatform(int desiredID, _GLFWplatform* platform)
         // error on failure as the platform-specific error description may be more helpful
         if (count == 1)
             return supportedPlatforms[0].connect(supportedPlatforms[0].ID, platform);
-
-        for (i = 0;  i < count;  i++)
-        {
-            if (supportedPlatforms[i].connect(desiredID, platform))
-                return GLFW_TRUE;
-        }
-
-        _glfwInputError(GLFW_PLATFORM_UNAVAILABLE, "Failed to detect any supported platform");
     }
-    else
+
+    for (size_t i = 0;  i < count;  i++)
     {
-        for (i = 0;  i < count;  i++)
-        {
-            if (supportedPlatforms[i].ID == desiredID)
-                return supportedPlatforms[i].connect(desiredID, platform);
-        }
-
-        _glfwInputError(GLFW_PLATFORM_UNAVAILABLE, "The requested platform is not supported");
+        if (supportedPlatforms[i].ID == desiredID)
+            return supportedPlatforms[i].connect(desiredID, platform);
     }
+
+    _glfwInputError(GLFW_PLATFORM_UNAVAILABLE, "The requested platform is not supported");
 
     return GLFW_FALSE;
 }
@@ -119,9 +105,6 @@ GLFWAPI int glfwPlatformSupported(int platformID)
     size_t i;
 
     if (platformID != GLFW_PLATFORM_WIN32 &&
-        platformID != GLFW_PLATFORM_COCOA &&
-        platformID != GLFW_PLATFORM_WAYLAND &&
-        platformID != GLFW_PLATFORM_X11 &&
         platformID != GLFW_PLATFORM_NULL)
     {
         _glfwInputError(GLFW_INVALID_ENUM, "Invalid platform ID 0x%08X", platformID);
@@ -139,49 +122,3 @@ GLFWAPI int glfwPlatformSupported(int platformID)
 
     return GLFW_FALSE;
 }
-
-GLFWAPI const char* glfwGetVersionString(void)
-{
-    return _GLFW_MAKE_VERSION(GLFW_VERSION_MAJOR,
-                              GLFW_VERSION_MINOR,
-                              GLFW_VERSION_REVISION)
-#if defined(_GLFW_WIN32)
-        " Win32 WGL"
-#endif
-#if defined(_GLFW_COCOA)
-        " Cocoa NSGL"
-#endif
-#if defined(_GLFW_WAYLAND)
-        " Wayland"
-#endif
-#if defined(_GLFW_X11)
-        " X11 GLX"
-#endif
-        " Null"
-        " EGL"
-        " OSMesa"
-#if defined(__MINGW64_VERSION_MAJOR)
-        " MinGW-w64"
-#elif defined(__MINGW32__)
-        " MinGW"
-#elif defined(_MSC_VER)
-        " VisualC"
-#endif
-#if defined(_GLFW_USE_HYBRID_HPG) || defined(_GLFW_USE_OPTIMUS_HPG)
-        " hybrid-GPU"
-#endif
-#if defined(_POSIX_MONOTONIC_CLOCK)
-        " monotonic"
-#endif
-#if defined(_GLFW_BUILD_DLL)
-#if defined(_WIN32)
-        " DLL"
-#elif defined(__APPLE__)
-        " dynamic"
-#else
-        " shared"
-#endif
-#endif
-        ;
-}
-

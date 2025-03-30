@@ -40,10 +40,8 @@ static const GUID _glfw_GUID_DEVINTERFACE_HID =
 //
 static GLFWbool loadLibraries(void)
 {
-    if (!GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
-                                GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-                            (const WCHAR*) &_glfw,
-                            (HMODULE*) &_glfw.win32.instance))
+    if (!GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, (const WCHAR*) &_glfw,
+                            &_glfw.win32.instance))
     {
         _glfwInputErrorWin32(GLFW_PLATFORM_ERROR,
                              "Win32: Failed to retrieve own module handle");
@@ -344,10 +342,7 @@ static GLFWbool createHelperWindow(void)
 //
 WCHAR* _glfwCreateWideStringFromUTF8Win32(const char* source)
 {
-    WCHAR* target;
-    int count;
-
-    count = MultiByteToWideChar(CP_UTF8, 0, source, -1, NULL, 0);
+    int count = MultiByteToWideChar(CP_UTF8, 0, source, -1, NULL, 0);
     if (!count)
     {
         _glfwInputErrorWin32(GLFW_PLATFORM_ERROR,
@@ -355,7 +350,7 @@ WCHAR* _glfwCreateWideStringFromUTF8Win32(const char* source)
         return NULL;
     }
 
-    target = _glfw_calloc(count, sizeof(WCHAR));
+    WCHAR* target = _glfw_calloc(count, sizeof(WCHAR));
 
     if (!MultiByteToWideChar(CP_UTF8, 0, source, -1, target, count))
     {
@@ -372,10 +367,7 @@ WCHAR* _glfwCreateWideStringFromUTF8Win32(const char* source)
 //
 char* _glfwCreateUTF8FromWideStringWin32(const WCHAR* source)
 {
-    char* target;
-    int size;
-
-    size = WideCharToMultiByte(CP_UTF8, 0, source, -1, NULL, 0, NULL, NULL);
+    int size = WideCharToMultiByte(CP_UTF8, 0, source, -1, NULL, 0, NULL, NULL);
     if (!size)
     {
         _glfwInputErrorWin32(GLFW_PLATFORM_ERROR,
@@ -383,7 +375,7 @@ char* _glfwCreateUTF8FromWideStringWin32(const WCHAR* source)
         return NULL;
     }
 
-    target = _glfw_calloc(size, 1);
+    char* target = _glfw_calloc(size, 1);
 
     if (!WideCharToMultiByte(CP_UTF8, 0, source, -1, target, size, NULL, NULL))
     {

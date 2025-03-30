@@ -210,8 +210,6 @@ struct _GLFWerror
 //
 struct _GLFWinitconfig
 {
-    GLFWbool      hatButtons;
-    int           angleType;
     int           platformID;
     PFN_vkGetInstanceProcAddr vulkanLoader;
 };

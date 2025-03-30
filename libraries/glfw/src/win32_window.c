@@ -2025,7 +2025,6 @@ GLFWbool _glfwRawMouseMotionSupportedWin32(void)
 void _glfwPollEventsWin32(void)
 {
     MSG msg;
-    HWND handle;
     _GLFWwindow* window;
 
     while (PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE))
@@ -2057,13 +2056,12 @@ void _glfwPollEventsWin32(void)
     //       Other Win hotkeys are handled implicitly by _glfwInputWindowFocus
     //       because they change the input focus
     // NOTE: The other half of this is in the WM_*KEY* handler in windowProc
-    handle = GetActiveWindow();
+    HWND handle = GetActiveWindow();
     if (handle)
     {
         window = GetPropW(handle, L"GLFW");
         if (window)
         {
-            int i;
             const int keys[4][2] =
             {
                 { VK_LSHIFT, GLFW_KEY_LEFT_SHIFT },
@@ -2072,7 +2070,7 @@ void _glfwPollEventsWin32(void)
                 { VK_RWIN, GLFW_KEY_RIGHT_SUPER }
             };
 
-            for (i = 0;  i < 4;  i++)
+            for (int i = 0;  i < 4;  i++)
             {
                 const int vk = keys[i][0];
                 const int key = keys[i][1];
@@ -2418,7 +2416,6 @@ VkResult _glfwCreateWindowSurfaceWin32(VkInstance instance,
                                        const VkAllocationCallbacks* allocator,
                                        VkSurfaceKHR* surface)
 {
-    VkResult err;
     VkWin32SurfaceCreateInfoKHR sci;
     PFN_vkCreateWin32SurfaceKHR vkCreateWin32SurfaceKHR;
 
@@ -2436,7 +2433,7 @@ VkResult _glfwCreateWindowSurfaceWin32(VkInstance instance,
     sci.hinstance = _glfw.win32.instance;
     sci.hwnd = window->win32.handle;
 
-    err = vkCreateWin32SurfaceKHR(instance, &sci, allocator, surface);
+    VkResult err = vkCreateWin32SurfaceKHR(instance, &sci, allocator, surface);
     if (err)
     {
         _glfwInputError(GLFW_PLATFORM_ERROR,

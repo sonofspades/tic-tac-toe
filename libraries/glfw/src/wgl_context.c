@@ -29,8 +29,8 @@
 
 #if defined(_GLFW_WIN32)
 
-#include <stdlib.h>
 #include <assert.h>
+#include <stdlib.h>
 
 // Return the value corresponding to the specified attribute
 //
@@ -39,9 +39,7 @@ static int findPixelFormatAttribValueWGL(const int* attribs,
                                          const int* values,
                                          int attrib)
 {
-    int i;
-
-    for (i = 0;  i < attribCount;  i++)
+    for (int i = 0;  i < attribCount;  i++)
     {
         if (attribs[i] == attrib)
             return values[i];
@@ -66,9 +64,8 @@ static int choosePixelFormatWGL(_GLFWwindow* window,
                                 const _GLFWctxconfig* ctxconfig,
                                 const _GLFWfbconfig* fbconfig)
 {
-    _GLFWfbconfig* usableConfigs;
     const _GLFWfbconfig* closest;
-    int i, pixelFormat, nativeCount, usableCount = 0, attribCount = 0;
+    int pixelFormat, nativeCount, usableCount = 0, attribCount = 0;
     int attribs[40];
     int values[sizeof(attribs) / sizeof(attribs[0])];
 
@@ -134,9 +131,9 @@ static int choosePixelFormatWGL(_GLFWwindow* window,
         nativeCount = _glfw_min(nativeCount, extensionCount);
     }
 
-    usableConfigs = _glfw_calloc(nativeCount, sizeof(_GLFWfbconfig));
+    _GLFWfbconfig* usableConfigs = _glfw_calloc(nativeCount, sizeof(_GLFWfbconfig));
 
-    for (i = 0;  i < nativeCount;  i++)
+    for (int i = 0;  i < nativeCount;  i++)
     {
         _GLFWfbconfig* u = usableConfigs + usableCount;
         pixelFormat = i + 1;

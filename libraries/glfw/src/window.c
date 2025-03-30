@@ -383,7 +383,6 @@ GLFWAPI void glfwWindowHint(int hint, int value)
             _glfw.hints.window.scaleToMonitor = value ? GLFW_TRUE : GLFW_FALSE;
             return;
         case GLFW_SCALE_FRAMEBUFFER:
-        case GLFW_COCOA_RETINA_FRAMEBUFFER:
             _glfw.hints.window.scaleFramebuffer = value ? GLFW_TRUE : GLFW_FALSE;
             return;
         case GLFW_CENTER_CURSOR:
@@ -516,8 +515,6 @@ GLFWAPI void glfwSetWindowTitle(GLFWwindow* handle, const char* title)
 GLFWAPI void glfwSetWindowIcon(GLFWwindow* handle,
                                int count, const GLFWimage* images)
 {
-    int i;
-
     assert(count >= 0);
     assert(count == 0 || images != NULL);
 
@@ -532,7 +529,7 @@ GLFWAPI void glfwSetWindowIcon(GLFWwindow* handle,
         return;
     }
 
-    for (i = 0; i < count; i++)
+    for (int i = 0; i < count; i++)
     {
         assert(images[i].pixels != NULL);
 

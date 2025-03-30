@@ -314,13 +314,10 @@ const _GLFWfbconfig* _glfwChooseFBConfig(const _GLFWfbconfig* desired, const _GL
 GLFWbool _glfwRefreshContextAttribs(_GLFWwindow* window,
                                     const _GLFWctxconfig* ctxconfig)
 {
-    _GLFWwindow* previous;
-    const char* version;
-
     window->context.source = ctxconfig->source;
     window->context.client = GLFW_OPENGL_API;
 
-    previous = _glfwPlatformGetTls(&_glfw.contextSlot);
+    _GLFWwindow* previous = _glfwPlatformGetTls(&_glfw.contextSlot);
     glfwMakeContextCurrent((GLFWwindow*) window);
     if (_glfwPlatformGetTls(&_glfw.contextSlot) != window)
         return GLFW_FALSE;
@@ -336,7 +333,7 @@ GLFWbool _glfwRefreshContextAttribs(_GLFWwindow* window,
         return GLFW_FALSE;
     }
 
-    version = (const char*) window->context.GetString(GL_VERSION);
+    const char* version = (const char*)window->context.GetString(GL_VERSION);
     if (!version)
     {
         if (ctxconfig->client == GLFW_OPENGL_API)
@@ -537,14 +534,11 @@ GLFWbool _glfwStringInExtensionString(const char* string, const char* extensions
 
     for (;;)
     {
-        const char* where;
-        const char* terminator;
-
-        where = strstr(start, string);
+        const char* where = strstr(start, string);
         if (!where)
             return GLFW_FALSE;
 
-        terminator = where + strlen(string);
+        const char* terminator = where + strlen(string);
         if (where == start || *(where - 1) == ' ')
         {
             if (*terminator == ' ' || *terminator == '\0')
