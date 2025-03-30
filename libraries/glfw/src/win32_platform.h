@@ -463,18 +463,6 @@ typedef struct _GLFWlibraryWin32
 
     struct {
         HINSTANCE                       instance;
-        PFN_DirectInput8Create          Create;
-        IDirectInput8W*                 api;
-    } dinput8;
-
-    struct {
-        HINSTANCE                       instance;
-        PFN_XInputGetCapabilities       GetCapabilities;
-        PFN_XInputGetState              GetState;
-    } xinput;
-
-    struct {
-        HINSTANCE                       instance;
         PFN_SetProcessDPIAware          SetProcessDPIAware_;
         PFN_ChangeWindowMessageFilterEx ChangeWindowMessageFilterEx_;
         PFN_EnableNonClientDpiScaling   EnableNonClientDpiScaling_;
