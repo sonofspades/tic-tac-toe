@@ -1959,33 +1959,6 @@ GLFWbool _glfwWindowHoveredWin32(_GLFWwindow* window)
     return cursorInContentArea(window);
 }
 
-GLFWbool _glfwFramebufferTransparentWin32(_GLFWwindow* window)
-{
-    BOOL composition, opaque;
-    DWORD color;
-
-    if (!window->win32.transparent)
-        return GLFW_FALSE;
-
-    if (!IsWindowsVistaOrGreater())
-        return GLFW_FALSE;
-
-    if (FAILED(DwmIsCompositionEnabled(&composition)) || !composition)
-        return GLFW_FALSE;
-
-    if (!IsWindows8OrGreater())
-    {
-        // HACK: Disable framebuffer transparency on Windows 7 when the
-        //       colorization color is opaque, because otherwise the window
-        //       contents is blended additively with the previous frame instead
-        //       of replacing it
-        if (FAILED(DwmGetColorizationColor(&color, &opaque)) || opaque)
-            return GLFW_FALSE;
-    }
-
-    return GLFW_TRUE;
-}
-
 void _glfwSetWindowResizableWin32(_GLFWwindow* window, GLFWbool enabled)
 {
     updateWindowStyles(window);
@@ -2031,42 +2004,6 @@ void _glfwSetWindowMousePassthroughWin32(_GLFWwindow* window, GLFWbool enabled)
 
     if (enabled)
         SetLayeredWindowAttributes(window->win32.handle, key, alpha, flags);
-}
-
-float _glfwGetWindowOpacityWin32(_GLFWwindow* window)
-{
-    BYTE alpha;
-    DWORD flags;
-
-    if ((GetWindowLongW(window->win32.handle, GWL_EXSTYLE) & WS_EX_LAYERED) &&
-        GetLayeredWindowAttributes(window->win32.handle, NULL, &alpha, &flags))
-    {
-        if (flags & LWA_ALPHA)
-            return alpha / 255.f;
-    }
-
-    return 1.f;
-}
-
-void _glfwSetWindowOpacityWin32(_GLFWwindow* window, float opacity)
-{
-    LONG exStyle = GetWindowLongW(window->win32.handle, GWL_EXSTYLE);
-    if (opacity < 1.f || (exStyle & WS_EX_TRANSPARENT))
-    {
-        const BYTE alpha = (BYTE) (255 * opacity);
-        exStyle |= WS_EX_LAYERED;
-        SetWindowLongW(window->win32.handle, GWL_EXSTYLE, exStyle);
-        SetLayeredWindowAttributes(window->win32.handle, 0, alpha, LWA_ALPHA);
-    }
-    else if (exStyle & WS_EX_TRANSPARENT)
-    {
-        SetLayeredWindowAttributes(window->win32.handle, 0, 0, 0);
-    }
-    else
-    {
-        exStyle &= ~WS_EX_LAYERED;
-        SetWindowLongW(window->win32.handle, GWL_EXSTYLE, exStyle);
-    }
 }
 
 void _glfwSetRawMouseMotionWin32(_GLFWwindow *window, GLFWbool enabled)

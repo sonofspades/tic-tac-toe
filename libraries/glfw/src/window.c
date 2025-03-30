@@ -733,36 +733,6 @@ GLFWAPI void glfwGetWindowContentScale(GLFWwindow* handle,
     _glfw.platform.getWindowContentScale(window, xscale, yscale);
 }
 
-GLFWAPI float glfwGetWindowOpacity(GLFWwindow* handle)
-{
-    _GLFW_REQUIRE_INIT_OR_RETURN(0.f);
-
-    _GLFWwindow* window = (_GLFWwindow*) handle;
-    assert(window != NULL);
-
-    return _glfw.platform.getWindowOpacity(window);
-}
-
-GLFWAPI void glfwSetWindowOpacity(GLFWwindow* handle, float opacity)
-{
-    assert(opacity == opacity);
-    assert(opacity >= 0.f);
-    assert(opacity <= 1.f);
-
-    _GLFW_REQUIRE_INIT();
-
-    _GLFWwindow* window = (_GLFWwindow*) handle;
-    assert(window != NULL);
-
-    if (opacity != opacity || opacity < 0.f || opacity > 1.f)
-    {
-        _glfwInputError(GLFW_INVALID_VALUE, "Invalid window opacity %f", opacity);
-        return;
-    }
-
-    _glfw.platform.setWindowOpacity(window, opacity);
-}
-
 GLFWAPI void glfwIconifyWindow(GLFWwindow* handle)
 {
     _GLFW_REQUIRE_INIT();
@@ -868,8 +838,6 @@ GLFWAPI int glfwGetWindowAttrib(GLFWwindow* handle, int attrib)
             return window->focusOnShow;
         case GLFW_MOUSE_PASSTHROUGH:
             return window->mousePassthrough;
-        case GLFW_TRANSPARENT_FRAMEBUFFER:
-            return _glfw.platform.framebufferTransparent(window);
         case GLFW_RESIZABLE:
             return window->resizable;
         case GLFW_DECORATED:

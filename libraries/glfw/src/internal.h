@@ -493,12 +493,9 @@ struct _GLFWplatform
     GLFWbool (*windowVisible)(_GLFWwindow*);
     GLFWbool (*windowMaximized)(_GLFWwindow*);
     GLFWbool (*windowHovered)(_GLFWwindow*);
-    GLFWbool (*framebufferTransparent)(_GLFWwindow*);
-    float (*getWindowOpacity)(_GLFWwindow*);
     void (*setWindowResizable)(_GLFWwindow*,GLFWbool);
     void (*setWindowDecorated)(_GLFWwindow*,GLFWbool);
     void (*setWindowFloating)(_GLFWwindow*,GLFWbool);
-    void (*setWindowOpacity)(_GLFWwindow*,float);
     void (*setWindowMousePassthrough)(_GLFWwindow*,GLFWbool);
     void (*pollEvents)(void);
     void (*waitEvents)(void);
