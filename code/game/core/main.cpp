@@ -57,13 +57,13 @@ auto main() -> int
         glfwSwapBuffers(window);
     }
 
-    glfwDestroyWindow(window);
-    glfwTerminate();
-
     glDeleteVertexArrays(1, &vao);
 
     glDeleteBuffers(1, &vbo);
     glDeleteBuffers(1, &ebo);
+
+    glfwDestroyWindow(window);
+    glfwTerminate();
 
     return 0;
 }
