@@ -596,10 +596,6 @@ void _glfwSetCursorWin32(_GLFWwindow* window, _GLFWcursor* cursor);
 void _glfwSetClipboardStringWin32(const char* string);
 const char* _glfwGetClipboardStringWin32(void);
 
-EGLenum _glfwGetEGLPlatformWin32(EGLint** attribs);
-EGLNativeDisplayType _glfwGetEGLNativeDisplayWin32(void);
-EGLNativeWindowType _glfwGetEGLNativeWindowWin32(_GLFWwindow* window);
-
 void _glfwGetRequiredInstanceExtensionsWin32(char** extensions);
 GLFWbool _glfwGetPhysicalDevicePresentationSupportWin32(VkInstance instance, VkPhysicalDevice device, uint32_t queuefamily);
 VkResult _glfwCreateWindowSurfaceWin32(VkInstance instance, _GLFWwindow* window, const VkAllocationCallbacks* allocator, VkSurfaceKHR* surface);
