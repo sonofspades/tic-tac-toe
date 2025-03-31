@@ -1,6 +1,5 @@
 #=======================================================================================================================
 target_include_directories(${PROJECT_NAME} PRIVATE ..)
- target_precompile_headers(${PROJECT_NAME} PRIVATE private.hpp)
-     target_link_libraries(${PROJECT_NAME} PRIVATE glfw glad)
+     target_link_libraries(${PROJECT_NAME} PRIVATE glfw glad glm)
             target_sources(${PROJECT_NAME} PRIVATE main.cpp)
 #=======================================================================================================================
