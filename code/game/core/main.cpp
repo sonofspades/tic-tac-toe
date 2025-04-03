@@ -5,6 +5,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
+
 #include <vector>
 
 auto vertex_stage_text =
@@ -52,7 +56,7 @@ auto main() -> int
     glAttachShader(shader, fragment_stage);
     glLinkProgram(shader);
 
-    const std::vector vertices
+    const std::vector tile_vertices
     {
        -0.5f,  0.5f, 0.0f,
         0.5f,  0.5f, 0.0f,
@@ -60,24 +64,66 @@ auto main() -> int
        -0.5f, -0.5f, 0.0f
     };
 
-    const std::vector<uint32_t> elements
+    const std::vector<uint32_t> tile_elements
     {
         0, 1, 2,
         2, 3, 0
     };
 
-    uint32_t vao, vbo, ebo;
+    uint32_t tile_vao, tile_vbo, tile_ebo;
 
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
+    glGenVertexArrays(1, &tile_vao);
+    glBindVertexArray(tile_vao);
 
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
+    glGenBuffers(1, &tile_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, tile_vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * tile_vertices.size(), tile_vertices.data(), GL_STATIC_DRAW);
 
-    glGenBuffers(1, &ebo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * elements.size(), elements.data(), GL_STATIC_DRAW);
+    glGenBuffers(1, &tile_ebo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, tile_ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * tile_elements.size(), tile_elements.data(), GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    std::vector<float>    o_vertices;
+    std::vector<uint32_t> o_elements;
+
+    Assimp::Importer importer;
+
+    auto scene = importer.ReadFile("o.obj", 0);
+    auto mesh  = scene->mMeshes[0];
+
+    for (auto i = 0; i < mesh->mNumVertices; i++)
+    {
+        auto vertex = mesh->mVertices[i];
+
+        o_vertices.push_back(vertex.x);
+        o_vertices.push_back(vertex.y);
+        o_vertices.push_back(vertex.z);
+    }
+
+    for (auto i = 0; i < mesh->mNumFaces; i++)
+    {
+        auto face = mesh->mFaces[i];
+
+        o_elements.push_back(face.mIndices[0]);
+        o_elements.push_back(face.mIndices[1]);
+        o_elements.push_back(face.mIndices[2]);
+    }
+
+    uint32_t o_vao, o_vbo, o_ebo;
+
+    glGenVertexArrays(1, &o_vao);
+    glBindVertexArray(o_vao);
+
+    glGenBuffers(1, &o_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, o_vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * o_vertices.size(), o_vertices.data(), GL_STATIC_DRAW);
+
+    glGenBuffers(1, &o_ebo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, o_ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * o_elements.size(), o_elements.data(), GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -116,17 +162,19 @@ auto main() -> int
 
                 glUniformMatrix4fv(2, 1, GL_FALSE, glm::value_ptr(model));
 
-                glDrawElements(GL_TRIANGLES, elements.size(), GL_UNSIGNED_INT, nullptr);
+                //glDrawElements(GL_TRIANGLES, tile_elements.size(), GL_UNSIGNED_INT, nullptr);
+
+                glDrawElements(GL_TRIANGLES, o_elements.size(), GL_UNSIGNED_INT, nullptr);
             }
         }
 
         glfwSwapBuffers(window);
     }
 
-    glDeleteVertexArrays(1, &vao);
+    glDeleteVertexArrays(1, &tile_vao);
 
-    glDeleteBuffers(1, &vbo);
-    glDeleteBuffers(1, &ebo);
+    glDeleteBuffers(1, &tile_vbo);
+    glDeleteBuffers(1, &tile_ebo);
 
     glfwDestroyWindow(window);
     glfwTerminate();
