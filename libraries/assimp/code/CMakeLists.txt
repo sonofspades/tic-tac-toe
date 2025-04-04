@@ -226,14 +226,6 @@ SET(Geometry_SRCS
 )
 SOURCE_GROUP(Geometry FILES ${Geometry_SRCS})
 
-SET( STEPParser_SRCS
-  AssetLib/STEPParser/STEPFileReader.h
-  AssetLib/STEPParser/STEPFileReader.cpp
-  AssetLib/STEPParser/STEPFileEncoding.cpp
-  AssetLib/STEPParser/STEPFileEncoding.h
-)
-SOURCE_GROUP(STEPParser FILES ${STEPParser_SRCS})
-
 IF ( ASSIMP_BUILD_NONFREE_C4D_IMPORTER )
   SET( C4D_SRCS
     AssetLib/C4D/C4DImporter.cpp
