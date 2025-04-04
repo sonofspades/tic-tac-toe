@@ -809,12 +809,6 @@ IF ( ASSIMP_BUILD_TESTS )
   ADD_SUBDIRECTORY( test/ )
 ENDIF ()
 
-# Generate a pkg-config .pc, revision.h, and config.h for the Assimp library.
-CONFIGURE_FILE( "${PROJECT_SOURCE_DIR}/assimp.pc.in" "${PROJECT_BINARY_DIR}/assimp.pc" @ONLY )
-IF ( ASSIMP_INSTALL )
-  INSTALL( FILES "${PROJECT_BINARY_DIR}/assimp.pc" DESTINATION ${ASSIMP_LIB_INSTALL_DIR}/pkgconfig/ COMPONENT ${LIBASSIMP-DEV_COMPONENT})
-ENDIF()
-
 CONFIGURE_FILE(
   ${CMAKE_CURRENT_LIST_DIR}/include/assimp/revision.h.in
   ${CMAKE_CURRENT_BINARY_DIR}/include/assimp/revision.h
