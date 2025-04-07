@@ -13,10 +13,10 @@
 
 auto vertex_stage_text =
 "#version 450\n"
-"layout(location = 0) in vec3 position;\n"
-"layout(location = 0) uniform mat4 proj;\n"
-"layout(location = 1) uniform mat4 view;\n"
-"layout(location = 2) uniform mat4 model;\n"
+"layout (location = 0) in vec3 position;\n"
+"layout (location = 0) uniform mat4 proj;\n"
+"layout (location = 1) uniform mat4 view;\n"
+"layout (location = 2) uniform mat4 model;\n"
 "void main()\n"
 "{\n"
 "    gl_Position = proj * view * model * vec4(position, 1.0);\n"
@@ -25,9 +25,10 @@ auto vertex_stage_text =
 auto fragment_stage_text =
 "#version 450\n"
 "out vec4 color;\n"
+"layout (location = 3) uniform vec3 u_color;\n"
 "void main()\n"
 "{\n"
-"    color = vec4(1.0, 0.0, 0.0, 1.0);\n"
+"    color = vec4(u_color, 1.0);\n"
 "}\n";
 
 auto main() -> int
@@ -89,23 +90,23 @@ auto main() -> int
     std::vector<float>    o_vertices;
     std::vector<uint32_t> o_elements;
 
-    Assimp::Importer importer;
+    Assimp::Importer o_importer;
 
-    auto scene = importer.ReadFile("o.obj", 0);
-    auto mesh  = scene->mMeshes[0];
+    const auto o_scene = o_importer.ReadFile("o.obj", 0);
+    const auto o_mesh  = o_scene->mMeshes[0];
 
-    for (auto i = 0; i < mesh->mNumVertices; i++)
+    for (auto i = 0; i < o_mesh->mNumVertices; i++)
     {
-        auto vertex = mesh->mVertices[i];
+        auto vertex = o_mesh->mVertices[i];
 
         o_vertices.push_back(vertex.x);
         o_vertices.push_back(vertex.y);
         o_vertices.push_back(vertex.z);
     }
 
-    for (auto i = 0; i < mesh->mNumFaces; i++)
+    for (auto i = 0; i < o_mesh->mNumFaces; i++)
     {
-        auto face = mesh->mFaces[i];
+        const auto face = o_mesh->mFaces[i];
 
         o_elements.push_back(face.mIndices[0]);
         o_elements.push_back(face.mIndices[1]);
@@ -128,10 +129,52 @@ auto main() -> int
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
+    std::vector<float>    x_vertices;
+    std::vector<uint32_t> x_elements;
+
+    Assimp::Importer x_importer;
+
+    const auto x_scene = x_importer.ReadFile("x.obj", 0);
+    const auto x_mesh  = x_scene->mMeshes[0];
+
+    for (auto i = 0; i < x_mesh->mNumVertices; i++)
+    {
+        auto vertex = x_mesh->mVertices[i];
+
+        x_vertices.push_back(vertex.x);
+        x_vertices.push_back(vertex.y);
+        x_vertices.push_back(vertex.z);
+    }
+
+    for (auto i = 0; i < x_mesh->mNumFaces; i++)
+    {
+        const auto face = x_mesh->mFaces[i];
+
+        x_elements.push_back(face.mIndices[0]);
+        x_elements.push_back(face.mIndices[1]);
+        x_elements.push_back(face.mIndices[2]);
+    }
+
+    uint32_t x_vao, x_vbo, x_ebo;
+
+    glGenVertexArrays(1, &x_vao);
+    glBindVertexArray(x_vao);
+
+    glGenBuffers(1, &x_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, x_vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * x_vertices.size(), x_vertices.data(), GL_STATIC_DRAW);
+
+    glGenBuffers(1, &x_ebo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, x_ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * x_elements.size(), x_elements.data(), GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
     glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 
     auto proj = glm::perspective(glm::radians(60.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.1f, 100.0f);
-    auto view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
+    auto view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.5f));
 
     while (!glfwWindowShouldClose(window))
     {
@@ -153,7 +196,7 @@ auto main() -> int
         {
             for (auto col = 0; col < 3; col++)
             {
-                constexpr auto  tile_space = 1.1f;
+                constexpr auto  tile_space = 1.2f;
 
                 const auto x = -tile_space + col * tile_space;
                 const auto y =  tile_space - row * tile_space;
@@ -162,9 +205,23 @@ auto main() -> int
 
                 glUniformMatrix4fv(2, 1, GL_FALSE, glm::value_ptr(model));
 
+                //glBindVertexArray(tile_vao);
                 //glDrawElements(GL_TRIANGLES, tile_elements.size(), GL_UNSIGNED_INT, nullptr);
 
-                glDrawElements(GL_TRIANGLES, o_elements.size(), GL_UNSIGNED_INT, nullptr);
+                if (row == col)
+                {
+                    glUniform3fv(3, 1, glm::value_ptr(glm::vec3(0.0f, 0.0f, 1.0f)));
+
+                    glBindVertexArray(x_vao);
+                    glDrawElements(GL_TRIANGLES, x_elements.size(), GL_UNSIGNED_INT, nullptr);
+                }
+                else
+                {
+                    glUniform3fv(3, 1, glm::value_ptr(glm::vec3(1.0f, 0.0f, 0.0f)));
+
+                    glBindVertexArray(o_vao);
+                    glDrawElements(GL_TRIANGLES, o_elements.size(), GL_UNSIGNED_INT, nullptr);
+                }
             }
         }
 
@@ -172,9 +229,21 @@ auto main() -> int
     }
 
     glDeleteVertexArrays(1, &tile_vao);
+    glDeleteVertexArrays(1, &o_vao);
+    glDeleteVertexArrays(1, &x_vao);
 
     glDeleteBuffers(1, &tile_vbo);
     glDeleteBuffers(1, &tile_ebo);
+
+    glDeleteBuffers(1, &o_vbo);
+    glDeleteBuffers(1, &o_ebo);
+    glDeleteBuffers(1, &x_vbo);
+    glDeleteBuffers(1, &x_ebo);
+
+    glDeleteShader(vertex_stage);
+    glDeleteShader(fragment_stage);
+
+    glDeleteProgram(shader);
 
     glfwDestroyWindow(window);
     glfwTerminate();
