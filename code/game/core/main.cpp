@@ -9,6 +9,8 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
+#include <btBulletCollisionCommon.h>
+
 #include <vector>
 
 auto vertex_stage_text =
@@ -30,6 +32,34 @@ auto fragment_stage_text =
 "{\n"
 "    color = vec4(u_color, 1.0);\n"
 "}\n";
+
+std::vector<float> debug_vertices;
+
+class PhysicsDebug : public btIDebugDraw
+{
+public:
+    void drawLine(const btVector3& from, const btVector3& to, const btVector3& color) override
+    {
+        debug_vertices.push_back(from.x());
+        debug_vertices.push_back(from.y());
+        debug_vertices.push_back(from.z());
+
+        debug_vertices.push_back(to.x());
+        debug_vertices.push_back(to.y());
+        debug_vertices.push_back(to.z());
+    }
+
+    void clearLines() override
+    {
+        debug_vertices.clear();
+    }
+
+    void drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color) override { }
+    void reportErrorWarning(const char* warningString) override { }
+    void draw3dText(const btVector3& location, const char* textString) override { }
+    void setDebugMode(int debugMode) override { }
+    int getDebugMode() const override { return DBG_DrawWireframe; }
+};
 
 auto main() -> int
 {
@@ -176,9 +206,36 @@ auto main() -> int
     auto proj = glm::perspective(glm::radians(60.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.1f, 100.0f);
     auto view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.5f));
 
+    btCollisionWorld* world = new btCollisionWorld(new btCollisionDispatcher(new btDefaultCollisionConfiguration()), new btDbvtBroadphase(), new btDefaultCollisionConfiguration());
+    world->setDebugDrawer(new PhysicsDebug());
+
+    btCollisionShape* tile_shape = new btBoxShape(btVector3(0.5f, 0.5f, 0.5f));
+
+    btCollisionObject* tile_object = new btCollisionObject();
+    tile_object->setCollisionShape(tile_shape);
+
+    world->addCollisionObject(tile_object);
+
+    uint32_t debug_vao, debug_vbo;
+
+    glGenVertexArrays(1, &debug_vao);
+    glBindVertexArray(debug_vao);
+
+    glGenBuffers(1, &debug_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, debug_vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * debug_vertices.size(), debug_vertices.data(), GL_DYNAMIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
+
+        world->debugDrawWorld();
+
+        glBindBuffer(GL_ARRAY_BUFFER, debug_vbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * debug_vertices.size(), debug_vertices.data(), GL_DYNAMIC_DRAW);
 
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         {
@@ -191,6 +248,14 @@ auto main() -> int
 
         glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(proj));
         glUniformMatrix4fv(1, 1, GL_FALSE, glm::value_ptr(view));
+
+        auto model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+
+        glUniformMatrix4fv(2, 1, GL_FALSE, glm::value_ptr(model));
+        glUniform3fv(3, 1, glm::value_ptr(glm::vec3(0.0f, 1.0f, 0.0f)));
+
+        glBindVertexArray(debug_vao);
+        glDrawArrays(GL_LINES, 0, static_cast<int>(debug_vertices.size()) / 3);
 
         for (auto row = 0; row < 3; row++)
         {
