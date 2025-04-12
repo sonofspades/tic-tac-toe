@@ -66,12 +66,12 @@ auto main() -> int
 {
     glfwInit();
 
-    constexpr auto window_half_width = 1000;
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-    constexpr auto window_width  = window_half_width * 2;
+    constexpr auto window_width  = 1000;
     constexpr auto window_height = 1000;
 
-    const auto window = glfwCreateWindow(window_width, window_height, "Tic-Tac-Toe", nullptr, nullptr);
+    const auto window = glfwCreateWindow(window_width * 2, window_height, "Tic-Tac-Toe", nullptr, nullptr);
 
     glfwSetKeyCallback(window, [](GLFWwindow*, const int key, int, const int action, int) -> void
     {
@@ -215,7 +215,7 @@ auto main() -> int
     constexpr auto tile_space = 1.2f;
 
     glm::mat4 view;
-    auto proj = glm::perspective(glm::radians(60.0f), static_cast<float>(window_half_width) / static_cast<float>(window_height), 0.1f, 100.0f);
+    auto proj = glm::perspective(glm::radians(60.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.1f, 100.0f);
 
     auto world = new btCollisionWorld(new btCollisionDispatcher(new btDefaultCollisionConfiguration()), new btDbvtBroadphase(), new btDefaultCollisionConfiguration());
          world->setDebugDrawer(new PhysicsDebug());
@@ -253,6 +253,8 @@ auto main() -> int
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
+    glEnable(GL_SCISSOR_TEST);
+
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -276,10 +278,11 @@ auto main() -> int
             view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.5f));
         }
 
-        glClear(GL_COLOR_BUFFER_BIT);
+        glViewport(0, 0, window_width, window_height);
+        glScissor(0, 0, window_width, window_height);
 
         glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
-        glViewport(0, 0, window_half_width, window_height);
+        glClear(GL_COLOR_BUFFER_BIT);
 
         glUseProgram(shader);
 
@@ -325,11 +328,11 @@ auto main() -> int
             }
         }
 
+        glViewport(window_width, 0, window_width, window_height);
+        glScissor(window_width, 0, window_width, window_height);
 
-        glViewport(window_half_width, 0, window_half_width, window_height);
-
-        //glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
-        //glClear(GL_COLOR_BUFFER_BIT);
+        glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
 
         view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.5f));
         glUniformMatrix4fv(1, 1, GL_FALSE, glm::value_ptr(view));
