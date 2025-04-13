@@ -271,35 +271,9 @@ extern "C" {
  #define GLFWAPI
 #endif
 
-
 /*************************************************************************
  * GLFW API tokens
  *************************************************************************/
-
-/*! @name GLFW version macros
- *  @{ */
-/*! @brief The major version number of the GLFW header.
- *
- *  The major version number of the GLFW header.  This is incremented when the
- *  API is changed in non-compatible ways.
- *  @ingroup init
- */
-#define GLFW_VERSION_MAJOR          3
-/*! @brief The minor version number of the GLFW header.
- *
- *  The minor version number of the GLFW header.  This is incremented when
- *  features are added to the API but it remains backward-compatible.
- *  @ingroup init
- */
-#define GLFW_VERSION_MINOR          5
-/*! @brief The revision number of the GLFW header.
- *
- *  The revision number of the GLFW header.  This is incremented when a bug fix
- *  release is made that does not contain any API changes.
- *  @ingroup init
- */
-#define GLFW_VERSION_REVISION       0
-/*! @} */
 
 /*! @brief One.
  *
@@ -344,23 +318,6 @@ extern "C" {
  */
 #define GLFW_REPEAT                 2
 /*! @} */
-
-/*! @defgroup hat_state Joystick hat states
- *  @brief Joystick hat states.
- *
- *  See [joystick hat input](@ref joystick_hat) for how these are used.
- *
- *  @ingroup input
- *  @{ */
-#define GLFW_HAT_CENTERED           0
-#define GLFW_HAT_UP                 1
-#define GLFW_HAT_RIGHT              2
-#define GLFW_HAT_DOWN               4
-#define GLFW_HAT_LEFT               8
-#define GLFW_HAT_RIGHT_UP           (GLFW_HAT_RIGHT | GLFW_HAT_UP)
-#define GLFW_HAT_RIGHT_DOWN         (GLFW_HAT_RIGHT | GLFW_HAT_DOWN)
-#define GLFW_HAT_LEFT_UP            (GLFW_HAT_LEFT  | GLFW_HAT_UP)
-#define GLFW_HAT_LEFT_DOWN          (GLFW_HAT_LEFT  | GLFW_HAT_DOWN)
 
 /*! @ingroup input
  */
@@ -582,78 +539,6 @@ extern "C" {
 #define GLFW_MOUSE_BUTTON_LEFT      GLFW_MOUSE_BUTTON_1
 #define GLFW_MOUSE_BUTTON_RIGHT     GLFW_MOUSE_BUTTON_2
 #define GLFW_MOUSE_BUTTON_MIDDLE    GLFW_MOUSE_BUTTON_3
-/*! @} */
-
-/*! @defgroup joysticks Joysticks
- *  @brief Joystick IDs.
- *
- *  See [joystick input](@ref joystick) for how these are used.
- *
- *  @ingroup input
- *  @{ */
-#define GLFW_JOYSTICK_1             0
-#define GLFW_JOYSTICK_2             1
-#define GLFW_JOYSTICK_3             2
-#define GLFW_JOYSTICK_4             3
-#define GLFW_JOYSTICK_5             4
-#define GLFW_JOYSTICK_6             5
-#define GLFW_JOYSTICK_7             6
-#define GLFW_JOYSTICK_8             7
-#define GLFW_JOYSTICK_9             8
-#define GLFW_JOYSTICK_10            9
-#define GLFW_JOYSTICK_11            10
-#define GLFW_JOYSTICK_12            11
-#define GLFW_JOYSTICK_13            12
-#define GLFW_JOYSTICK_14            13
-#define GLFW_JOYSTICK_15            14
-#define GLFW_JOYSTICK_16            15
-#define GLFW_JOYSTICK_LAST          GLFW_JOYSTICK_16
-/*! @} */
-
-/*! @defgroup gamepad_buttons Gamepad buttons
- *  @brief Gamepad buttons.
- *
- *  See @ref gamepad for how these are used.
- *
- *  @ingroup input
- *  @{ */
-#define GLFW_GAMEPAD_BUTTON_A               0
-#define GLFW_GAMEPAD_BUTTON_B               1
-#define GLFW_GAMEPAD_BUTTON_X               2
-#define GLFW_GAMEPAD_BUTTON_Y               3
-#define GLFW_GAMEPAD_BUTTON_LEFT_BUMPER     4
-#define GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER    5
-#define GLFW_GAMEPAD_BUTTON_BACK            6
-#define GLFW_GAMEPAD_BUTTON_START           7
-#define GLFW_GAMEPAD_BUTTON_GUIDE           8
-#define GLFW_GAMEPAD_BUTTON_LEFT_THUMB      9
-#define GLFW_GAMEPAD_BUTTON_RIGHT_THUMB     10
-#define GLFW_GAMEPAD_BUTTON_DPAD_UP         11
-#define GLFW_GAMEPAD_BUTTON_DPAD_RIGHT      12
-#define GLFW_GAMEPAD_BUTTON_DPAD_DOWN       13
-#define GLFW_GAMEPAD_BUTTON_DPAD_LEFT       14
-#define GLFW_GAMEPAD_BUTTON_LAST            GLFW_GAMEPAD_BUTTON_DPAD_LEFT
-
-#define GLFW_GAMEPAD_BUTTON_CROSS       GLFW_GAMEPAD_BUTTON_A
-#define GLFW_GAMEPAD_BUTTON_CIRCLE      GLFW_GAMEPAD_BUTTON_B
-#define GLFW_GAMEPAD_BUTTON_SQUARE      GLFW_GAMEPAD_BUTTON_X
-#define GLFW_GAMEPAD_BUTTON_TRIANGLE    GLFW_GAMEPAD_BUTTON_Y
-/*! @} */
-
-/*! @defgroup gamepad_axes Gamepad axes
- *  @brief Gamepad axes.
- *
- *  See @ref gamepad for how these are used.
- *
- *  @ingroup input
- *  @{ */
-#define GLFW_GAMEPAD_AXIS_LEFT_X        0
-#define GLFW_GAMEPAD_AXIS_LEFT_Y        1
-#define GLFW_GAMEPAD_AXIS_RIGHT_X       2
-#define GLFW_GAMEPAD_AXIS_RIGHT_Y       3
-#define GLFW_GAMEPAD_AXIS_LEFT_TRIGGER  4
-#define GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER 5
-#define GLFW_GAMEPAD_AXIS_LAST          GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER
 /*! @} */
 
 /*! @defgroup errors Error codes
@@ -1284,20 +1169,6 @@ extern "C" {
  *  @ingroup context
  */
 typedef void (*GLFWglproc)(void);
-
-/*! @brief Vulkan API function pointer type.
- *
- *  Generic function pointer used for returning Vulkan API function pointers
- *  without forcing a cast from a regular pointer.
- *
- *  @sa @ref vulkan_proc
- *  @sa @ref glfwGetInstanceProcAddress
- *
- *  @since Added in version 3.2.
- *
- *  @ingroup vulkan
- */
-typedef void (*GLFWvkproc)(void);
 
 /*! @brief Opaque monitor object.
  *
@@ -1999,29 +1870,6 @@ typedef struct GLFWimage
     unsigned char* pixels;
 } GLFWimage;
 
-/*! @brief Gamepad input state
- *
- *  This describes the input state of a gamepad.
- *
- *  @sa @ref gamepad
- *  @sa @ref glfwGetGamepadState
- *
- *  @since Added in version 3.3.
- *
- *  @ingroup input
- */
-typedef struct GLFWgamepadstate
-{
-    /*! The states of each [gamepad button](@ref gamepad_buttons), `GLFW_PRESS`
-     *  or `GLFW_RELEASE`.
-     */
-    unsigned char buttons[15];
-    /*! The states of each [gamepad axis](@ref gamepad_axes), in the range -1.0
-     *  to 1.0 inclusive.
-     */
-    float axes[6];
-} GLFWgamepadstate;
-
 /*! @brief Custom heap memory allocator.
  *
  *  This describes a custom heap memory allocator for GLFW.  To set an allocator, pass it
@@ -2053,7 +1901,6 @@ typedef struct GLFWallocator
      */
     void* user;
 } GLFWallocator;
-
 
 /*************************************************************************
  * GLFW API functions
@@ -2215,115 +2062,6 @@ GLFWAPI void glfwInitHint(int hint, int value);
  *  @ingroup init
  */
 GLFWAPI void glfwInitAllocator(const GLFWallocator* allocator);
-
-#if defined(VK_VERSION_1_0)
-
-/*! @brief Sets the desired Vulkan `vkGetInstanceProcAddr` function.
- *
- *  This function sets the `vkGetInstanceProcAddr` function that GLFW will use for all
- *  Vulkan related entry point queries.
- *
- *  This feature is mostly useful on macOS, if your copy of the Vulkan loader is in
- *  a location where GLFW cannot find it through dynamic loading, or if you are still
- *  using the static library version of the loader.
- *
- *  If set to `NULL`, GLFW will try to load the Vulkan loader dynamically by its standard
- *  name and get this function from there.  This is the default behavior.
- *
- *  The standard name of the loader is `vulkan-1.dll` on Windows, `libvulkan.so.1` on
- *  Linux and other Unix-like systems and `libvulkan.1.dylib` on macOS.  If your code is
- *  also loading it via these names then you probably don't need to use this function.
- *
- *  The function address you set is never reset by GLFW, but it only takes effect during
- *  initialization.  Once GLFW has been initialized, any updates will be ignored until the
- *  library is terminated and initialized again.
- *
- *  @param[in] loader The address of the function to use, or `NULL`.
- *
- *  @par Loader function signature
- *  @code
- *  PFN_vkVoidFunction vkGetInstanceProcAddr(VkInstance instance, const char* name)
- *  @endcode
- *  For more information about this function, see the
- *  [Vulkan Registry](https://www.khronos.org/registry/vulkan/).
- *
- *  @errors None.
- *
- *  @remark This function may be called before @ref glfwInit.
- *
- *  @thread_safety This function must only be called from the main thread.
- *
- *  @sa @ref vulkan_loader
- *  @sa @ref glfwInit
- *
- *  @since Added in version 3.4.
- *
- *  @ingroup init
- */
-GLFWAPI void glfwInitVulkanLoader(PFN_vkGetInstanceProcAddr loader);
-
-#endif /*VK_VERSION_1_0*/
-
-/*! @brief Retrieves the version of the GLFW library.
- *
- *  This function retrieves the major, minor and revision numbers of the GLFW
- *  library.  It is intended for when you are using GLFW as a shared library and
- *  want to ensure that you are using the minimum required version.
- *
- *  Any or all of the version arguments may be `NULL`.
- *
- *  @param[out] major Where to store the major version number, or `NULL`.
- *  @param[out] minor Where to store the minor version number, or `NULL`.
- *  @param[out] rev Where to store the revision number, or `NULL`.
- *
- *  @errors None.
- *
- *  @remark This function may be called before @ref glfwInit.
- *
- *  @thread_safety This function may be called from any thread.
- *
- *  @sa @ref intro_version
- *  @sa @ref glfwGetVersionString
- *
- *  @since Added in version 1.0.
- *
- *  @ingroup init
- */
-GLFWAPI void glfwGetVersion(int* major, int* minor, int* rev);
-
-/*! @brief Returns a string describing the compile-time configuration.
- *
- *  This function returns the compile-time generated
- *  [version string](@ref intro_version_string) of the GLFW library binary.  It describes
- *  the version, platforms, compiler and any platform or operating system specific
- *  compile-time options.  It should not be confused with the OpenGL or OpenGL ES version
- *  string, queried with `glGetString`.
- *
- *  __Do not use the version string__ to parse the GLFW library version.  The
- *  @ref glfwGetVersion function provides the version of the running library
- *  binary in numerical format.
- *
- *  __Do not use the version string__ to parse what platforms are supported.  The @ref
- *  glfwPlatformSupported function lets you query platform support.
- *
- *  @return The ASCII encoded GLFW version string.
- *
- *  @errors None.
- *
- *  @remark This function may be called before @ref glfwInit.
- *
- *  @pointer_lifetime The returned string is static and compile-time generated.
- *
- *  @thread_safety This function may be called from any thread.
- *
- *  @sa @ref intro_version
- *  @sa @ref glfwGetVersion
- *
- *  @since Added in version 3.0.
- *
- *  @ingroup init
- */
-GLFWAPI const char* glfwGetVersionString(void);
 
 /*! @brief Returns and clears the last error for the calling thread.
  *

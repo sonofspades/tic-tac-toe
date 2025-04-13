@@ -557,10 +557,7 @@ GLFWbool _glfwConnectWin32(int platformID, _GLFWplatform* platform)
         .pollEvents = _glfwPollEventsWin32,
         .waitEvents = _glfwWaitEventsWin32,
         .waitEventsTimeout = _glfwWaitEventsTimeoutWin32,
-        .postEmptyEvent = _glfwPostEmptyEventWin32,
-        .getRequiredInstanceExtensions = _glfwGetRequiredInstanceExtensionsWin32,
-        .getPhysicalDevicePresentationSupport = _glfwGetPhysicalDevicePresentationSupportWin32,
-        .createWindowSurface = _glfwCreateWindowSurfaceWin32
+        .postEmptyEvent = _glfwPostEmptyEventWin32
     };
 
     *platform = win32;
@@ -592,7 +589,7 @@ int _glfwInitWin32(void)
 void _glfwTerminateWin32(void)
 {
     if (_glfw.win32.blankCursor)
-        DestroyIcon((HICON) _glfw.win32.blankCursor);
+        DestroyIcon(_glfw.win32.blankCursor);
 
     if (_glfw.win32.deviceNotificationHandle)
         UnregisterDeviceNotification(_glfw.win32.deviceNotificationHandle);

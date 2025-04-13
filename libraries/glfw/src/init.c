@@ -48,8 +48,7 @@ static GLFWerrorfun _glfwErrorCallback;
 static GLFWallocator _glfwInitAllocator;
 static _GLFWinitconfig _glfwInitHints =
 {
-    .platformID = GLFW_ANY_PLATFORM,
-    .vulkanLoader = NULL
+    .platformID = GLFW_ANY_PLATFORM
 };
 
 // The allocation function used when no custom allocator is set
@@ -99,7 +98,6 @@ static void terminate(void)
     _glfw.monitors = NULL;
     _glfw.monitorCount = 0;
 
-    _glfwTerminateVulkan();
     _glfw.platform.terminate();
 
     _glfw.initialized = GLFW_FALSE;
@@ -436,11 +434,6 @@ GLFWAPI void glfwInitAllocator(const GLFWallocator* allocator)
     }
     else
         memset(&_glfwInitAllocator, 0, sizeof(GLFWallocator));
-}
-
-GLFWAPI void glfwInitVulkanLoader(PFN_vkGetInstanceProcAddr loader)
-{
-    _glfwInitHints.vulkanLoader = loader;
 }
 
 GLFWAPI int glfwGetError(const char** description)

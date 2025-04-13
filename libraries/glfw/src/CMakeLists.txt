@@ -1,19 +1,12 @@
 add_library(glfw ${GLFW_LIBRARY_TYPE}
                  "${GLFW_SOURCE_DIR}/include/GLFW/glfw3.h"
                  "${GLFW_SOURCE_DIR}/include/GLFW/glfw3native.h"
-                 internal.h platform.h context.c init.c input.c monitor.c platform.c vulkan.c window.c)
+                 internal.h platform.h context.c init.c input.c monitor.c platform.c window.c)
 
 # The time, thread and module code is shared between all backends on a given OS,
 # including the null backend, which still needs those bits to be functional
-if (APPLE)
-    target_sources(glfw PRIVATE cocoa_time.h cocoa_time.c posix_thread.h
-                                posix_module.c posix_thread.c)
-elseif (WIN32)
-    target_sources(glfw PRIVATE win32_time.h win32_thread.h win32_module.c
-                                win32_time.c win32_thread.c)
-else()
-    target_sources(glfw PRIVATE posix_time.h posix_thread.h posix_module.c
-                                posix_time.c posix_thread.c)
+if (WIN32)
+    target_sources(glfw PRIVATE win32_time.h win32_thread.h win32_module.c win32_time.c win32_thread.c)
 endif()
 
 if (GLFW_BUILD_WIN32)
@@ -21,61 +14,11 @@ if (GLFW_BUILD_WIN32)
     target_sources(glfw PRIVATE win32_platform.h win32_init.c win32_monitor.c win32_window.c wgl_context.c)
 endif()
 
-if (GLFW_BUILD_X11)
-    target_compile_definitions(glfw PRIVATE _GLFW_X11)
-    target_sources(glfw PRIVATE x11_platform.h xkb_unicode.h x11_init.c
-                                x11_monitor.c x11_window.c xkb_unicode.c
-                                glx_context.c)
-endif()
-
 if (GLFW_BUILD_X11 OR GLFW_BUILD_WAYLAND)
     if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         target_sources(glfw PRIVATE linux_joystick.h linux_joystick.c)
     endif()
     target_sources(glfw PRIVATE posix_poll.h posix_poll.c)
-endif()
-
-if (GLFW_BUILD_WAYLAND)
-    include(CheckIncludeFiles)
-    include(CheckFunctionExists)
-    check_function_exists(memfd_create HAVE_MEMFD_CREATE)
-    if (HAVE_MEMFD_CREATE)
-        target_compile_definitions(glfw PRIVATE HAVE_MEMFD_CREATE)
-    endif()
-
-    find_program(WAYLAND_SCANNER_EXECUTABLE NAMES wayland-scanner)
-    if (NOT WAYLAND_SCANNER_EXECUTABLE)
-        message(FATAL_ERROR "Failed to find wayland-scanner")
-    endif()
-
-    macro(generate_wayland_protocol protocol_file)
-        set(protocol_path "${GLFW_SOURCE_DIR}/deps/wayland/${protocol_file}")
-
-        string(REGEX REPLACE "\\.xml$" "-client-protocol.h" header_file ${protocol_file})
-        string(REGEX REPLACE "\\.xml$" "-client-protocol-code.h" code_file ${protocol_file})
-
-        add_custom_command(OUTPUT ${header_file}
-            COMMAND "${WAYLAND_SCANNER_EXECUTABLE}" client-header "${protocol_path}" ${header_file}
-            DEPENDS "${protocol_path}"
-            VERBATIM)
-
-        add_custom_command(OUTPUT ${code_file}
-            COMMAND "${WAYLAND_SCANNER_EXECUTABLE}" private-code "${protocol_path}" ${code_file}
-            DEPENDS "${protocol_path}"
-            VERBATIM)
-
-        target_sources(glfw PRIVATE ${header_file} ${code_file})
-    endmacro()
-
-    generate_wayland_protocol("wayland.xml")
-    generate_wayland_protocol("viewporter.xml")
-    generate_wayland_protocol("xdg-shell.xml")
-    generate_wayland_protocol("idle-inhibit-unstable-v1.xml")
-    generate_wayland_protocol("pointer-constraints-unstable-v1.xml")
-    generate_wayland_protocol("relative-pointer-unstable-v1.xml")
-    generate_wayland_protocol("fractional-scale-v1.xml")
-    generate_wayland_protocol("xdg-activation-v1.xml")
-    generate_wayland_protocol("xdg-decoration-unstable-v1.xml")
 endif()
 
 if (WIN32 AND GLFW_BUILD_SHARED_LIBRARY)
@@ -123,88 +66,6 @@ if (GLFW_BUILD_COCOA)
     set(glfw_PKG_LIBS "-framework Cocoa -framework IOKit -framework CoreFoundation -framework QuartzCore")
 endif()
 
-if (GLFW_BUILD_WAYLAND)
-    include(FindPkgConfig)
-
-    pkg_check_modules(Wayland REQUIRED
-        wayland-client>=0.2.7
-        wayland-cursor>=0.2.7
-        wayland-egl>=0.2.7
-        xkbcommon>=0.5.0)
-
-    target_include_directories(glfw PRIVATE ${Wayland_INCLUDE_DIRS})
-
-    if (NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        find_package(EpollShim)
-        if (EPOLLSHIM_FOUND)
-            target_include_directories(glfw PRIVATE ${EPOLLSHIM_INCLUDE_DIRS})
-            target_link_libraries(glfw PRIVATE ${EPOLLSHIM_LIBRARIES})
-        endif()
-    endif()
-endif()
-
-if (GLFW_BUILD_X11)
-    find_package(X11 REQUIRED)
-    target_include_directories(glfw PRIVATE "${X11_X11_INCLUDE_PATH}")
-
-    # Check for XRandR (modern resolution switching and gamma control)
-    if (NOT X11_Xrandr_INCLUDE_PATH)
-        message(FATAL_ERROR "RandR headers not found; install libxrandr development package")
-    endif()
-    target_include_directories(glfw PRIVATE "${X11_Xrandr_INCLUDE_PATH}")
-
-    # Check for Xinerama (legacy multi-monitor support)
-    if (NOT X11_Xinerama_INCLUDE_PATH)
-        message(FATAL_ERROR "Xinerama headers not found; install libxinerama development package")
-    endif()
-    target_include_directories(glfw PRIVATE "${X11_Xinerama_INCLUDE_PATH}")
-
-    # Check for Xkb (X keyboard extension)
-    if (NOT X11_Xkb_INCLUDE_PATH)
-        message(FATAL_ERROR "XKB headers not found; install X11 development package")
-    endif()
-    target_include_directories(glfw PRIVATE "${X11_Xkb_INCLUDE_PATH}")
-
-    # Check for Xcursor (cursor creation from RGBA images)
-    if (NOT X11_Xcursor_INCLUDE_PATH)
-        message(FATAL_ERROR "Xcursor headers not found; install libxcursor development package")
-    endif()
-    target_include_directories(glfw PRIVATE "${X11_Xcursor_INCLUDE_PATH}")
-
-    # Check for XInput (modern HID input)
-    if (NOT X11_Xi_INCLUDE_PATH)
-        message(FATAL_ERROR "XInput headers not found; install libxi development package")
-    endif()
-    target_include_directories(glfw PRIVATE "${X11_Xi_INCLUDE_PATH}")
-
-    # Check for X Shape (custom window input shape)
-    if (NOT X11_Xshape_INCLUDE_PATH)
-        message(FATAL_ERROR "X Shape headers not found; install libxext development package")
-    endif()
-    target_include_directories(glfw PRIVATE "${X11_Xshape_INCLUDE_PATH}")
-endif()
-
-if (UNIX AND NOT APPLE)
-    find_library(RT_LIBRARY rt)
-    mark_as_advanced(RT_LIBRARY)
-    if (RT_LIBRARY)
-        target_link_libraries(glfw PRIVATE "${RT_LIBRARY}")
-        list(APPEND glfw_PKG_LIBS "-lrt")
-    endif()
-
-    find_library(MATH_LIBRARY m)
-    mark_as_advanced(MATH_LIBRARY)
-    if (MATH_LIBRARY)
-        target_link_libraries(glfw PRIVATE "${MATH_LIBRARY}")
-        list(APPEND glfw_PKG_LIBS "-lm")
-    endif()
-
-    if (CMAKE_DL_LIBS)
-        target_link_libraries(glfw PRIVATE "${CMAKE_DL_LIBS}")
-        list(APPEND glfw_PKG_LIBS "-l${CMAKE_DL_LIBS}")
-    endif()
-endif()
-
 if (WIN32)
     if (GLFW_USE_HYBRID_HPG)
         target_compile_definitions(glfw PRIVATE _GLFW_USE_HYBRID_HPG)
@@ -234,16 +95,6 @@ if (MINGW)
     target_compile_definitions(glfw PRIVATE WINVER=0x0501)
 endif()
 
-# Workaround for legacy MinGW not providing XInput and DirectInput
-if (MINGW)
-    include(CheckIncludeFile)
-    check_include_file(dinput.h DINPUT_H_FOUND)
-    check_include_file(xinput.h XINPUT_H_FOUND)
-    if (NOT DINPUT_H_FOUND OR NOT XINPUT_H_FOUND)
-        target_include_directories(glfw PRIVATE "${GLFW_SOURCE_DIR}/deps/mingw")
-    endif()
-endif()
-
 # Workaround for the MS CRT deprecating parts of the standard library
 if (MSVC OR CMAKE_C_SIMULATE_ID STREQUAL "MSVC")
     target_compile_definitions(glfw PRIVATE _CRT_SECURE_NO_WARNINGS)
@@ -252,66 +103,6 @@ endif()
 # Workaround for -std=c99 on Linux disabling _DEFAULT_SOURCE (POSIX 2008 and more)
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     target_compile_definitions(glfw PRIVATE _DEFAULT_SOURCE)
-endif()
-
-if (GLFW_BUILD_SHARED_LIBRARY)
-    if (WIN32)
-        if (MINGW)
-            # Remove the dependency on the shared version of libgcc
-            # NOTE: MinGW-w64 has the correct default but MinGW needs this
-            target_link_libraries(glfw PRIVATE "-static-libgcc")
-
-            # Remove the lib prefix on the DLL (but not the import library)
-            set_target_properties(glfw PROPERTIES PREFIX "")
-
-            # Add a suffix to the import library to avoid naming conflicts
-            set_target_properties(glfw PROPERTIES IMPORT_SUFFIX "dll.a")
-        else()
-            # Add a suffix to the import library to avoid naming conflicts
-            set_target_properties(glfw PROPERTIES IMPORT_SUFFIX "dll.lib")
-        endif()
-        set (GLFW_LIB_NAME_SUFFIX "dll")
-
-        target_compile_definitions(glfw INTERFACE GLFW_DLL)
-    endif()
-
-    if (MINGW)
-        # Enable link-time exploit mitigation features enabled by default on MSVC
-        include(CheckCCompilerFlag)
-        include(CMakePushCheckState)
-
-        # Compatibility with data execution prevention (DEP)
-        cmake_push_check_state()
-        set(CMAKE_REQUIRED_FLAGS "-Wl,--nxcompat")
-        check_c_compiler_flag("" _GLFW_HAS_DEP)
-        if (_GLFW_HAS_DEP)
-            target_link_libraries(glfw PRIVATE "-Wl,--nxcompat")
-        endif()
-        cmake_pop_check_state()
-
-        # Compatibility with address space layout randomization (ASLR)
-        cmake_push_check_state()
-        set(CMAKE_REQUIRED_FLAGS "-Wl,--dynamicbase")
-        check_c_compiler_flag("" _GLFW_HAS_ASLR)
-        if (_GLFW_HAS_ASLR)
-            target_link_libraries(glfw PRIVATE "-Wl,--dynamicbase")
-        endif()
-        cmake_pop_check_state()
-
-        # Compatibility with 64-bit address space layout randomization (ASLR)
-        cmake_push_check_state()
-        set(CMAKE_REQUIRED_FLAGS "-Wl,--high-entropy-va")
-        check_c_compiler_flag("" _GLFW_HAS_64ASLR)
-        if (_GLFW_HAS_64ASLR)
-            target_link_libraries(glfw PRIVATE "-Wl,--high-entropy-va")
-        endif()
-        cmake_pop_check_state()
-    endif()
-
-    if (UNIX)
-        # Hide symbols not explicitly tagged for export from the shared library
-        target_compile_options(glfw PRIVATE "-fvisibility=hidden")
-    endif()
 endif()
 
 list(JOIN glfw_PKG_DEPS " " deps)
