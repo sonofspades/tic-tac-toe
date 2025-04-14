@@ -11,6 +11,7 @@
 
 #include <btBulletCollisionCommon.h>
 
+#include <iostream>
 #include <vector>
 
 auto vertex_stage_text =
@@ -62,6 +63,18 @@ public:
     int getDebugMode() const override { return DBG_DrawWireframe; }
 };
 
+btCollisionWorld* world;
+
+glm::mat4 view;
+glm::mat4 proj;
+
+enum tile_type
+{
+    tile_empty,
+    tile_x,
+    tile_o
+};
+
 auto main() -> int
 {
     glfwInit();
@@ -78,6 +91,51 @@ auto main() -> int
         if (key == GLFW_KEY_TAB && action == GLFW_PRESS)
         {
             side_view = !side_view;
+        }
+    });
+
+    glfwSetMouseButtonCallback(window, [](GLFWwindow* window_ptr, const int button, const int action, const int) -> void
+    {
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+        {
+            double x, y;
+
+            glfwGetCursorPos(window_ptr, &x, &y);
+
+            float ndcX = (x / window_width - 0.5) * 2.0f;
+            float ndcY = (x / window_height - 0.5) * 2.0f;
+
+            glm::mat4 invProj = glm::inverse(proj);
+            glm::mat4 invView = glm::inverse(view);
+
+            glm::vec4 nearPointNDC(ndcX, ndcY, -1.0f, 1.0f); // Near plane
+            glm::vec4  farPointNDC(ndcX, ndcY,  1.0f, 1.0f); // Far plane
+
+            glm::vec4 nearPointWorld = invView * (invProj * nearPointNDC);
+            glm::vec4 farPointWorld  = invView * (invProj * farPointNDC);
+
+            nearPointWorld /= nearPointWorld.w;
+             farPointWorld /= farPointWorld.w;
+
+            glm::vec3 rayStart = glm::vec3(nearPointWorld);
+            glm::vec3 rayEnd   = glm::vec3(farPointWorld);
+
+            glm::vec3 rayDir = glm::normalize(rayEnd - rayStart);
+            glm::vec3 out_end = rayStart + rayDir * 1000.0f;
+
+            const btVector3 rayFrom(rayStart.x, rayStart.y, rayStart.z);
+            const btVector3 rayTo(out_end.x, out_end.y, out_end.z);
+
+            btCollisionWorld::ClosestRayResultCallback result(rayFrom, rayTo);
+
+            world->rayTest(rayFrom, rayTo, result);
+
+            if (result.hasHit())
+            {
+                //result.m_collisionObject->getUserIndex()
+
+                std::cout << "hit\n";
+            }
         }
     });
 
@@ -212,13 +270,56 @@ auto main() -> int
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    constexpr auto tile_space = 1.2f;
+    std::vector<float>    grid_vertices;
+    std::vector<uint32_t> grid_elements;
 
-    glm::mat4 view;
-    auto proj = glm::perspective(glm::radians(60.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.1f, 100.0f);
+    Assimp::Importer grid_importer;
 
-    auto world = new btCollisionWorld(new btCollisionDispatcher(new btDefaultCollisionConfiguration()), new btDbvtBroadphase(), new btDefaultCollisionConfiguration());
-         world->setDebugDrawer(new PhysicsDebug());
+    const auto grid_scene = grid_importer.ReadFile("grid.obj", 0);
+    const auto grid_mesh  = grid_scene->mMeshes[0];
+
+    for (auto i = 0; i < grid_mesh->mNumVertices; i++)
+    {
+        auto vertex = grid_mesh->mVertices[i];
+
+        grid_vertices.push_back(vertex.x);
+        grid_vertices.push_back(vertex.y);
+        grid_vertices.push_back(vertex.z);
+    }
+
+    for (auto i = 0; i < grid_mesh->mNumFaces; i++)
+    {
+        const auto face = grid_mesh->mFaces[i];
+
+        grid_elements.push_back(face.mIndices[0]);
+        grid_elements.push_back(face.mIndices[1]);
+        grid_elements.push_back(face.mIndices[2]);
+    }
+
+    uint32_t grid_vao, grid_vbo, grid_ebo;
+
+    glGenVertexArrays(1, &grid_vao);
+    glBindVertexArray(grid_vao);
+
+    glGenBuffers(1, &grid_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, grid_vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * grid_vertices.size(), grid_vertices.data(), GL_STATIC_DRAW);
+
+    glGenBuffers(1, &grid_ebo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, grid_ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * grid_elements.size(), grid_elements.data(), GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    constexpr auto tile_space = 1.5f;
+
+    proj = glm::perspective(glm::radians(60.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.1f, 100.0f);
+
+    world = new btCollisionWorld(new btCollisionDispatcher(new btDefaultCollisionConfiguration()), new btDbvtBroadphase(), new btDefaultCollisionConfiguration());
+    world->setDebugDrawer(new PhysicsDebug());
+
+    int32_t tiles[3][3] { };
 
     for (auto row = 0; row < 3; row++)
     {
@@ -254,6 +355,7 @@ auto main() -> int
     glEnableVertexAttribArray(0);
 
     glEnable(GL_SCISSOR_TEST);
+    glEnable(GL_DEPTH_TEST);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -275,14 +377,14 @@ auto main() -> int
         }
         else
         {
-            view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.5f));
+            view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -4.0f));
         }
 
         glViewport(0, 0, window_width, window_height);
         glScissor(0, 0, window_width, window_height);
 
         glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glUseProgram(shader);
 
@@ -290,8 +392,12 @@ auto main() -> int
         glUniformMatrix4fv(1, 1, GL_FALSE, glm::value_ptr(view));
 
         auto model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-
         glUniformMatrix4fv(2, 1, GL_FALSE, glm::value_ptr(model));
+        glUniform3fv(3, 1, glm::value_ptr(glm::vec3(1.0f, 1.0f, 0.0f)));
+
+        glBindVertexArray(grid_vao);
+        glDrawElements(GL_TRIANGLES, grid_elements.size(), GL_UNSIGNED_INT, nullptr);
+
         glUniform3fv(3, 1, glm::value_ptr(glm::vec3(0.0f, 1.0f, 0.0f)));
 
         glBindVertexArray(debug_vao);
@@ -311,14 +417,14 @@ auto main() -> int
                 //glBindVertexArray(tile_vao);
                 //glDrawElements(GL_TRIANGLES, tile_elements.size(), GL_UNSIGNED_INT, nullptr);
 
-                if (row == col)
+                if (tiles[row][col] == tile_x)
                 {
                     glUniform3fv(3, 1, glm::value_ptr(glm::vec3(0.0f, 0.0f, 1.0f)));
 
                     glBindVertexArray(x_vao);
                     glDrawElements(GL_TRIANGLES, x_elements.size(), GL_UNSIGNED_INT, nullptr);
                 }
-                else
+                else if (tiles[row][col] == tile_o)
                 {
                     glUniform3fv(3, 1, glm::value_ptr(glm::vec3(1.0f, 0.0f, 0.0f)));
 
@@ -332,10 +438,17 @@ auto main() -> int
         glScissor(window_width, 0, window_width, window_height);
 
         glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.5f));
+        view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -4.0f));
         glUniformMatrix4fv(1, 1, GL_FALSE, glm::value_ptr(view));
+
+        model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+        glUniformMatrix4fv(2, 1, GL_FALSE, glm::value_ptr(model));
+        glUniform3fv(3, 1, glm::value_ptr(glm::vec3(1.0f, 1.0f, 0.0f)));
+
+        glBindVertexArray(grid_vao);
+        glDrawElements(GL_TRIANGLES, grid_elements.size(), GL_UNSIGNED_INT, nullptr);
 
         for (auto row = 0; row < 3; row++)
         {
@@ -351,14 +464,14 @@ auto main() -> int
                 //glBindVertexArray(tile_vao);
                 //glDrawElements(GL_TRIANGLES, tile_elements.size(), GL_UNSIGNED_INT, nullptr);
 
-                if (row == col)
+                if (tiles[row][col] == tile_x)
                 {
                     glUniform3fv(3, 1, glm::value_ptr(glm::vec3(0.0f, 0.0f, 1.0f)));
 
                     glBindVertexArray(x_vao);
                     glDrawElements(GL_TRIANGLES, x_elements.size(), GL_UNSIGNED_INT, nullptr);
                 }
-                else
+                else if (tiles[row][col] == tile_o)
                 {
                     glUniform3fv(3, 1, glm::value_ptr(glm::vec3(1.0f, 0.0f, 0.0f)));
 
