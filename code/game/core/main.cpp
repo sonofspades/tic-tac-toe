@@ -114,7 +114,7 @@ auto main() -> int
             glm::vec4  farPointNDC(ndcX, ndcY,  1.0f, 1.0f);
 
             glm::vec4 nearPointWorld = invView * (invProj * nearPointNDC);
-            glm::vec4 farPointWorld  = invView * (invProj * farPointNDC);
+            glm::vec4 farPointWorld  = invView * (invProj *  farPointNDC);
 
             nearPointWorld /= nearPointWorld.w;
              farPointWorld /=  farPointWorld.w;
@@ -157,36 +157,6 @@ auto main() -> int
     glAttachShader(shader, vertex_stage);
     glAttachShader(shader, fragment_stage);
     glLinkProgram(shader);
-
-    const std::vector tile_vertices
-    {
-        -0.5f,  0.5f, 0.0f,
-         0.5f,  0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,
-        -0.5f, -0.5f, 0.0f
-     };
-
-    const std::vector<uint32_t> tile_elements
-    {
-        0, 1, 2,
-        2, 3, 0
-    };
-
-    uint32_t tile_vao, tile_vbo, tile_ebo;
-
-    glGenVertexArrays(1, &tile_vao);
-    glBindVertexArray(tile_vao);
-
-    glGenBuffers(1, &tile_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, tile_vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * tile_vertices.size(), tile_vertices.data(), GL_STATIC_DRAW);
-
-    glGenBuffers(1, &tile_ebo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, tile_ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * tile_elements.size(), tile_elements.data(), GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
 
     std::vector<float>    o_vertices;
     std::vector<uint32_t> o_elements;
@@ -463,9 +433,6 @@ auto main() -> int
 
                 glUniformMatrix4fv(2, 1, GL_FALSE, glm::value_ptr(model));
 
-                //glBindVertexArray(tile_vao);
-                //glDrawElements(GL_TRIANGLES, tile_elements.size(), GL_UNSIGNED_INT, nullptr);
-
                 if (tiles[row][col] == tile_x)
                 {
                     glUniform3fv(3, 1, glm::value_ptr(glm::vec3(0.0f, 0.0f, 1.0f)));
@@ -486,12 +453,8 @@ auto main() -> int
         glfwSwapBuffers(window);
     }
 
-    glDeleteVertexArrays(1, &tile_vao);
     glDeleteVertexArrays(1, &o_vao);
     glDeleteVertexArrays(1, &x_vao);
-
-    glDeleteBuffers(1, &tile_vbo);
-    glDeleteBuffers(1, &tile_ebo);
 
     glDeleteBuffers(1, &o_vbo);
     glDeleteBuffers(1, &o_ebo);
