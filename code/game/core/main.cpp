@@ -34,8 +34,6 @@ auto fragment_stage_text =
 "    color = vec4(u_color, 1.0);\n"
 "}\n";
 
-auto side_view = false;
-
 std::vector<float> debug_vertices;
 
 class PhysicsDebug : public btIDebugDraw
@@ -88,9 +86,8 @@ auto main() -> int
 
     glfwSetKeyCallback(window, [](GLFWwindow*, const int key, int, const int action, int) -> void
     {
-        if (key == GLFW_KEY_TAB && action == GLFW_PRESS)
+        if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
         {
-            side_view = !side_view;
         }
     });
 
@@ -347,14 +344,7 @@ auto main() -> int
             glfwSetWindowShouldClose(window, true);
         }
 
-        if (side_view)
-        {
-            view = glm::lookAt(glm::vec3(-5.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        }
-        else
-        {
-            view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -4.0f));
-        }
+        view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -4.0f));
 
         glViewport(0, 0, window_width, window_height);
         glScissor(0, 0, window_width, window_height);
@@ -389,9 +379,6 @@ auto main() -> int
                 model = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, 0.0f));
 
                 glUniformMatrix4fv(2, 1, GL_FALSE, glm::value_ptr(model));
-
-                //glBindVertexArray(tile_vao);
-                //glDrawElements(GL_TRIANGLES, tile_elements.size(), GL_UNSIGNED_INT, nullptr);
 
                 if (tiles[row][col] == tile_x)
                 {
