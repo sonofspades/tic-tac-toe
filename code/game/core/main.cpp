@@ -102,29 +102,31 @@ auto main() -> int
 
             glfwGetCursorPos(window_ptr, &x, &y);
 
-            float ndcX = (x / window_width - 0.5) * 2.0f;
-            float ndcY = (x / window_height - 0.5) * 2.0f;
+            //x -= window_width;
+
+            float ndcX =        (2.0f * x) / window_width - 1.0f;
+            float ndcY = 1.0f - (2.0f * y) / window_height;
 
             glm::mat4 invProj = glm::inverse(proj);
             glm::mat4 invView = glm::inverse(view);
 
-            glm::vec4 nearPointNDC(ndcX, ndcY, -1.0f, 1.0f); // Near plane
-            glm::vec4  farPointNDC(ndcX, ndcY,  1.0f, 1.0f); // Far plane
+            glm::vec4 nearPointNDC(ndcX, ndcY, -1.0f, 1.0f);
+            glm::vec4  farPointNDC(ndcX, ndcY,  1.0f, 1.0f);
 
             glm::vec4 nearPointWorld = invView * (invProj * nearPointNDC);
             glm::vec4 farPointWorld  = invView * (invProj * farPointNDC);
 
             nearPointWorld /= nearPointWorld.w;
-             farPointWorld /= farPointWorld.w;
+             farPointWorld /=  farPointWorld.w;
 
             glm::vec3 rayStart = glm::vec3(nearPointWorld);
             glm::vec3 rayEnd   = glm::vec3(farPointWorld);
+            glm::vec3 rayDir   = glm::normalize(rayEnd - rayStart);
 
-            glm::vec3 rayDir = glm::normalize(rayEnd - rayStart);
-            glm::vec3 out_end = rayStart + rayDir * 1000.0f;
+            glm::vec3 ray_end = rayStart + rayDir * 1000.0f;
 
             const btVector3 rayFrom(rayStart.x, rayStart.y, rayStart.z);
-            const btVector3 rayTo(out_end.x, out_end.y, out_end.z);
+            const btVector3 rayTo(ray_end.x, ray_end.y, ray_end.z);
 
             btCollisionWorld::ClosestRayResultCallback result(rayFrom, rayTo);
 
@@ -134,7 +136,7 @@ auto main() -> int
             {
                 //result.m_collisionObject->getUserIndex()
 
-                std::cout << "hit\n";
+                std::cout << std::format("hit from {} {}\n", x, y);
             }
         }
     });
