@@ -61,6 +61,8 @@ public:
     int getDebugMode() const override { return DBG_DrawWireframe; }
 };
 
+auto is_editor = false;
+
 int32_t tiles[3][3] { };
 auto x_turn = true;
 auto is_end = false;
@@ -95,6 +97,16 @@ auto check_col(const int32_t col, const int32_t type) -> bool
            tiles[2][col] == type;
 }
 
+auto check_diagonals(const int32_t type) -> bool
+{
+    return tiles[0][0] == type &&
+           tiles[1][1] == type &&
+           tiles[2][2] == type ||
+           tiles[0][2] == type &&
+           tiles[1][1] == type &&
+           tiles[2][0] == type;
+}
+
 auto check_win(const int32_t type) ->  void
 {
     for (auto row = 0; row < 3; row++)
@@ -116,6 +128,8 @@ auto check_win(const int32_t type) ->  void
             return;
         }
     }
+
+    is_end = check_diagonals(type);
 }
 
 auto main() -> int
@@ -127,7 +141,7 @@ auto main() -> int
     constexpr auto window_width  = 1000;
     constexpr auto window_height = 1000;
 
-    const auto window = glfwCreateWindow(window_width * 2, window_height, "Tic-Tac-Toe", nullptr, nullptr);
+    const auto window = glfwCreateWindow(window_width, window_height, "Tic-Tac-Toe", nullptr, nullptr);
 
     glfwSetKeyCallback(window, [](GLFWwindow*, const int key, int, const int action, int) -> void
     {
@@ -143,6 +157,11 @@ auto main() -> int
 
             x_turn = true;
             is_end = false;
+        }
+
+        if (key == GLFW_KEY_TAB && action == GLFW_PRESS)
+        {
+            is_editor = !is_editor;
         }
     });
 
@@ -414,99 +433,95 @@ auto main() -> int
             glfwSetWindowShouldClose(window, true);
         }
 
-        view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -4.0f));
-
-        glViewport(0, 0, window_width, window_height);
-        glScissor(0, 0, window_width, window_height);
-
-        glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         glUseProgram(shader);
+
+        view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -4.0f));
 
         glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(proj));
         glUniformMatrix4fv(1, 1, GL_FALSE, glm::value_ptr(view));
 
-        auto model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-        glUniformMatrix4fv(2, 1, GL_FALSE, glm::value_ptr(model));
-        glUniform3fv(3, 1, glm::value_ptr(grid_color));
-
-        glBindVertexArray(grid_vao);
-        glDrawElements(GL_TRIANGLES, grid_elements.size(), GL_UNSIGNED_INT, nullptr);
-
-        glUniform3fv(3, 1, glm::value_ptr(glm::vec3(0.0f, 1.0f, 0.0f)));
-
-        glBindVertexArray(debug_vao);
-        glDrawArrays(GL_LINES, 0, static_cast<int>(debug_vertices.size()) / 3);
-
-        for (auto row = 0; row < 3; row++)
+        if (is_editor)
         {
-            for (auto col = 0; col < 3; col++)
+            glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            auto model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+            glUniformMatrix4fv(2, 1, GL_FALSE, glm::value_ptr(model));
+            glUniform3fv(3, 1, glm::value_ptr(grid_color));
+
+            glBindVertexArray(grid_vao);
+            glDrawElements(GL_TRIANGLES, grid_elements.size(), GL_UNSIGNED_INT, nullptr);
+
+            glUniform3fv(3, 1, glm::value_ptr(glm::vec3(0.0f, 1.0f, 0.0f)));
+
+            glBindVertexArray(debug_vao);
+            glDrawArrays(GL_LINES, 0, static_cast<int>(debug_vertices.size()) / 3);
+
+            for (auto row = 0; row < 3; row++)
             {
-                const auto x = -tile_space + col * tile_space;
-                const auto y =  tile_space - row * tile_space;
-
-                model = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, 0.0f));
-
-                glUniformMatrix4fv(2, 1, GL_FALSE, glm::value_ptr(model));
-
-                if (tiles[row][col] == tile_x)
+                for (auto col = 0; col < 3; col++)
                 {
-                    glUniform3fv(3, 1, glm::value_ptr(x_color));
+                    const auto x = -tile_space + col * tile_space;
+                    const auto y =  tile_space - row * tile_space;
 
-                    glBindVertexArray(x_vao);
-                    glDrawElements(GL_TRIANGLES, x_elements.size(), GL_UNSIGNED_INT, nullptr);
-                }
-                else if (tiles[row][col] == tile_o)
-                {
-                    glUniform3fv(3, 1, glm::value_ptr(o_color));
+                    model = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, 0.0f));
 
-                    glBindVertexArray(o_vao);
-                    glDrawElements(GL_TRIANGLES, o_elements.size(), GL_UNSIGNED_INT, nullptr);
+                    glUniformMatrix4fv(2, 1, GL_FALSE, glm::value_ptr(model));
+
+                    if (tiles[row][col] == tile_x)
+                    {
+                        glUniform3fv(3, 1, glm::value_ptr(x_color));
+
+                        glBindVertexArray(x_vao);
+                        glDrawElements(GL_TRIANGLES, x_elements.size(), GL_UNSIGNED_INT, nullptr);
+                    }
+                    else if (tiles[row][col] == tile_o)
+                    {
+                        glUniform3fv(3, 1, glm::value_ptr(o_color));
+
+                        glBindVertexArray(o_vao);
+                        glDrawElements(GL_TRIANGLES, o_elements.size(), GL_UNSIGNED_INT, nullptr);
+                    }
                 }
             }
         }
-
-        glViewport(window_width, 0, window_width, window_height);
-        glScissor(window_width, 0, window_width, window_height);
-
-        glClearColor(0.42745098039215684f, 0.8823529411764706f, 0.8235294117647058f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -4.0f));
-        glUniformMatrix4fv(1, 1, GL_FALSE, glm::value_ptr(view));
-
-        model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-        glUniformMatrix4fv(2, 1, GL_FALSE, glm::value_ptr(model));
-        glUniform3fv(3, 1, glm::value_ptr(grid_color));
-
-        glBindVertexArray(grid_vao);
-        glDrawElements(GL_TRIANGLES, grid_elements.size(), GL_UNSIGNED_INT, nullptr);
-
-        for (auto row = 0; row < 3; row++)
+        else
         {
-            for (auto col = 0; col < 3; col++)
+            glClearColor(0.42745098039215684f, 0.8823529411764706f, 0.8235294117647058f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+            glUniformMatrix4fv(2, 1, GL_FALSE, glm::value_ptr(model));
+            glUniform3fv(3, 1, glm::value_ptr(grid_color));
+
+            glBindVertexArray(grid_vao);
+            glDrawElements(GL_TRIANGLES, grid_elements.size(), GL_UNSIGNED_INT, nullptr);
+
+            for (auto row = 0; row < 3; row++)
             {
-                const auto x = -tile_space + col * tile_space;
-                const auto y =  tile_space - row * tile_space;
-
-                model = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, 0.0f));
-
-                glUniformMatrix4fv(2, 1, GL_FALSE, glm::value_ptr(model));
-
-                if (tiles[row][col] == tile_x)
+                for (auto col = 0; col < 3; col++)
                 {
-                    glUniform3fv(3, 1, glm::value_ptr(x_color));
+                    const auto x = -tile_space + col * tile_space;
+                    const auto y =  tile_space - row * tile_space;
 
-                    glBindVertexArray(x_vao);
-                    glDrawElements(GL_TRIANGLES, x_elements.size(), GL_UNSIGNED_INT, nullptr);
-                }
-                else if (tiles[row][col] == tile_o)
-                {
-                    glUniform3fv(3, 1, glm::value_ptr(o_color));
+                    model = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, 0.0f));
 
-                    glBindVertexArray(o_vao);
-                    glDrawElements(GL_TRIANGLES, o_elements.size(), GL_UNSIGNED_INT, nullptr);
+                    glUniformMatrix4fv(2, 1, GL_FALSE, glm::value_ptr(model));
+
+                    if (tiles[row][col] == tile_x)
+                    {
+                        glUniform3fv(3, 1, glm::value_ptr(x_color));
+
+                        glBindVertexArray(x_vao);
+                        glDrawElements(GL_TRIANGLES, x_elements.size(), GL_UNSIGNED_INT, nullptr);
+                    }
+                    else if (tiles[row][col] == tile_o)
+                    {
+                        glUniform3fv(3, 1, glm::value_ptr(o_color));
+
+                        glBindVertexArray(o_vao);
+                        glDrawElements(GL_TRIANGLES, o_elements.size(), GL_UNSIGNED_INT, nullptr);
+                    }
                 }
             }
         }
