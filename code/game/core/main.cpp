@@ -61,6 +61,10 @@ public:
     int getDebugMode() const override { return DBG_DrawWireframe; }
 };
 
+int32_t tiles[3][3] { };
+auto x_turn = true;
+auto is_end = false;
+
 btCollisionWorld* world;
 
 glm::mat4 view;
@@ -72,6 +76,47 @@ enum tile_type
     tile_x,
     tile_o
 };
+
+auto check_row(const int32_t row, const int32_t type) -> bool
+{
+    std::cout << std::format("{}{}{}\n", tiles[row][0], tiles[row][1], tiles[row][2]);
+
+    return tiles[row][0] == type &&
+           tiles[row][1] == type &&
+           tiles[row][2] == type;
+}
+
+auto check_col(const int32_t col, const int32_t type) -> bool
+{
+    std::cout << std::format("{}{}{}\n", tiles[0][col], tiles[1][col], tiles[2][col]);
+
+    return tiles[0][col] == type &&
+           tiles[1][col] == type &&
+           tiles[2][col] == type;
+}
+
+auto check_win(const int32_t type) ->  void
+{
+    for (auto row = 0; row < 3; row++)
+    {
+        is_end = check_row(row, type);
+
+        if (is_end)
+        {
+            return;
+        }
+    }
+
+    for (auto col = 0; col < 3; col++)
+    {
+        is_end = check_col(col, type);
+
+        if (is_end)
+        {
+            return;
+        }
+    }
+}
 
 auto main() -> int
 {
@@ -88,12 +133,22 @@ auto main() -> int
     {
         if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
         {
+            for (auto row = 0; row < 3; row++)
+            {
+                for (auto col = 0; col < 3; col++)
+                {
+                    tiles[row][col] = tile_empty;
+                }
+            }
+
+            x_turn = true;
+            is_end = false;
         }
     });
 
     glfwSetMouseButtonCallback(window, [](GLFWwindow* window_ptr, const int button, const int action, const int) -> void
     {
-        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && !is_end)
         {
             double x, y;
 
@@ -131,9 +186,24 @@ auto main() -> int
 
             if (result.hasHit())
             {
-                //result.m_collisionObject->getUserIndex()
+                auto row = result.m_collisionObject->getUserIndex();
+                auto col = result.m_collisionObject->getUserIndex2();
 
-                std::cout << std::format("hit from {} {}\n", x, y);
+                if (tiles[row][col] == tile_empty)
+                {
+                    if (x_turn)
+                    {
+                        tiles[row][col] = tile_x;
+                        check_win(tile_x);
+                    }
+                    else
+                    {
+                        tiles[row][col] = tile_o;
+                        check_win(tile_o);
+                    }
+
+                    x_turn = !x_turn;
+                }
             }
         }
     });
@@ -288,8 +358,6 @@ auto main() -> int
     world = new btCollisionWorld(new btCollisionDispatcher(new btDefaultCollisionConfiguration()), new btDbvtBroadphase(), new btDefaultCollisionConfiguration());
     world->setDebugDrawer(new PhysicsDebug());
 
-    int32_t tiles[3][3] { };
-
     for (auto row = 0; row < 3; row++)
     {
         for (auto col = 0; col < 3; col++)
@@ -306,6 +374,8 @@ auto main() -> int
             auto tile_object = new btCollisionObject();
             tile_object->setCollisionShape(tile_shape);
             tile_object->setWorldTransform(transform);
+            tile_object->setUserIndex(row);
+            tile_object->setUserIndex2(col);
 
             world->addCollisionObject(tile_object);
         }
