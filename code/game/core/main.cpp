@@ -173,8 +173,6 @@ auto main() -> int
 
             glfwGetCursorPos(window_ptr, &x, &y);
 
-            //x -= window_width;
-
             float ndcX =        (2.0f * x) / window_width - 1.0f;
             float ndcY = 1.0f - (2.0f * y) / window_height;
 

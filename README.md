@@ -5,3 +5,9 @@ Game developed live on our [YouTube](https://www.youtube.com/playlist?list=PLTBW
 ![Preview](PREVIEW.png)
 
 Check out the full game description on [Wikipedia](https://en.wikipedia.org/wiki/Tic-tac-toe).
+
+## Tasks
+
+- [ ] Task 1
+- [ ] Task 2
+- [ ] Task 3
