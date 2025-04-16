@@ -1,5 +1,7 @@
-# Tic-Tac-Toe Game
+# Tic-Tac-Toe
 
-Game developed Live on stream on our [youtube](https://www.youtube.com/@sonofspades/streams) channel.
+Game developed live on our [YouTube](https://www.youtube.com/playlist?list=PLTBWjr8hHbdpq-5MNiSVT9Puh6iP2xzf7) channel.
 
-Read the complete description of this game [here](https://en.wikipedia.org/wiki/Tic-tac-toe).
+![Preview](PREVIEW.png)
+
+Check out the full game description on [Wikipedia](https://en.wikipedia.org/wiki/Tic-tac-toe).
