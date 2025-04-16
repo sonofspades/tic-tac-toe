@@ -81,8 +81,6 @@ enum tile_type
 
 auto check_row(const int32_t row, const int32_t type) -> bool
 {
-    std::cout << std::format("{}{}{}\n", tiles[row][0], tiles[row][1], tiles[row][2]);
-
     return tiles[row][0] == type &&
            tiles[row][1] == type &&
            tiles[row][2] == type;
@@ -90,8 +88,6 @@ auto check_row(const int32_t row, const int32_t type) -> bool
 
 auto check_col(const int32_t col, const int32_t type) -> bool
 {
-    std::cout << std::format("{}{}{}\n", tiles[0][col], tiles[1][col], tiles[2][col]);
-
     return tiles[0][col] == type &&
            tiles[1][col] == type &&
            tiles[2][col] == type;
