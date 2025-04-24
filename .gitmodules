@@ -1,0 +1,3 @@
+[submodule "modules/graphics"]
+	path = modules/graphics
+	url = https://github.com/sonofspades/graphics-module.git
