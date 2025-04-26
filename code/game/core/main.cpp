@@ -124,16 +124,21 @@ auto check_win(const int32_t type) ->  void
 
 auto main() -> int
 {
-    glfwInit();
-
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    static auto window_closed = false;
 
     constexpr auto window_width  = 1000;
     constexpr auto window_height = 1000;
 
-    const auto window = glfwCreateWindow(window_width, window_height, "Tic-Tac-Toe", nullptr, nullptr);
+    if (glfwInit() != GLFW_TRUE)
+    {
+        return -1;
+    }
 
-    glfwSetKeyCallback(window, [](GLFWwindow*, const int key, int, const int action, int) -> void
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
+    const auto window = glfwCreateWindow(window_width, window_height, "Tic-Tac-Toe", nullptr);
+
+    glfwSetKeyCallback(window, [](const int key, int, const int action, int) -> void
     {
         if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
         {
@@ -152,6 +157,11 @@ auto main() -> int
         if (key == GLFW_KEY_TAB && action == GLFW_PRESS)
         {
             is_editor = !is_editor;
+        }
+
+        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        {
+            window_closed = true;
         }
     });
 
@@ -195,6 +205,11 @@ auto main() -> int
                 }
             }
         }
+    });
+
+    glfwSetWindowCloseCallback(window, []() -> void
+    {
+        window_closed = true;
     });
 
     glfwMakeContextCurrent(window);
@@ -385,14 +400,9 @@ auto main() -> int
     glm::vec3    o_color { 0.9686274509803922f, 0.35294117647058826f, 0.35294117647058826f };
     glm::vec3 grid_color { 1.0f, 0.6627450980392157f, 0.3333333333333333f };
 
-    while (!glfwWindowShouldClose(window))
+    while (!window_closed)
     {
         glfwPollEvents();
-
-        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        {
-            glfwSetWindowShouldClose(window, true);
-        }
 
         glUseProgram(shader);
 
