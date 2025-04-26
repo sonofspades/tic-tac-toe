@@ -214,8 +214,8 @@ auto main() -> int
     glAttachShader(shader, frag_stage);
     glLinkProgram(shader);
 
-    std::vector<float>    o_vertices;
-    std::vector<uint32_t> o_elements;
+    std::vector<glm::vec3> o_vertices;
+    std::vector<uint32_t>  o_elements;
 
     Assimp::Importer o_importer;
 
@@ -226,9 +226,7 @@ auto main() -> int
     {
         auto vertex = o_mesh->mVertices[i];
 
-        o_vertices.push_back(vertex.x);
-        o_vertices.push_back(vertex.y);
-        o_vertices.push_back(vertex.z);
+        o_vertices.emplace_back(vertex.x, vertex.y, vertex.z);
     }
 
     for (auto i = 0; i < o_mesh->mNumFaces; i++)
@@ -247,17 +245,17 @@ auto main() -> int
 
     glGenBuffers(1, &o_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, o_vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * o_vertices.size(), o_vertices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, o_vertices.size() * sizeof(glm::vec3), o_vertices.data(), GL_STATIC_DRAW);
 
     glGenBuffers(1, &o_ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, o_ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * o_elements.size(), o_elements.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, o_elements.size() * sizeof(uint32_t), o_elements.data(), GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), nullptr);
     glEnableVertexAttribArray(0);
 
-    std::vector<float>    x_vertices;
-    std::vector<uint32_t> x_elements;
+    std::vector<glm::vec3> x_vertices;
+    std::vector<uint32_t>  x_elements;
 
     Assimp::Importer x_importer;
 
@@ -268,9 +266,7 @@ auto main() -> int
     {
         auto vertex = x_mesh->mVertices[i];
 
-        x_vertices.push_back(vertex.x);
-        x_vertices.push_back(vertex.y);
-        x_vertices.push_back(vertex.z);
+        x_vertices.emplace_back(vertex.x, vertex.y, vertex.z);
     }
 
     for (auto i = 0; i < x_mesh->mNumFaces; i++)
@@ -289,17 +285,17 @@ auto main() -> int
 
     glGenBuffers(1, &x_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, x_vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * x_vertices.size(), x_vertices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, x_vertices.size() * sizeof(glm::vec3), x_vertices.data(), GL_STATIC_DRAW);
 
     glGenBuffers(1, &x_ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, x_ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * x_elements.size(), x_elements.data(), GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), nullptr);
     glEnableVertexAttribArray(0);
 
-    std::vector<float>    grid_vertices;
-    std::vector<uint32_t> grid_elements;
+    std::vector<glm::vec3> grid_vertices;
+    std::vector<uint32_t>  grid_elements;
 
     Assimp::Importer grid_importer;
 
@@ -310,9 +306,7 @@ auto main() -> int
     {
         auto vertex = grid_mesh->mVertices[i];
 
-        grid_vertices.push_back(vertex.x);
-        grid_vertices.push_back(vertex.y);
-        grid_vertices.push_back(vertex.z);
+        grid_vertices.emplace_back(vertex.x, vertex.y, vertex.z);
     }
 
     for (auto i = 0; i < grid_mesh->mNumFaces; i++)
@@ -331,16 +325,16 @@ auto main() -> int
 
     glGenBuffers(1, &grid_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, grid_vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * grid_vertices.size(), grid_vertices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * grid_vertices.size(), grid_vertices.data(), GL_STATIC_DRAW);
 
     glGenBuffers(1, &grid_ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, grid_ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * grid_elements.size(), grid_elements.data(), GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
     glEnableVertexAttribArray(0);
 
-    constexpr auto tile_space = 1.5f;
+    constexpr auto tile_size = 1.5f;
 
     proj = glm::perspective(glm::radians(60.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.1f, 100.0f);
 
@@ -351,8 +345,8 @@ auto main() -> int
     {
         for (auto col = 0; col < 3; col++)
         {
-            const auto x = -tile_space + col * tile_space;
-            const auto y =  tile_space - row * tile_space;
+            const auto x = -tile_size + col * tile_size;
+            const auto y =  tile_size - row * tile_size;
 
             btTransform transform;
             transform.setIdentity();
@@ -434,8 +428,8 @@ auto main() -> int
         {
             for (auto col = 0; col < 3; col++)
             {
-                const auto x = -tile_space + col * tile_space;
-                const auto y =  tile_space - row * tile_space;
+                const auto x = -tile_size + col * tile_size;
+                const auto y =  tile_size - row * tile_size;
 
                 model = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, 0.0f));
 
