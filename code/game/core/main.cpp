@@ -411,8 +411,8 @@ auto main() -> int
     glEnable(GL_SCISSOR_TEST);
     glEnable(GL_DEPTH_TEST);
 
-    glm::vec3 x_color    { 1.0f, 0.8392156862745098f, 0.22745098039215686f };
-    glm::vec3 o_color    { 0.9686274509803922f, 0.35294117647058826f, 0.35294117647058826f };
+    glm::vec3    x_color { 1.0f, 0.8392156862745098f, 0.22745098039215686f };
+    glm::vec3    o_color { 0.9686274509803922f, 0.35294117647058826f, 0.35294117647058826f };
     glm::vec3 grid_color { 1.0f, 0.6627450980392157f, 0.3333333333333333f };
 
     while (!glfwWindowShouldClose(window))
@@ -493,10 +493,18 @@ auto main() -> int
     glDeleteVertexArrays(1, &o_vao);
     glDeleteVertexArrays(1, &x_vao);
 
+    glDeleteVertexArrays(1, &grid_vao);
+    glDeleteVertexArrays(1, &debug_vao);
+
     glDeleteBuffers(1, &o_vbo);
     glDeleteBuffers(1, &o_ebo);
     glDeleteBuffers(1, &x_vbo);
     glDeleteBuffers(1, &x_ebo);
+
+    glDeleteBuffers(1, &grid_vbo);
+    glDeleteBuffers(1, &grid_ebo);
+
+    glDeleteBuffers(1, &debug_vbo);
 
     glDeleteShader(vertex_stage);
     glDeleteShader(fragment_stage);
