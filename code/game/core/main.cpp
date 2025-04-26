@@ -13,9 +13,6 @@
 
 #include <opengl/commands.hpp>
 
-#include <iostream>
-#include <vector>
-
 auto vertex_stage_text =
 "#version 450\n"
 "layout (location = 0) in vec3 position;\n"
@@ -167,42 +164,24 @@ auto main() -> int
     {
         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && !is_end)
         {
-            double x, y;
-
+                                   double x,  y;
             glfwGetCursorPos(window_ptr, &x, &y);
 
-            float ndcX =        (2.0f * x) / window_width - 1.0f;
-            float ndcY = 1.0f - (2.0f * y) / window_height;
+            constexpr glm::vec4 viewport { 0.0f, 0.0f, window_width, window_height };
 
-            glm::mat4 invProj = glm::inverse(proj);
-            glm::mat4 invView = glm::inverse(view);
+            auto start = glm::unProject(glm::vec3(x, window_height - y, -1.0f), view, proj, viewport);
+            auto end   = glm::unProject(glm::vec3(x, window_height - y,  1.0f), view, proj, viewport);
+                 end   = start + glm::normalize(end - start) * 1000.0f;
 
-            glm::vec4 nearPointNDC(ndcX, ndcY, -1.0f, 1.0f);
-            glm::vec4  farPointNDC(ndcX, ndcY,  1.0f, 1.0f);
+            const btVector3 from(start.x, start.y, start.z);
+            const btVector3   to(  end.x,   end.y,   end.z);
 
-            glm::vec4 nearPointWorld = invView * (invProj * nearPointNDC);
-            glm::vec4 farPointWorld  = invView * (invProj *  farPointNDC);
-
-            nearPointWorld /= nearPointWorld.w;
-             farPointWorld /=  farPointWorld.w;
-
-            glm::vec3 rayStart = glm::vec3(nearPointWorld);
-            glm::vec3 rayEnd   = glm::vec3(farPointWorld);
-            glm::vec3 rayDir   = glm::normalize(rayEnd - rayStart);
-
-            glm::vec3 ray_end = rayStart + rayDir * 1000.0f;
-
-            const btVector3 rayFrom(rayStart.x, rayStart.y, rayStart.z);
-            const btVector3 rayTo(ray_end.x, ray_end.y, ray_end.z);
-
-            btCollisionWorld::ClosestRayResultCallback result(rayFrom, rayTo);
-
-            world->rayTest(rayFrom, rayTo, result);
-
+            btCollisionWorld::ClosestRayResultCallback result(from, to);
+                                               world->rayTest(from, to, result);
             if (result.hasHit())
             {
-                auto row = result.m_collisionObject->getUserIndex();
-                auto col = result.m_collisionObject->getUserIndex2();
+                const auto row = result.m_collisionObject->getUserIndex();
+                const auto col = result.m_collisionObject->getUserIndex2();
 
                 if (tiles[row][col] == tile_empty)
                 {
