@@ -33,20 +33,15 @@ auto fragment_stage_text =
 "    color = vec4(u_color, 1.0);\n"
 "}\n";
 
-std::vector<float> debug_vertices;
+std::vector<glm::vec3> debug_vertices;
 
 class PhysicsDebug : public btIDebugDraw
 {
 public:
     void drawLine(const btVector3& from, const btVector3& to, const btVector3& color) override
     {
-        debug_vertices.push_back(from.x());
-        debug_vertices.push_back(from.y());
-        debug_vertices.push_back(from.z());
-
-        debug_vertices.push_back(to.x());
-        debug_vertices.push_back(to.y());
-        debug_vertices.push_back(to.z());
+        debug_vertices.emplace_back(from.x(), from.y(), from.z());
+        debug_vertices.emplace_back(to.x(), to.y(), to.z());
     }
 
     void clearLines() override
@@ -57,7 +52,7 @@ public:
     void drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color) override { }
     void reportErrorWarning(const char* warningString) override { }
     void setDebugMode(int debugMode) override { }
-    int getDebugMode() const override { return DBG_DrawWireframe; }
+    int  getDebugMode() const override { return DBG_DrawWireframe; }
 };
 
 auto is_editor = false;
@@ -206,17 +201,17 @@ auto main() -> int
 
     gladLoadGL();
 
-    const auto vertex_stage = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex_stage, 1, &vertex_stage_text, nullptr);
-    glCompileShader(vertex_stage);
+    const auto vert_stage = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vert_stage, 1, &vertex_stage_text, nullptr);
+    glCompileShader(vert_stage);
 
-    const auto fragment_stage = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment_stage, 1, &fragment_stage_text, nullptr);
-    glCompileShader(fragment_stage);
+    const auto frag_stage = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(frag_stage, 1, &fragment_stage_text, nullptr);
+    glCompileShader(frag_stage);
 
     const auto shader = glCreateProgram();
-    glAttachShader(shader, vertex_stage);
-    glAttachShader(shader, fragment_stage);
+    glAttachShader(shader, vert_stage);
+    glAttachShader(shader, frag_stage);
     glLinkProgram(shader);
 
     std::vector<float>    o_vertices;
@@ -375,6 +370,8 @@ auto main() -> int
         }
     }
 
+    world->debugDrawWorld();
+
     uint32_t debug_vao, debug_vbo;
 
     glGenVertexArrays(1, &debug_vao);
@@ -382,9 +379,9 @@ auto main() -> int
 
     glGenBuffers(1, &debug_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, debug_vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * debug_vertices.size(), debug_vertices.data(), GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, debug_vertices.size() * sizeof(glm::vec3), debug_vertices.data(), GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), nullptr);
     glEnableVertexAttribArray(0);
 
     glEnable(GL_SCISSOR_TEST);
@@ -397,11 +394,6 @@ auto main() -> int
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
-
-        world->debugDrawWorld();
-
-        glBindBuffer(GL_ARRAY_BUFFER, debug_vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * debug_vertices.size(), debug_vertices.data(), GL_DYNAMIC_DRAW);
 
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         {
@@ -425,7 +417,7 @@ auto main() -> int
             glUniform3fv(3, 1, glm::value_ptr(glm::vec3(0.0f, 1.0f, 0.0f)));
 
             glBindVertexArray(debug_vao);
-            glDrawArrays(GL_LINES, 0, static_cast<int>(debug_vertices.size()) / 3);
+            glDrawArrays(GL_LINES, 0, static_cast<int>(debug_vertices.size()));
         }
         else
         {
@@ -485,8 +477,8 @@ auto main() -> int
 
     glDeleteBuffers(1, &debug_vbo);
 
-    glDeleteShader(vertex_stage);
-    glDeleteShader(fragment_stage);
+    glDeleteShader(vert_stage);
+    glDeleteShader(frag_stage);
 
     glDeleteProgram(shader);
 
