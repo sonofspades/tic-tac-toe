@@ -159,8 +159,6 @@ void _glfwInputWindowCloseRequest(_GLFWwindow* window)
 {
     assert(window != NULL);
 
-    window->shouldClose = GLFW_TRUE;
-
     if (window->callbacks.close)
         window->callbacks.close((GLFWwindow*) window);
 }
@@ -177,10 +175,7 @@ void _glfwInputWindowMonitor(_GLFWwindow* window, _GLFWmonitor* monitor)
 //////                        GLFW public API                       //////
 //////////////////////////////////////////////////////////////////////////
 
-GLFWAPI GLFWwindow* glfwCreateWindow(int width, int height,
-                                     const char* title,
-                                     GLFWmonitor* monitor,
-                                     GLFWwindow* share)
+GLFWAPI GLFWwindow* glfwCreateWindow(int width, int height, const char* title, GLFWmonitor* monitor)
 {
     _GLFWfbconfig fbconfig;
     _GLFWctxconfig ctxconfig;
@@ -209,7 +204,6 @@ GLFWAPI GLFWwindow* glfwCreateWindow(int width, int height,
     wndconfig.width   = width;
     wndconfig.height  = height;
     wndconfig.title   = title;
-    ctxconfig.share   = (_GLFWwindow*) share;
 
     if (!_glfwIsValidContextConfig(&ctxconfig))
         return NULL;
@@ -464,26 +458,6 @@ GLFWAPI void glfwDestroyWindow(GLFWwindow* handle)
 
     _glfw_free(window->title);
     _glfw_free(window);
-}
-
-GLFWAPI int glfwWindowShouldClose(GLFWwindow* handle)
-{
-    _GLFW_REQUIRE_INIT_OR_RETURN(0);
-
-    _GLFWwindow* window = (_GLFWwindow*) handle;
-    assert(window != NULL);
-
-    return window->shouldClose;
-}
-
-GLFWAPI void glfwSetWindowShouldClose(GLFWwindow* handle, int value)
-{
-    _GLFW_REQUIRE_INIT();
-
-    _GLFWwindow* window = (_GLFWwindow*) handle;
-    assert(window != NULL);
-
-    window->shouldClose = value;
 }
 
 GLFWAPI const char* glfwGetWindowTitle(GLFWwindow* handle)
@@ -969,26 +943,6 @@ GLFWAPI void glfwSetWindowMonitor(GLFWwindow* wh,
                                     refreshRate);
 }
 
-GLFWAPI void glfwSetWindowUserPointer(GLFWwindow* handle, void* pointer)
-{
-    _GLFW_REQUIRE_INIT();
-
-    _GLFWwindow* window = (_GLFWwindow*) handle;
-    assert(window != NULL);
-
-    window->userPointer = pointer;
-}
-
-GLFWAPI void* glfwGetWindowUserPointer(GLFWwindow* handle)
-{
-    _GLFW_REQUIRE_INIT_OR_RETURN(NULL);
-
-    _GLFWwindow* window = (_GLFWwindow*) handle;
-    assert(window != NULL);
-
-    return window->userPointer;
-}
-
 GLFWAPI GLFWwindowposfun glfwSetWindowPosCallback(GLFWwindow* handle,
                                                   GLFWwindowposfun cbfun)
 {
@@ -1013,8 +967,7 @@ GLFWAPI GLFWwindowsizefun glfwSetWindowSizeCallback(GLFWwindow* handle,
     return cbfun;
 }
 
-GLFWAPI GLFWwindowclosefun glfwSetWindowCloseCallback(GLFWwindow* handle,
-                                                      GLFWwindowclosefun cbfun)
+GLFWAPI GLFWwindowclosefun glfwSetWindowCloseCallback(GLFWwindow* handle, GLFWwindowclosefun cbfun)
 {
     _GLFW_REQUIRE_INIT_OR_RETURN(NULL);
 

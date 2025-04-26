@@ -57,22 +57,6 @@ GLFWbool _glfwIsValidContextConfig(const _GLFWctxconfig* ctxconfig)
         return GLFW_FALSE;
     }
 
-    if (ctxconfig->share)
-    {
-        if (ctxconfig->client == GLFW_NO_API ||
-            ctxconfig->share->context.client == GLFW_NO_API)
-        {
-            _glfwInputError(GLFW_NO_WINDOW_CONTEXT, NULL);
-            return GLFW_FALSE;
-        }
-
-        if (ctxconfig->source != ctxconfig->share->context.source)
-        {
-            _glfwInputError(GLFW_INVALID_ENUM, "Context creation APIs do not match between contexts");
-            return GLFW_FALSE;
-        }
-    }
-
     if (ctxconfig->client == GLFW_OPENGL_API)
     {
         if ((ctxconfig->major < 1 || ctxconfig->minor < 0) ||

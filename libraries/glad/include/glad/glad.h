@@ -1629,9 +1629,6 @@ GLAPI PFNGLGETTEXLEVELPARAMETERFVPROC glad_glGetTexLevelParameterfv;
 typedef void (APIENTRYP PFNGLGETTEXLEVELPARAMETERIVPROC)(GLenum target, GLint level, GLenum pname, GLint *params);
 GLAPI PFNGLGETTEXLEVELPARAMETERIVPROC glad_glGetTexLevelParameteriv;
 #define glGetTexLevelParameteriv glad_glGetTexLevelParameteriv
-typedef GLboolean (APIENTRYP PFNGLISENABLEDPROC)(GLenum cap);
-GLAPI PFNGLISENABLEDPROC glad_glIsEnabled;
-#define glIsEnabled glad_glIsEnabled
 typedef void (APIENTRYP PFNGLDEPTHRANGEPROC)(GLdouble n, GLdouble f);
 GLAPI PFNGLDEPTHRANGEPROC glad_glDepthRange;
 #define glDepthRange glad_glDepthRange
@@ -1678,9 +1675,6 @@ GLAPI PFNGLDELETETEXTURESPROC glad_glDeleteTextures;
 typedef void (APIENTRYP PFNGLGENTEXTURESPROC)(GLsizei n, GLuint *textures);
 GLAPI PFNGLGENTEXTURESPROC glad_glGenTextures;
 #define glGenTextures glad_glGenTextures
-typedef GLboolean (APIENTRYP PFNGLISTEXTUREPROC)(GLuint texture);
-GLAPI PFNGLISTEXTUREPROC glad_glIsTexture;
-#define glIsTexture glad_glIsTexture
 #endif
 #ifndef GL_VERSION_1_2
 #define GL_VERSION_1_2 1
@@ -1769,9 +1763,6 @@ GLAPI PFNGLGENQUERIESPROC glad_glGenQueries;
 typedef void (APIENTRYP PFNGLDELETEQUERIESPROC)(GLsizei n, const GLuint *ids);
 GLAPI PFNGLDELETEQUERIESPROC glad_glDeleteQueries;
 #define glDeleteQueries glad_glDeleteQueries
-typedef GLboolean (APIENTRYP PFNGLISQUERYPROC)(GLuint id);
-GLAPI PFNGLISQUERYPROC glad_glIsQuery;
-#define glIsQuery glad_glIsQuery
 typedef void (APIENTRYP PFNGLBEGINQUERYPROC)(GLenum target, GLuint id);
 GLAPI PFNGLBEGINQUERYPROC glad_glBeginQuery;
 #define glBeginQuery glad_glBeginQuery
@@ -1796,9 +1787,6 @@ GLAPI PFNGLDELETEBUFFERSPROC glad_glDeleteBuffers;
 typedef void (APIENTRYP PFNGLGENBUFFERSPROC)(GLsizei n, GLuint *buffers);
 GLAPI PFNGLGENBUFFERSPROC glad_glGenBuffers;
 #define glGenBuffers glad_glGenBuffers
-typedef GLboolean (APIENTRYP PFNGLISBUFFERPROC)(GLuint buffer);
-GLAPI PFNGLISBUFFERPROC glad_glIsBuffer;
-#define glIsBuffer glad_glIsBuffer
 typedef void (APIENTRYP PFNGLBUFFERDATAPROC)(GLenum target, GLsizeiptr size, const void *data, GLenum usage);
 GLAPI PFNGLBUFFERDATAPROC glad_glBufferData;
 #define glBufferData glad_glBufferData
@@ -1917,12 +1905,6 @@ GLAPI PFNGLGETVERTEXATTRIBIVPROC glad_glGetVertexAttribiv;
 typedef void (APIENTRYP PFNGLGETVERTEXATTRIBPOINTERVPROC)(GLuint index, GLenum pname, void **pointer);
 GLAPI PFNGLGETVERTEXATTRIBPOINTERVPROC glad_glGetVertexAttribPointerv;
 #define glGetVertexAttribPointerv glad_glGetVertexAttribPointerv
-typedef GLboolean (APIENTRYP PFNGLISPROGRAMPROC)(GLuint program);
-GLAPI PFNGLISPROGRAMPROC glad_glIsProgram;
-#define glIsProgram glad_glIsProgram
-typedef GLboolean (APIENTRYP PFNGLISSHADERPROC)(GLuint shader);
-GLAPI PFNGLISSHADERPROC glad_glIsShader;
-#define glIsShader glad_glIsShader
 typedef void (APIENTRYP PFNGLLINKPROGRAMPROC)(GLuint program);
 GLAPI PFNGLLINKPROGRAMPROC glad_glLinkProgram;
 #define glLinkProgram glad_glLinkProgram
@@ -2144,9 +2126,6 @@ GLAPI PFNGLENABLEIPROC glad_glEnablei;
 typedef void (APIENTRYP PFNGLDISABLEIPROC)(GLenum target, GLuint index);
 GLAPI PFNGLDISABLEIPROC glad_glDisablei;
 #define glDisablei glad_glDisablei
-typedef GLboolean (APIENTRYP PFNGLISENABLEDIPROC)(GLenum target, GLuint index);
-GLAPI PFNGLISENABLEDIPROC glad_glIsEnabledi;
-#define glIsEnabledi glad_glIsEnabledi
 typedef void (APIENTRYP PFNGLBEGINTRANSFORMFEEDBACKPROC)(GLenum primitiveMode);
 GLAPI PFNGLBEGINTRANSFORMFEEDBACKPROC glad_glBeginTransformFeedback;
 #define glBeginTransformFeedback glad_glBeginTransformFeedback
@@ -2303,9 +2282,6 @@ GLAPI PFNGLCLEARBUFFERFIPROC glad_glClearBufferfi;
 typedef const GLubyte * (APIENTRYP PFNGLGETSTRINGIPROC)(GLenum name, GLuint index);
 GLAPI PFNGLGETSTRINGIPROC glad_glGetStringi;
 #define glGetStringi glad_glGetStringi
-typedef GLboolean (APIENTRYP PFNGLISRENDERBUFFERPROC)(GLuint renderbuffer);
-GLAPI PFNGLISRENDERBUFFERPROC glad_glIsRenderbuffer;
-#define glIsRenderbuffer glad_glIsRenderbuffer
 typedef void (APIENTRYP PFNGLBINDRENDERBUFFERPROC)(GLenum target, GLuint renderbuffer);
 GLAPI PFNGLBINDRENDERBUFFERPROC glad_glBindRenderbuffer;
 #define glBindRenderbuffer glad_glBindRenderbuffer
@@ -2321,9 +2297,6 @@ GLAPI PFNGLRENDERBUFFERSTORAGEPROC glad_glRenderbufferStorage;
 typedef void (APIENTRYP PFNGLGETRENDERBUFFERPARAMETERIVPROC)(GLenum target, GLenum pname, GLint *params);
 GLAPI PFNGLGETRENDERBUFFERPARAMETERIVPROC glad_glGetRenderbufferParameteriv;
 #define glGetRenderbufferParameteriv glad_glGetRenderbufferParameteriv
-typedef GLboolean (APIENTRYP PFNGLISFRAMEBUFFERPROC)(GLuint framebuffer);
-GLAPI PFNGLISFRAMEBUFFERPROC glad_glIsFramebuffer;
-#define glIsFramebuffer glad_glIsFramebuffer
 typedef void (APIENTRYP PFNGLBINDFRAMEBUFFERPROC)(GLenum target, GLuint framebuffer);
 GLAPI PFNGLBINDFRAMEBUFFERPROC glad_glBindFramebuffer;
 #define glBindFramebuffer glad_glBindFramebuffer
@@ -2440,9 +2413,6 @@ GLAPI PFNGLPROVOKINGVERTEXPROC glad_glProvokingVertex;
 typedef GLsync (APIENTRYP PFNGLFENCESYNCPROC)(GLenum condition, GLbitfield flags);
 GLAPI PFNGLFENCESYNCPROC glad_glFenceSync;
 #define glFenceSync glad_glFenceSync
-typedef GLboolean (APIENTRYP PFNGLISSYNCPROC)(GLsync sync);
-GLAPI PFNGLISSYNCPROC glad_glIsSync;
-#define glIsSync glad_glIsSync
 typedef void (APIENTRYP PFNGLDELETESYNCPROC)(GLsync sync);
 GLAPI PFNGLDELETESYNCPROC glad_glDeleteSync;
 #define glDeleteSync glad_glDeleteSync
@@ -2495,9 +2465,6 @@ GLAPI PFNGLGENSAMPLERSPROC glad_glGenSamplers;
 typedef void (APIENTRYP PFNGLDELETESAMPLERSPROC)(GLsizei count, const GLuint *samplers);
 GLAPI PFNGLDELETESAMPLERSPROC glad_glDeleteSamplers;
 #define glDeleteSamplers glad_glDeleteSamplers
-typedef GLboolean (APIENTRYP PFNGLISSAMPLERPROC)(GLuint sampler);
-GLAPI PFNGLISSAMPLERPROC glad_glIsSampler;
-#define glIsSampler glad_glIsSampler
 typedef void (APIENTRYP PFNGLBINDSAMPLERPROC)(GLuint unit, GLuint sampler);
 GLAPI PFNGLBINDSAMPLERPROC glad_glBindSampler;
 #define glBindSampler glad_glBindSampler
@@ -2775,9 +2742,6 @@ GLAPI PFNGLDELETETRANSFORMFEEDBACKSPROC glad_glDeleteTransformFeedbacks;
 typedef void (APIENTRYP PFNGLGENTRANSFORMFEEDBACKSPROC)(GLsizei n, GLuint *ids);
 GLAPI PFNGLGENTRANSFORMFEEDBACKSPROC glad_glGenTransformFeedbacks;
 #define glGenTransformFeedbacks glad_glGenTransformFeedbacks
-typedef GLboolean (APIENTRYP PFNGLISTRANSFORMFEEDBACKPROC)(GLuint id);
-GLAPI PFNGLISTRANSFORMFEEDBACKPROC glad_glIsTransformFeedback;
-#define glIsTransformFeedback glad_glIsTransformFeedback
 typedef void (APIENTRYP PFNGLPAUSETRANSFORMFEEDBACKPROC)(void);
 GLAPI PFNGLPAUSETRANSFORMFEEDBACKPROC glad_glPauseTransformFeedback;
 #define glPauseTransformFeedback glad_glPauseTransformFeedback
@@ -2845,9 +2809,6 @@ GLAPI PFNGLDELETEPROGRAMPIPELINESPROC glad_glDeleteProgramPipelines;
 typedef void (APIENTRYP PFNGLGENPROGRAMPIPELINESPROC)(GLsizei n, GLuint *pipelines);
 GLAPI PFNGLGENPROGRAMPIPELINESPROC glad_glGenProgramPipelines;
 #define glGenProgramPipelines glad_glGenProgramPipelines
-typedef GLboolean (APIENTRYP PFNGLISPROGRAMPIPELINEPROC)(GLuint pipeline);
-GLAPI PFNGLISPROGRAMPIPELINEPROC glad_glIsProgramPipeline;
-#define glIsProgramPipeline glad_glIsProgramPipeline
 typedef void (APIENTRYP PFNGLGETPROGRAMPIPELINEIVPROC)(GLuint pipeline, GLenum pname, GLint *params);
 GLAPI PFNGLGETPROGRAMPIPELINEIVPROC glad_glGetProgramPipelineiv;
 #define glGetProgramPipelineiv glad_glGetProgramPipelineiv

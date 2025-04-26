@@ -1,4 +1,3 @@
-
 link_libraries(glfw)
 
 include_directories("${GLFW_SOURCE_DIR}/deps")
@@ -13,17 +12,14 @@ if (MSVC OR CMAKE_C_SIMULATE_ID STREQUAL "MSVC")
 endif()
 
 set(GLAD_GL "${GLFW_SOURCE_DIR}/deps/glad/gl.h")
-set(GLAD_VULKAN "${GLFW_SOURCE_DIR}/deps/glad/vulkan.h")
-set(GETOPT "${GLFW_SOURCE_DIR}/deps/getopt.h"
-           "${GLFW_SOURCE_DIR}/deps/getopt.c")
-set(TINYCTHREAD "${GLFW_SOURCE_DIR}/deps/tinycthread.h"
-                "${GLFW_SOURCE_DIR}/deps/tinycthread.c")
+set(GETOPT "${GLFW_SOURCE_DIR}/deps/getopt.h" "${GLFW_SOURCE_DIR}/deps/getopt.c")
+set(TINYCTHREAD "${GLFW_SOURCE_DIR}/deps/tinycthread.h" "${GLFW_SOURCE_DIR}/deps/tinycthread.c")
 
 add_executable(allocator allocator.c ${GLAD_GL})
 add_executable(clipboard clipboard.c ${GETOPT} ${GLAD_GL})
 add_executable(events events.c ${GETOPT} ${GLAD_GL})
 add_executable(msaa msaa.c ${GETOPT} ${GLAD_GL})
-add_executable(glfwinfo glfwinfo.c ${GETOPT} ${GLAD_GL} ${GLAD_VULKAN})
+add_executable(glfwinfo glfwinfo.c ${GETOPT} ${GLAD_GL})
 add_executable(iconify iconify.c ${GETOPT} ${GLAD_GL})
 add_executable(monitors monitors.c ${GETOPT} ${GLAD_GL})
 add_executable(reopen reopen.c ${GLAD_GL})
@@ -53,10 +49,8 @@ set_target_properties(${GUI_ONLY_BINARIES} ${CONSOLE_BINARIES} PROPERTIES C_STAN
 
 if (MSVC)
     # Tell MSVC to use main instead of WinMain
-    set_target_properties(${GUI_ONLY_BINARIES} PROPERTIES
-                          LINK_FLAGS "/ENTRY:mainCRTStartup")
+    set_target_properties(${GUI_ONLY_BINARIES} PROPERTIES LINK_FLAGS "/ENTRY:mainCRTStartup")
 elseif (CMAKE_C_SIMULATE_ID STREQUAL "MSVC")
     # Tell Clang using MS CRT to use main instead of WinMain
-    set_target_properties(${GUI_ONLY_BINARIES} PROPERTIES
-                          LINK_FLAGS "-Wl,/entry:mainCRTStartup")
+    set_target_properties(${GUI_ONLY_BINARIES} PROPERTIES LINK_FLAGS "-Wl,/entry:mainCRTStartup")
 endif()

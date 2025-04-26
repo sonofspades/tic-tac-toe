@@ -429,8 +429,6 @@ GLFWbool _glfwInitWGL(void)
         _glfwPlatformGetModuleSymbol(_glfw.wgl.instance, "wglGetCurrentContext");
     _glfw.wgl.MakeCurrent = (PFN_wglMakeCurrent)
         _glfwPlatformGetModuleSymbol(_glfw.wgl.instance, "wglMakeCurrent");
-    _glfw.wgl.ShareLists = (PFN_wglShareLists)
-        _glfwPlatformGetModuleSymbol(_glfw.wgl.instance, "wglShareLists");
 
     // NOTE: A dummy context has to be created for opengl32.dll to load the
     //       OpenGL ICD, from which we can then query WGL extensions
@@ -540,12 +538,8 @@ GLFWbool _glfwCreateContextWGL(_GLFWwindow* window,
                                const _GLFWfbconfig* fbconfig)
 {
     int attribs[40];
-    int pixelFormat;
     PIXELFORMATDESCRIPTOR pfd;
     HGLRC share = NULL;
-
-    if (ctxconfig->share)
-        share = ctxconfig->share->context.wgl.handle;
 
     window->context.wgl.dc = GetDC(window->win32.handle);
     if (!window->context.wgl.dc)
@@ -555,7 +549,7 @@ GLFWbool _glfwCreateContextWGL(_GLFWwindow* window,
         return GLFW_FALSE;
     }
 
-    pixelFormat = choosePixelFormatWGL(window, ctxconfig, fbconfig);
+    int pixelFormat = choosePixelFormatWGL(window, ctxconfig, fbconfig);
     if (!pixelFormat)
         return GLFW_FALSE;
 
@@ -745,16 +739,6 @@ GLFWbool _glfwCreateContextWGL(_GLFWwindow* window,
             _glfwInputErrorWin32(GLFW_VERSION_UNAVAILABLE,
                                  "WGL: Failed to create OpenGL context");
             return GLFW_FALSE;
-        }
-
-        if (share)
-        {
-            if (!wglShareLists(share, window->context.wgl.handle))
-            {
-                _glfwInputErrorWin32(GLFW_PLATFORM_ERROR,
-                                     "WGL: Failed to enable sharing with specified OpenGL context");
-                return GLFW_FALSE;
-            }
         }
     }
 

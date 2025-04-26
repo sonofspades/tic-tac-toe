@@ -27,24 +27,6 @@
 
 #pragma once
 
-#if defined(_GLFW_USE_CONFIG_H)
- #include "glfw_config.h"
-#endif
-
-#if defined(GLFW_INCLUDE_GLCOREARB) || \
-    defined(GLFW_INCLUDE_ES1)       || \
-    defined(GLFW_INCLUDE_ES2)       || \
-    defined(GLFW_INCLUDE_ES3)       || \
-    defined(GLFW_INCLUDE_ES31)      || \
-    defined(GLFW_INCLUDE_ES32)      || \
-    defined(GLFW_INCLUDE_NONE)      || \
-    defined(GLFW_INCLUDE_GLEXT)     || \
-    defined(GLFW_INCLUDE_GLU)       || \
-    defined(GLFW_INCLUDE_VULKAN)    || \
-    defined(GLFW_DLL)
- #error "You must not define any header option macros when compiling GLFW"
-#endif
-
 #define GLFW_INCLUDE_NONE
 #include "../include/GLFW/glfw3.h"
 
@@ -200,7 +182,6 @@ struct _GLFWctxconfig
     int           profile;
     int           robustness;
     int           release;
-    _GLFWwindow*  share;
 };
 
 // Framebuffer configuration
@@ -272,8 +253,6 @@ struct _GLFWwindow
     GLFWbool            floating;
     GLFWbool            focusOnShow;
     GLFWbool            mousePassthrough;
-    GLFWbool            shouldClose;
-    void*               userPointer;
     GLFWbool            doublebuffer;
     GLFWvidmode         videoMode;
     _GLFWmonitor*       monitor;
@@ -326,7 +305,6 @@ struct _GLFWwindow
 struct _GLFWmonitor
 {
     char            name[128];
-    void*           userPointer;
 
     // Physical dimensions in millimeters.
     int             widthMM, heightMM;

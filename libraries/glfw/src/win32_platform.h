@@ -335,14 +335,12 @@ typedef PROC (WINAPI * PFN_wglGetProcAddress)(LPCSTR);
 typedef HDC (WINAPI * PFN_wglGetCurrentDC)(void);
 typedef HGLRC (WINAPI * PFN_wglGetCurrentContext)(void);
 typedef BOOL (WINAPI * PFN_wglMakeCurrent)(HDC,HGLRC);
-typedef BOOL (WINAPI * PFN_wglShareLists)(HGLRC,HGLRC);
 #define wglCreateContext _glfw.wgl.CreateContext
 #define wglDeleteContext _glfw.wgl.DeleteContext
 #define wglGetProcAddress _glfw.wgl.GetProcAddress
 #define wglGetCurrentDC _glfw.wgl.GetCurrentDC
 #define wglGetCurrentContext _glfw.wgl.GetCurrentContext
 #define wglMakeCurrent _glfw.wgl.MakeCurrent
-#define wglShareLists _glfw.wgl.ShareLists
 
 #define GLFW_WIN32_WINDOW_STATE         _GLFWwindowWin32  win32;
 #define GLFW_WIN32_LIBRARY_WINDOW_STATE _GLFWlibraryWin32 win32;
@@ -372,7 +370,6 @@ typedef struct _GLFWlibraryWGL
     PFN_wglGetCurrentDC                 GetCurrentDC;
     PFN_wglGetCurrentContext            GetCurrentContext;
     PFN_wglMakeCurrent                  MakeCurrent;
-    PFN_wglShareLists                   ShareLists;
 
     PFNWGLSWAPINTERVALEXTPROC           SwapIntervalEXT;
     PFNWGLGETPIXELFORMATATTRIBIVARBPROC GetPixelFormatAttribivARB;

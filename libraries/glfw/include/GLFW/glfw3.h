@@ -33,7 +33,6 @@
 extern "C" {
 #endif
 
-
 /*************************************************************************
  * Doxygen documentation
  *************************************************************************/
@@ -85,7 +84,6 @@ extern "C" {
  *  information, see the @ref window_guide.
  */
 
-
 /*************************************************************************
  * Compiler- and platform-specific preprocessor work
  *************************************************************************/
@@ -106,14 +104,6 @@ extern "C" {
  * Include it unconditionally to avoid surprising side-effects.
  */
 #include <stdint.h>
-
-#if defined(GLFW_INCLUDE_VULKAN)
-  #include <vulkan/vulkan.h>
-#endif /* Vulkan header */
-
-/* The Vulkan header may have indirectly included windows.h (because of
- * VK_USE_PLATFORM_WIN32_KHR) so we offer our replacement symbols after it.
- */
 
 /* It is customary to use APIENTRY for OpenGL function pointer declarations on
  * all platforms.  Additionally, the Windows OpenGL header needs APIENTRY.
@@ -1444,7 +1434,7 @@ typedef void (* GLFWwindowsizefun)(GLFWwindow* window, int width, int height);
  *
  *  @ingroup window
  */
-typedef void (* GLFWwindowclosefun)(GLFWwindow* window);
+typedef void (* GLFWwindowclosefun)();
 
 /*! @brief The function pointer type for window content refresh callbacks.
  *
@@ -1686,7 +1676,7 @@ typedef void (* GLFWscrollfun)(GLFWwindow* window, double xoffset, double yoffse
  *
  *  @ingroup input
  */
-typedef void (* GLFWkeyfun)(GLFWwindow* window, int key, int scancode, int action, int mods);
+typedef void (* GLFWkeyfun)(int key, int scancode, int action, int mods);
 
 /*! @brief The function pointer type for Unicode character callbacks.
  *
@@ -2390,56 +2380,6 @@ GLFWAPI void glfwGetMonitorContentScale(GLFWmonitor* monitor, float* xscale, flo
  */
 GLFWAPI const char* glfwGetMonitorName(GLFWmonitor* monitor);
 
-/*! @brief Sets the user pointer of the specified monitor.
- *
- *  This function sets the user-defined pointer of the specified monitor.  The
- *  current value is retained until the monitor is disconnected.  The initial
- *  value is `NULL`.
- *
- *  This function may be called from the monitor callback, even for a monitor
- *  that is being disconnected.
- *
- *  @param[in] monitor The monitor whose pointer to set.
- *  @param[in] pointer The new value.
- *
- *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED.
- *
- *  @thread_safety This function may be called from any thread.  Access is not
- *  synchronized.
- *
- *  @sa @ref monitor_userptr
- *  @sa @ref glfwGetMonitorUserPointer
- *
- *  @since Added in version 3.3.
- *
- *  @ingroup monitor
- */
-GLFWAPI void glfwSetMonitorUserPointer(GLFWmonitor* monitor, void* pointer);
-
-/*! @brief Returns the user pointer of the specified monitor.
- *
- *  This function returns the current value of the user-defined pointer of the
- *  specified monitor.  The initial value is `NULL`.
- *
- *  This function may be called from the monitor callback, even for a monitor
- *  that is being disconnected.
- *
- *  @param[in] monitor The monitor whose pointer to return.
- *
- *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED.
- *
- *  @thread_safety This function may be called from any thread.  Access is not
- *  synchronized.
- *
- *  @sa @ref monitor_userptr
- *  @sa @ref glfwSetMonitorUserPointer
- *
- *  @since Added in version 3.3.
- *
- *  @ingroup monitor
- */
-GLFWAPI void* glfwGetMonitorUserPointer(GLFWmonitor* monitor);
-
 /*! @brief Sets the monitor configuration callback.
  *
  *  This function sets the monitor configuration callback, or removes the
@@ -2870,7 +2810,7 @@ GLFWAPI void glfwWindowHintString(int hint, const char* value);
  *
  *  @ingroup window
  */
-GLFWAPI GLFWwindow* glfwCreateWindow(int width, int height, const char* title, GLFWmonitor* monitor, GLFWwindow* share);
+GLFWAPI GLFWwindow* glfwCreateWindow(int width, int height, const char* title, GLFWmonitor* monitor);
 
 /*! @brief Destroys the specified window and its context.
  *
@@ -2900,48 +2840,6 @@ GLFWAPI GLFWwindow* glfwCreateWindow(int width, int height, const char* title, G
  *  @ingroup window
  */
 GLFWAPI void glfwDestroyWindow(GLFWwindow* window);
-
-/*! @brief Checks the close flag of the specified window.
- *
- *  This function returns the value of the close flag of the specified window.
- *
- *  @param[in] window The window to query.
- *  @return The value of the close flag.
- *
- *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED.
- *
- *  @thread_safety This function may be called from any thread.  Access is not
- *  synchronized.
- *
- *  @sa @ref window_close
- *
- *  @since Added in version 3.0.
- *
- *  @ingroup window
- */
-GLFWAPI int glfwWindowShouldClose(GLFWwindow* window);
-
-/*! @brief Sets the close flag of the specified window.
- *
- *  This function sets the value of the close flag of the specified window.
- *  This can be used to override the user's attempt to close the window, or
- *  to signal that it should be closed.
- *
- *  @param[in] window The window whose flag to change.
- *  @param[in] value The new value.
- *
- *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED.
- *
- *  @thread_safety This function may be called from any thread.  Access is not
- *  synchronized.
- *
- *  @sa @ref window_close
- *
- *  @since Added in version 3.0.
- *
- *  @ingroup window
- */
-GLFWAPI void glfwSetWindowShouldClose(GLFWwindow* window, int value);
 
 /*! @brief Returns the title of the specified window.
  *
@@ -3370,33 +3268,6 @@ GLFWAPI void glfwGetWindowFrameSize(GLFWwindow* window, int* left, int* top, int
  */
 GLFWAPI void glfwGetWindowContentScale(GLFWwindow* window, float* xscale, float* yscale);
 
-/*! @brief Returns the opacity of the whole window.
- *
- *  This function returns the opacity of the window, including any decorations.
- *
- *  The opacity (or alpha) value is a positive finite number between zero and
- *  one, where zero is fully transparent and one is fully opaque.  If the system
- *  does not support whole window transparency, this function always returns one.
- *
- *  The initial opacity value for newly created windows is one.
- *
- *  @param[in] window The window to query.
- *  @return The opacity value of the specified window.
- *
- *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED and @ref
- *  GLFW_PLATFORM_ERROR.
- *
- *  @thread_safety This function must only be called from the main thread.
- *
- *  @sa @ref window_transparency
- *  @sa @ref glfwSetWindowOpacity
- *
- *  @since Added in version 3.3.
- *
- *  @ingroup window
- */
-GLFWAPI float glfwGetWindowOpacity(GLFWwindow* window);
-
 /*! @brief Sets the opacity of the whole window.
  *
  *  This function sets the opacity of the window, including any decorations.
@@ -3790,50 +3661,6 @@ GLFWAPI int glfwGetWindowAttrib(GLFWwindow* window, int attrib);
  */
 GLFWAPI void glfwSetWindowAttrib(GLFWwindow* window, int attrib, int value);
 
-/*! @brief Sets the user pointer of the specified window.
- *
- *  This function sets the user-defined pointer of the specified window.  The
- *  current value is retained until the window is destroyed.  The initial value
- *  is `NULL`.
- *
- *  @param[in] window The window whose pointer to set.
- *  @param[in] pointer The new value.
- *
- *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED.
- *
- *  @thread_safety This function may be called from any thread.  Access is not
- *  synchronized.
- *
- *  @sa @ref window_userptr
- *  @sa @ref glfwGetWindowUserPointer
- *
- *  @since Added in version 3.0.
- *
- *  @ingroup window
- */
-GLFWAPI void glfwSetWindowUserPointer(GLFWwindow* window, void* pointer);
-
-/*! @brief Returns the user pointer of the specified window.
- *
- *  This function returns the current value of the user-defined pointer of the
- *  specified window.  The initial value is `NULL`.
- *
- *  @param[in] window The window whose pointer to return.
- *
- *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED.
- *
- *  @thread_safety This function may be called from any thread.  Access is not
- *  synchronized.
- *
- *  @sa @ref window_userptr
- *  @sa @ref glfwSetWindowUserPointer
- *
- *  @since Added in version 3.0.
- *
- *  @ingroup window
- */
-GLFWAPI void* glfwGetWindowUserPointer(GLFWwindow* window);
-
 /*! @brief Sets the position callback for the specified window.
  *
  *  This function sets the position callback of the specified window, which is
@@ -3906,9 +3733,6 @@ GLFWAPI GLFWwindowsizefun glfwSetWindowSizeCallback(GLFWwindow* window, GLFWwind
  *  This function sets the close callback of the specified window, which is
  *  called when the user attempts to close the window, for example by clicking
  *  the close widget in the title bar.
- *
- *  The close flag is set before this callback is called, but you can modify it
- *  at any time with @ref glfwSetWindowShouldClose.
  *
  *  The close callback is not triggered by @ref glfwDestroyWindow.
  *
@@ -4152,8 +3976,6 @@ GLFWAPI GLFWwindowcontentscalefun glfwSetWindowContentScaleCallback(GLFWwindow* 
  *  GLFW will pass those events on to the application callbacks before
  *  returning.
  *
- *  Event processing is not required for joystick input to work.
- *
  *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED and @ref
  *  GLFW_PLATFORM_ERROR.
  *
@@ -4196,8 +4018,6 @@ GLFWAPI void glfwPollEvents(void);
  *  can pass events to GLFW in response to many window system function calls.
  *  GLFW will pass those events on to the application callbacks before
  *  returning.
- *
- *  Event processing is not required for joystick input to work.
  *
  *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED and @ref
  *  GLFW_PLATFORM_ERROR.
@@ -4243,8 +4063,6 @@ GLFWAPI void glfwWaitEvents(void);
  *  can pass events to GLFW in response to many window system function calls.
  *  GLFW will pass those events on to the application callbacks before
  *  returning.
- *
- *  Event processing is not required for joystick input to work.
  *
  *  @param[in] timeout The maximum amount of time, in seconds, to wait.
  *
@@ -5314,27 +5132,6 @@ GLFWAPI uint64_t glfwGetTimerFrequency(void);
  */
 GLFWAPI void glfwMakeContextCurrent(GLFWwindow* window);
 
-/*! @brief Returns the window whose context is current on the calling thread.
- *
- *  This function returns the window whose OpenGL or OpenGL ES context is
- *  current on the calling thread.
- *
- *  @return The window whose context is current, or `NULL` if no window's
- *  context is current.
- *
- *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED.
- *
- *  @thread_safety This function may be called from any thread.
- *
- *  @sa @ref context_current
- *  @sa @ref glfwMakeContextCurrent
- *
- *  @since Added in version 3.0.
- *
- *  @ingroup context
- */
-GLFWAPI GLFWwindow* glfwGetCurrentContext(void);
-
 /*! @brief Swaps the front and back buffers of the specified window.
  *
  *  This function swaps the front and back buffers of the specified window when
@@ -5494,76 +5291,6 @@ GLFWAPI int glfwExtensionSupported(const char* extension);
  *  @ingroup context
  */
 GLFWAPI GLFWglproc glfwGetProcAddress(const char* procname);
-
-/*! @brief Returns whether the Vulkan loader and an ICD have been found.
- *
- *  This function returns whether the Vulkan loader and any minimally functional
- *  ICD have been found.
- *
- *  The availability of a Vulkan loader and even an ICD does not by itself guarantee that
- *  surface creation or even instance creation is possible.  Call @ref
- *  glfwGetRequiredInstanceExtensions to check whether the extensions necessary for Vulkan
- *  surface creation are available and @ref glfwGetPhysicalDevicePresentationSupport to
- *  check whether a queue family of a physical device supports image presentation.
- *
- *  @return `GLFW_TRUE` if Vulkan is minimally available, or `GLFW_FALSE`
- *  otherwise.
- *
- *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED.
- *
- *  @thread_safety This function may be called from any thread.
- *
- *  @sa @ref vulkan_support
- *
- *  @since Added in version 3.2.
- *
- *  @ingroup vulkan
- */
-GLFWAPI int glfwVulkanSupported(void);
-
-/*! @brief Returns the Vulkan instance extensions required by GLFW.
- *
- *  This function returns an array of names of Vulkan instance extensions required
- *  by GLFW for creating Vulkan surfaces for GLFW windows.  If successful, the
- *  list will always contain `VK_KHR_surface`, so if you don't require any
- *  additional extensions you can pass this list directly to the
- *  `VkInstanceCreateInfo` struct.
- *
- *  If Vulkan is not available on the machine, this function returns `NULL` and
- *  generates a @ref GLFW_API_UNAVAILABLE error.  Call @ref glfwVulkanSupported
- *  to check whether Vulkan is at least minimally available.
- *
- *  If Vulkan is available but no set of extensions allowing window surface
- *  creation was found, this function returns `NULL`.  You may still use Vulkan
- *  for off-screen rendering and compute work.
- *
- *  @param[out] count Where to store the number of extensions in the returned
- *  array.  This is set to zero if an error occurred.
- *  @return An array of ASCII encoded extension names, or `NULL` if an
- *  [error](@ref error_handling) occurred.
- *
- *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED and @ref
- *  GLFW_API_UNAVAILABLE.
- *
- *  @remark Additional extensions may be required by future versions of GLFW.
- *  You should check if any extensions you wish to enable are already in the
- *  returned array, as it is an error to specify an extension more than once in
- *  the `VkInstanceCreateInfo` struct.
- *
- *  @pointer_lifetime The returned array is allocated and freed by GLFW.  You
- *  should not free it yourself.  It is guaranteed to be valid only until the
- *  library is terminated.
- *
- *  @thread_safety This function may be called from any thread.
- *
- *  @sa @ref vulkan_ext
- *  @sa @ref glfwCreateWindowSurface
- *
- *  @since Added in version 3.2.
- *
- *  @ingroup vulkan
- */
-GLFWAPI const char** glfwGetRequiredInstanceExtensions(uint32_t* count);
 
 /*************************************************************************
  * Global definition cleanup

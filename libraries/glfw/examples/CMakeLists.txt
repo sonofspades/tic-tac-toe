@@ -1,4 +1,3 @@
-
 link_libraries(glfw)
 
 include_directories("${GLFW_SOURCE_DIR}/deps")
@@ -10,12 +9,6 @@ endif()
 # Workaround for the MS CRT deprecating parts of the standard library
 if (MSVC OR CMAKE_C_SIMULATE_ID STREQUAL "MSVC")
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-endif()
-
-if (WIN32)
-    set(ICON glfw.rc)
-elseif (APPLE)
-    set(ICON glfw.icns)
 endif()
 
 set(GLAD_GL "${GLFW_SOURCE_DIR}/deps/glad/gl.h")

@@ -80,7 +80,7 @@ void _glfwInputKey(_GLFWwindow* window, int key, int scancode, int action, int m
         mods &= ~(GLFW_MOD_CAPS_LOCK | GLFW_MOD_NUM_LOCK);
 
     if (window->callbacks.key)
-        window->callbacks.key((GLFWwindow*) window, key, scancode, action, mods);
+        window->callbacks.key(key, scancode, action, mods);
 }
 
 // Notifies shared code of a Unicode codepoint input event

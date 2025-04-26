@@ -56,16 +56,6 @@ if (GLFW_BUILD_WIN32)
     list(APPEND glfw_PKG_LIBS "-lgdi32")
 endif()
 
-if (GLFW_BUILD_COCOA)
-    target_link_libraries(glfw PRIVATE "-framework Cocoa"
-                                       "-framework IOKit"
-                                       "-framework CoreFoundation"
-                                       "-framework QuartzCore")
-
-    set(glfw_PKG_DEPS "")
-    set(glfw_PKG_LIBS "-framework Cocoa -framework IOKit -framework CoreFoundation -framework QuartzCore")
-endif()
-
 if (WIN32)
     if (GLFW_USE_HYBRID_HPG)
         target_compile_definitions(glfw PRIVATE _GLFW_USE_HYBRID_HPG)
@@ -87,37 +77,7 @@ if (GLFW_BUILD_WIN32)
     target_compile_definitions(glfw PRIVATE UNICODE _UNICODE)
 endif()
 
-# HACK: When building on MinGW, WINVER and UNICODE need to be defined before
-# the inclusion of stddef.h (by glfw3.h), which is itself included before
-# win32_platform.h.  We define them here until a saner solution can be found
-# NOTE: MinGW-w64 and Visual C++ do /not/ need this hack.
-if (MINGW)
-    target_compile_definitions(glfw PRIVATE WINVER=0x0501)
-endif()
-
 # Workaround for the MS CRT deprecating parts of the standard library
 if (MSVC OR CMAKE_C_SIMULATE_ID STREQUAL "MSVC")
     target_compile_definitions(glfw PRIVATE _CRT_SECURE_NO_WARNINGS)
 endif()
-
-# Workaround for -std=c99 on Linux disabling _DEFAULT_SOURCE (POSIX 2008 and more)
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    target_compile_definitions(glfw PRIVATE _DEFAULT_SOURCE)
-endif()
-
-list(JOIN glfw_PKG_DEPS " " deps)
-list(JOIN glfw_PKG_LIBS " " libs)
-
-set(GLFW_PKG_CONFIG_REQUIRES_PRIVATE "${deps}" CACHE INTERNAL
-    "GLFW pkg-config Requires.private")
-set(GLFW_PKG_CONFIG_LIBS_PRIVATE "${libs}" CACHE INTERNAL
-    "GLFW pkg-config Libs.private")
-
-if (GLFW_INSTALL)
-    install(TARGETS glfw
-            EXPORT glfwTargets
-            RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-            ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-            LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
-endif()
-
