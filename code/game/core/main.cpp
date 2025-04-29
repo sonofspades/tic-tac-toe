@@ -421,7 +421,7 @@ auto main() -> int
             glUniform3fv(3, 1, glm::value_ptr(glm::vec3(0.0f, 1.0f, 0.0f)));
 
             glBindVertexArray(debug_vao);
-            glDrawArrays(GL_LINES, 0, static_cast<int>(debug_vertices.size()));
+            opengl::Commands::draw_vertices(GL_LINES, debug_vertices.size());
         }
         else
         {
@@ -432,7 +432,7 @@ auto main() -> int
         glUniform3fv(3, 1, glm::value_ptr(grid_color));
 
         glBindVertexArray(grid_vao);
-        glDrawElements(GL_TRIANGLES, grid_elements.size(), GL_UNSIGNED_INT, nullptr);
+        opengl::Commands::draw_elements(GL_TRIANGLES, grid_elements.size());
 
         for (auto row = 0; row < 3; row++)
         {
@@ -450,14 +450,14 @@ auto main() -> int
                     glUniform3fv(3, 1, glm::value_ptr(x_color));
 
                     glBindVertexArray(x_vao);
-                    glDrawElements(GL_TRIANGLES, x_elements.size(), GL_UNSIGNED_INT, nullptr);
+                    opengl::Commands::draw_elements(GL_TRIANGLES, x_elements.size());
                 }
                 else if (tiles[row][col] == tile_o)
                 {
                     glUniform3fv(3, 1, glm::value_ptr(o_color));
 
                     glBindVertexArray(o_vao);
-                    glDrawElements(GL_TRIANGLES, o_elements.size(), GL_UNSIGNED_INT, nullptr);
+                    opengl::Commands::draw_elements(GL_TRIANGLES, o_elements.size());
                 }
             }
         }
