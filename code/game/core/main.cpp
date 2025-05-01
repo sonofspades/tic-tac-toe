@@ -12,6 +12,7 @@
 #include <btBulletCollisionCommon.h>
 
 #include <opengl/commands.hpp>
+#include <opengl/functions.hpp>
 
 auto vertex_stage_text =
 "#version 450\n"
@@ -215,6 +216,8 @@ auto main() -> int
     glfwMakeContextCurrent(window);
 
     gladLoadGL();
+
+    opengl::Functions::init();
 
     const auto vert_stage = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vert_stage, 1, &vertex_stage_text, nullptr);
