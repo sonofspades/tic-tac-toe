@@ -11,6 +11,8 @@
 
 #include <btBulletCollisionCommon.h>
 
+#include "opengl/constants/commands.hpp"
+
 #include <opengl/commands.hpp>
 #include <opengl/functions.hpp>
 
@@ -424,7 +426,7 @@ auto main() -> int
             glUniform3fv(3, 1, glm::value_ptr(glm::vec3(0.0f, 1.0f, 0.0f)));
 
             glBindVertexArray(debug_vao);
-            opengl::Commands::draw_vertices(GL_LINES, debug_vertices.size());
+            opengl::Commands::draw_vertices(opengl::constants::lines, debug_vertices.size());
         }
         else
         {
@@ -435,7 +437,7 @@ auto main() -> int
         glUniform3fv(3, 1, glm::value_ptr(grid_color));
 
         glBindVertexArray(grid_vao);
-        opengl::Commands::draw_elements(GL_TRIANGLES, grid_elements.size());
+        opengl::Commands::draw_elements(opengl::constants::triangles, grid_elements.size());
 
         for (auto row = 0; row < 3; row++)
         {
@@ -453,14 +455,14 @@ auto main() -> int
                     glUniform3fv(3, 1, glm::value_ptr(x_color));
 
                     glBindVertexArray(x_vao);
-                    opengl::Commands::draw_elements(GL_TRIANGLES, x_elements.size());
+                    opengl::Commands::draw_elements(opengl::constants::triangles, x_elements.size());
                 }
                 else if (tiles[row][col] == tile_o)
                 {
                     glUniform3fv(3, 1, glm::value_ptr(o_color));
 
                     glBindVertexArray(o_vao);
-                    opengl::Commands::draw_elements(GL_TRIANGLES, o_elements.size());
+                    opengl::Commands::draw_elements(opengl::constants::triangles, o_elements.size());
                 }
             }
         }
