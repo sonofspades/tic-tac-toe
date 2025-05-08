@@ -66,8 +66,6 @@
 
 #include <wctype.h>
 #include <windows.h>
-#include <dinput.h>
-#include <xinput.h>
 #include <dbt.h>
 
 // HACK: Define macros that some windows.h variants don't
@@ -185,40 +183,6 @@ typedef enum
 #define _glfwIsWindows10Version1703OrGreaterWin32() \
     _glfwIsWindows10BuildOrGreaterWin32(15063)
 
-// HACK: Define macros that some xinput.h variants don't
-#ifndef XINPUT_CAPS_WIRELESS
- #define XINPUT_CAPS_WIRELESS 0x0002
-#endif
-#ifndef XINPUT_DEVSUBTYPE_WHEEL
- #define XINPUT_DEVSUBTYPE_WHEEL 0x02
-#endif
-#ifndef XINPUT_DEVSUBTYPE_ARCADE_STICK
- #define XINPUT_DEVSUBTYPE_ARCADE_STICK 0x03
-#endif
-#ifndef XINPUT_DEVSUBTYPE_FLIGHT_STICK
- #define XINPUT_DEVSUBTYPE_FLIGHT_STICK 0x04
-#endif
-#ifndef XINPUT_DEVSUBTYPE_DANCE_PAD
- #define XINPUT_DEVSUBTYPE_DANCE_PAD 0x05
-#endif
-#ifndef XINPUT_DEVSUBTYPE_GUITAR
- #define XINPUT_DEVSUBTYPE_GUITAR 0x06
-#endif
-#ifndef XINPUT_DEVSUBTYPE_DRUM_KIT
- #define XINPUT_DEVSUBTYPE_DRUM_KIT 0x08
-#endif
-#ifndef XINPUT_DEVSUBTYPE_ARCADE_PAD
- #define XINPUT_DEVSUBTYPE_ARCADE_PAD 0x13
-#endif
-#ifndef XUSER_MAX_COUNT
- #define XUSER_MAX_COUNT 4
-#endif
-
-// HACK: Define macros that some dinput.h variants don't
-#ifndef DIDFT_OPTIONAL
- #define DIDFT_OPTIONAL 0x80000000
-#endif
-
 #define WGL_NUMBER_PIXEL_FORMATS_ARB 0x2000
 #define WGL_SUPPORT_OPENGL_ARB 0x2010
 #define WGL_DRAW_TO_WINDOW_ARB 0x2001
@@ -269,16 +233,6 @@ typedef enum
 #define ERROR_INVALID_VERSION_ARB 0x2095
 #define ERROR_INVALID_PROFILE_ARB 0x2096
 #define ERROR_INCOMPATIBLE_DEVICE_CONTEXTS_ARB 0x2054
-
-// xinput.dll function pointer typedefs
-typedef DWORD (WINAPI * PFN_XInputGetCapabilities)(DWORD,DWORD,XINPUT_CAPABILITIES*);
-typedef DWORD (WINAPI * PFN_XInputGetState)(DWORD,XINPUT_STATE*);
-#define XInputGetCapabilities _glfw.win32.xinput.GetCapabilities
-#define XInputGetState _glfw.win32.xinput.GetState
-
-// dinput8.dll function pointer typedefs
-typedef HRESULT (WINAPI * PFN_DirectInput8Create)(HINSTANCE,DWORD,REFIID,LPVOID*,LPUNKNOWN);
-#define DirectInput8Create _glfw.win32.dinput8.Create
 
 // user32.dll function pointer typedefs
 typedef BOOL (WINAPI * PFN_SetProcessDPIAware)(void);
@@ -402,8 +356,6 @@ typedef struct _GLFWwindowWin32
     GLFWbool            frameAction;
     GLFWbool            iconified;
     GLFWbool            maximized;
-    // Whether to enable framebuffer transparency on DWM
-    GLFWbool            transparent;
     GLFWbool            scaleToMonitor;
     GLFWbool            keymenu;
     GLFWbool            showDefault;
@@ -430,7 +382,6 @@ typedef struct _GLFWlibraryWin32
     char*               clipboardString;
     short int           keycodes[512];
     short int           scancodes[GLFW_KEY_LAST + 1];
-    char                keynames[GLFW_KEY_LAST + 1][5];
     // Where to place the cursor when re-enabled
     double              restoreCursorPosX, restoreCursorPosY;
     // The window whose disabled cursor mode is active
@@ -505,7 +456,6 @@ char* _glfwCreateUTF8FromWideStringWin32(const WCHAR* source);
 BOOL _glfwIsWindowsVersionOrGreaterWin32(WORD major, WORD minor, WORD sp);
 BOOL _glfwIsWindows10BuildOrGreaterWin32(WORD build);
 void _glfwInputErrorWin32(int error, const char* description);
-void _glfwUpdateKeyNamesWin32(void);
 
 void _glfwPollMonitorsWin32(void);
 void _glfwSetVideoModeWin32(_GLFWmonitor* monitor, const GLFWvidmode* desired);
@@ -530,7 +480,6 @@ void _glfwRestoreWindowWin32(_GLFWwindow* window);
 void _glfwMaximizeWindowWin32(_GLFWwindow* window);
 void _glfwShowWindowWin32(_GLFWwindow* window);
 void _glfwHideWindowWin32(_GLFWwindow* window);
-void _glfwRequestWindowAttentionWin32(_GLFWwindow* window);
 void _glfwFocusWindowWin32(_GLFWwindow* window);
 void _glfwSetWindowMonitorWin32(_GLFWwindow* window, _GLFWmonitor* monitor, int xpos, int ypos, int width, int height, int refreshRate);
 GLFWbool _glfwWindowFocusedWin32(_GLFWwindow* window);
@@ -538,26 +487,19 @@ GLFWbool _glfwWindowIconifiedWin32(_GLFWwindow* window);
 GLFWbool _glfwWindowVisibleWin32(_GLFWwindow* window);
 GLFWbool _glfwWindowMaximizedWin32(_GLFWwindow* window);
 GLFWbool _glfwWindowHoveredWin32(_GLFWwindow* window);
-GLFWbool _glfwFramebufferTransparentWin32(_GLFWwindow* window);
 void _glfwSetWindowResizableWin32(_GLFWwindow* window, GLFWbool enabled);
 void _glfwSetWindowDecoratedWin32(_GLFWwindow* window, GLFWbool enabled);
 void _glfwSetWindowFloatingWin32(_GLFWwindow* window, GLFWbool enabled);
 void _glfwSetWindowMousePassthroughWin32(_GLFWwindow* window, GLFWbool enabled);
-float _glfwGetWindowOpacityWin32(_GLFWwindow* window);
-void _glfwSetWindowOpacityWin32(_GLFWwindow* window, float opacity);
 
 void _glfwSetRawMouseMotionWin32(_GLFWwindow *window, GLFWbool enabled);
 GLFWbool _glfwRawMouseMotionSupportedWin32(void);
 
 void _glfwPollEventsWin32(void);
-void _glfwWaitEventsWin32(void);
-void _glfwWaitEventsTimeoutWin32(double timeout);
-void _glfwPostEmptyEventWin32(void);
 
 void _glfwGetCursorPosWin32(_GLFWwindow* window, double* xpos, double* ypos);
 void _glfwSetCursorPosWin32(_GLFWwindow* window, double xpos, double ypos);
 void _glfwSetCursorModeWin32(_GLFWwindow* window, int mode);
-const char* _glfwGetScancodeNameWin32(int scancode);
 int _glfwGetKeyScancodeWin32(int key);
 GLFWbool _glfwCreateCursorWin32(_GLFWcursor* cursor, const GLFWimage* image, int xhot, int yhot);
 GLFWbool _glfwCreateStandardCursorWin32(_GLFWcursor* cursor, int shape);
@@ -577,7 +519,5 @@ void _glfwSetGammaRampWin32(_GLFWmonitor* monitor, const GLFWgammaramp* ramp);
 
 GLFWbool _glfwInitWGL(void);
 void _glfwTerminateWGL(void);
-GLFWbool _glfwCreateContextWGL(_GLFWwindow* window,
-                               const _GLFWctxconfig* ctxconfig,
-                               const _GLFWfbconfig* fbconfig);
 
+GLFWbool _glfwCreateContextWGL(_GLFWwindow* window, const _GLFWctxconfig* ctxconfig, const _GLFWfbconfig* fbconfig);

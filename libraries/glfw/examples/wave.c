@@ -389,7 +389,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 // main
 //========================================================================
 
-int main(int argc, char* argv[])
+int main(void)
 {
     GLFWwindow* window;
     double t, dt_total, t_old;

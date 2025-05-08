@@ -367,43 +367,6 @@ static void updateWindowStyles(const _GLFWwindow* window)
                  SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOZORDER);
 }
 
-// Update window framebuffer transparency
-//
-static void updateFramebufferTransparency(const _GLFWwindow* window)
-{
-    BOOL composition, opaque;
-    DWORD color;
-
-    if (!IsWindowsVistaOrGreater())
-        return;
-
-    if (FAILED(DwmIsCompositionEnabled(&composition)) || !composition)
-       return;
-
-    if (IsWindows8OrGreater() ||
-        (SUCCEEDED(DwmGetColorizationColor(&color, &opaque)) && !opaque))
-    {
-        HRGN region = CreateRectRgn(0, 0, -1, -1);
-        DWM_BLURBEHIND bb = {0};
-        bb.dwFlags = DWM_BB_ENABLE | DWM_BB_BLURREGION;
-        bb.hRgnBlur = region;
-        bb.fEnable = TRUE;
-
-        DwmEnableBlurBehindWindow(window->win32.handle, &bb);
-        DeleteObject(region);
-    }
-    else
-    {
-        // HACK: Disable framebuffer transparency on Windows 7 when the
-        //       colorization color is opaque, because otherwise the window
-        //       contents is blended additively with the previous frame instead
-        //       of replacing it
-        DWM_BLURBEHIND bb = {0};
-        bb.dwFlags = DWM_BB_ENABLE;
-        DwmEnableBlurBehindWindow(window->win32.handle, &bb);
-    }
-}
-
 // Retrieves and translates modifier keys
 //
 static int getKeyMods(void)
@@ -651,12 +614,6 @@ static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
         {
             _glfwInputWindowCloseRequest(window);
             return 0;
-        }
-
-        case WM_INPUTLANGCHANGE:
-        {
-            _glfwUpdateKeyNamesWin32();
-            break;
         }
 
         case WM_CHAR:
@@ -1162,14 +1119,6 @@ static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
             break;
         }
 
-        case WM_DWMCOMPOSITIONCHANGED:
-        case WM_DWMCOLORIZATIONCOLORCHANGED:
-        {
-            if (window->win32.transparent)
-                updateFramebufferTransparency(window);
-            return 0;
-        }
-
         case WM_GETDPISCALEDSIZE:
         {
             if (window->win32.scaleToMonitor)
@@ -1409,12 +1358,9 @@ static int createNativeWindow(_GLFWwindow* window,
 
     if (IsWindows7OrGreater())
     {
-        ChangeWindowMessageFilterEx(window->win32.handle,
-                                    WM_DROPFILES, MSGFLT_ALLOW, NULL);
-        ChangeWindowMessageFilterEx(window->win32.handle,
-                                    WM_COPYDATA, MSGFLT_ALLOW, NULL);
-        ChangeWindowMessageFilterEx(window->win32.handle,
-                                    WM_COPYGLOBALDATA, MSGFLT_ALLOW, NULL);
+        ChangeWindowMessageFilterEx(window->win32.handle, WM_DROPFILES, MSGFLT_ALLOW, NULL);
+        ChangeWindowMessageFilterEx(window->win32.handle, WM_COPYDATA, MSGFLT_ALLOW, NULL);
+        ChangeWindowMessageFilterEx(window->win32.handle, WM_COPYGLOBALDATA, MSGFLT_ALLOW, NULL);
     }
 
     window->win32.scaleToMonitor = wndconfig->scaleToMonitor;
@@ -1480,12 +1426,6 @@ static int createNativeWindow(_GLFWwindow* window,
     }
 
     DragAcceptFiles(window->win32.handle, TRUE);
-
-    if (fbconfig->transparent)
-    {
-        updateFramebufferTransparency(window);
-        window->win32.transparent = GLFW_TRUE;
-    }
 
     _glfwGetWindowSizeWin32(window, &window->win32.width, &window->win32.height);
 
@@ -1639,12 +1579,10 @@ void _glfwSetWindowPosWin32(_GLFWwindow* window, int xpos, int ypos)
     }
     else
     {
-        AdjustWindowRectEx(&rect, getWindowStyle(window),
-                           FALSE, getWindowExStyle(window));
+        AdjustWindowRectEx(&rect, getWindowStyle(window), FALSE, getWindowExStyle(window));
     }
 
-    SetWindowPos(window->win32.handle, NULL, rect.left, rect.top, 0, 0,
-                 SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE);
+    SetWindowPos(window->win32.handle, NULL, rect.left, rect.top, 0, 0, SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE);
 }
 
 void _glfwGetWindowSizeWin32(_GLFWwindow* window, int* width, int* height)
@@ -1680,8 +1618,7 @@ void _glfwSetWindowSizeWin32(_GLFWwindow* window, int width, int height)
         }
         else
         {
-            AdjustWindowRectEx(&rect, getWindowStyle(window),
-                               FALSE, getWindowExStyle(window));
+            AdjustWindowRectEx(&rect, getWindowStyle(window), FALSE, getWindowExStyle(window));
         }
 
         SetWindowPos(window->win32.handle, HWND_TOP,
@@ -1810,11 +1747,6 @@ void _glfwShowWindowWin32(_GLFWwindow* window)
 void _glfwHideWindowWin32(_GLFWwindow* window)
 {
     ShowWindow(window->win32.handle, SW_HIDE);
-}
-
-void _glfwRequestWindowAttentionWin32(_GLFWwindow* window)
-{
-    FlashWindow(window->win32.handle, TRUE);
 }
 
 void _glfwFocusWindowWin32(_GLFWwindow* window)
@@ -1972,8 +1904,7 @@ void _glfwSetWindowDecoratedWin32(_GLFWwindow* window, GLFWbool enabled)
 void _glfwSetWindowFloatingWin32(_GLFWwindow* window, GLFWbool enabled)
 {
     const HWND after = enabled ? HWND_TOPMOST : HWND_NOTOPMOST;
-    SetWindowPos(window->win32.handle, after, 0, 0, 0, 0,
-                 SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE);
+    SetWindowPos(window->win32.handle, after, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE);
 }
 
 void _glfwSetWindowMousePassthroughWin32(_GLFWwindow* window, GLFWbool enabled)
@@ -2103,25 +2034,6 @@ void _glfwPollEventsWin32(void)
     }
 }
 
-void _glfwWaitEventsWin32(void)
-{
-    WaitMessage();
-
-    _glfwPollEventsWin32();
-}
-
-void _glfwWaitEventsTimeoutWin32(double timeout)
-{
-    MsgWaitForMultipleObjects(0, NULL, FALSE, (DWORD) (timeout * 1e3), QS_ALLINPUT);
-
-    _glfwPollEventsWin32();
-}
-
-void _glfwPostEmptyEventWin32(void)
-{
-    PostMessageW(_glfw.win32.helperWindowHandle, WM_NULL, 0, 0);
-}
-
 void _glfwGetCursorPosWin32(_GLFWwindow* window, double* xpos, double* ypos)
 {
     POINT pos;
@@ -2186,21 +2098,6 @@ void _glfwSetCursorModeWin32(_GLFWwindow* window, int mode)
 
     if (cursorInContentArea(window))
         updateCursorImage(window);
-}
-
-const char* _glfwGetScancodeNameWin32(int scancode)
-{
-    if (scancode < 0 || scancode > (KF_EXTENDED | 0xff))
-    {
-        _glfwInputError(GLFW_INVALID_VALUE, "Invalid scancode %i", scancode);
-        return NULL;
-    }
-
-    const int key = _glfw.win32.keycodes[scancode];
-    if (key == GLFW_KEY_UNKNOWN)
-        return NULL;
-
-    return _glfw.win32.keynames[key];
 }
 
 int _glfwGetKeyScancodeWin32(int key)
@@ -2287,15 +2184,13 @@ void _glfwSetCursorWin32(_GLFWwindow* window, _GLFWcursor* cursor)
 
 void _glfwSetClipboardStringWin32(const char* string)
 {
-    int characterCount, tries = 0;
-    HANDLE object;
-    WCHAR* buffer;
+    int tries = 0;
 
-    characterCount = MultiByteToWideChar(CP_UTF8, 0, string, -1, NULL, 0);
+    int characterCount = MultiByteToWideChar(CP_UTF8, 0, string, -1, NULL, 0);
     if (!characterCount)
         return;
 
-    object = GlobalAlloc(GMEM_MOVEABLE, characterCount * sizeof(WCHAR));
+    HANDLE object = GlobalAlloc(GMEM_MOVEABLE, characterCount * sizeof(WCHAR));
     if (!object)
     {
         _glfwInputErrorWin32(GLFW_PLATFORM_ERROR,
@@ -2303,7 +2198,7 @@ void _glfwSetClipboardStringWin32(const char* string)
         return;
     }
 
-    buffer = GlobalLock(object);
+    WCHAR* buffer = GlobalLock(object);
     if (!buffer)
     {
         _glfwInputErrorWin32(GLFW_PLATFORM_ERROR,
@@ -2338,7 +2233,6 @@ void _glfwSetClipboardStringWin32(const char* string)
 
 const char* _glfwGetClipboardStringWin32(void)
 {
-    HANDLE object;
     int tries = 0;
 
     // NOTE: Retry clipboard opening a few times as some other application may have it
@@ -2356,7 +2250,7 @@ const char* _glfwGetClipboardStringWin32(void)
         }
     }
 
-    object = GetClipboardData(CF_UNICODETEXT);
+    HANDLE object = GetClipboardData(CF_UNICODETEXT);
     if (!object)
     {
         _glfwInputErrorWin32(GLFW_FORMAT_UNAVAILABLE,
@@ -2383,14 +2277,13 @@ const char* _glfwGetClipboardStringWin32(void)
     return _glfw.win32.clipboardString;
 }
 
-GLFWAPI HWND glfwGetWin32Window(GLFWwindow* handle)
+HWND glfwGetWin32Window(GLFWwindow* handle)
 {
     _GLFW_REQUIRE_INIT_OR_RETURN(NULL);
 
     if (_glfw.platform.platformID != GLFW_PLATFORM_WIN32)
     {
-        _glfwInputError(GLFW_PLATFORM_UNAVAILABLE,
-                        "Win32: Platform not initialized");
+        _glfwInputError(GLFW_PLATFORM_UNAVAILABLE, "Win32: Platform not initialized");
         return NULL;
     }
 

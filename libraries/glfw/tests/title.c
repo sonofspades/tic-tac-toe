@@ -42,14 +42,13 @@ static void error_callback(int error, const char* description)
 
 int main(void)
 {
-    GLFWwindow* window;
-
     glfwSetErrorCallback(error_callback);
 
     if (!glfwInit())
         exit(EXIT_FAILURE);
 
-    window = glfwCreateWindow(400, 400, "English 日本語 русский язык 官話", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(400, 400, "English 日本語 русский язык 官話", NULL);
+
     if (!window)
     {
         glfwTerminate();

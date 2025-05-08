@@ -150,7 +150,7 @@ void draw_marker(struct nk_command_buffer* canvas, int lead, struct nk_vec2 pos)
     nk_fill_circle(canvas, rect, colors[lead]);
 }
 
-int main(int argc, char** argv)
+int main(void)
 {
     int ch, width, height;
     unsigned long frame_count = 0;
@@ -228,13 +228,12 @@ int main(int argc, char** argv)
     while (!glfwWindowShouldClose(window))
     {
         int width, height;
-        struct nk_rect area;
 
         glfwPollEvents();
         sample_input(window);
 
         glfwGetWindowSize(window, &width, &height);
-        area = nk_rect(0.f, 0.f, (float) width, (float) height);
+        struct nk_rect area = nk_rect(0.f, 0.f, (float)width, (float)height);
 
         glClear(GL_COLOR_BUFFER_BIT);
         nk_glfw3_new_frame();

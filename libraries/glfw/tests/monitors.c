@@ -219,7 +219,7 @@ static void test_modes(GLFWmonitor* monitor)
     }
 }
 
-int main(int argc, char** argv)
+int main(void)
 {
     int ch, i, count, mode = LIST_MODE;
     GLFWmonitor** monitors;

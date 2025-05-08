@@ -36,11 +36,10 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <string.h>
-#include <locale.h>
 
 #include "getopt.h"
 
@@ -466,13 +465,12 @@ static void char_callback(GLFWwindow* window, unsigned int codepoint)
 
 static void drop_callback(GLFWwindow* window, int count, const char* paths[])
 {
-    int i;
     Slot* slot = glfwGetWindowUserPointer(window);
 
     printf("%08x to %i at %0.3f: Drop input\n",
            counter++, slot->number, glfwGetTime());
 
-    for (i = 0;  i < count;  i++)
+    for (int i = 0;  i < count;  i++)
         printf("  %i: \"%s\"\n", i, paths[i]);
 }
 
@@ -542,7 +540,7 @@ static void joystick_callback(int jid, int event)
     }
 }
 
-int main(int argc, char** argv)
+int main(void)
 {
     Slot* slots;
     GLFWmonitor* monitor = NULL;

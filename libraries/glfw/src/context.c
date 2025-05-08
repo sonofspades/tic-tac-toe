@@ -180,9 +180,6 @@ const _GLFWfbconfig* _glfwChooseFBConfig(const _GLFWfbconfig* desired, const _GL
                 // not important to us here, so we count them as one
                 missing++;
             }
-
-            if (desired->transparent != current->transparent)
-                missing++;
         }
 
         // These polynomials make many small channel size differences matter
@@ -539,7 +536,7 @@ GLFWbool _glfwStringInExtensionString(const char* string, const char* extensions
 //////                        GLFW public API                       //////
 //////////////////////////////////////////////////////////////////////////
 
-GLFWAPI void glfwMakeContextCurrent(GLFWwindow* handle)
+void glfwMakeContextCurrent(GLFWwindow* handle)
 {
     _GLFW_REQUIRE_INIT();
 
@@ -548,8 +545,7 @@ GLFWAPI void glfwMakeContextCurrent(GLFWwindow* handle)
 
     if (window && window->context.client == GLFW_NO_API)
     {
-        _glfwInputError(GLFW_NO_WINDOW_CONTEXT,
-                        "Cannot make current with a window that has no OpenGL or OpenGL ES context");
+        _glfwInputError(GLFW_NO_WINDOW_CONTEXT, "Cannot make current with a window that has no OpenGL or OpenGL ES context");
         return;
     }
 
@@ -563,30 +559,21 @@ GLFWAPI void glfwMakeContextCurrent(GLFWwindow* handle)
         window->context.makeCurrent(window);
 }
 
-GLFWAPI GLFWwindow* glfwGetCurrentContext(void)
+void glfwSwapBuffers(GLFWwindow* handle)
 {
-    _GLFW_REQUIRE_INIT_OR_RETURN(NULL);
-    return _glfwPlatformGetTls(&_glfw.contextSlot);
-}
-
-GLFWAPI void glfwSwapBuffers(GLFWwindow* handle)
-{
-    _GLFW_REQUIRE_INIT();
-
     _GLFWwindow* window = (_GLFWwindow*) handle;
     assert(window != NULL);
 
     if (window->context.client == GLFW_NO_API)
     {
-        _glfwInputError(GLFW_NO_WINDOW_CONTEXT,
-                        "Cannot swap buffers of a window that has no OpenGL or OpenGL ES context");
+        _glfwInputError(GLFW_NO_WINDOW_CONTEXT, "Cannot swap buffers of a window that has no OpenGL or OpenGL ES context");
         return;
     }
 
     window->context.swapBuffers(window);
 }
 
-GLFWAPI void glfwSwapInterval(int interval)
+void glfwSwapInterval(int interval)
 {
     _GLFW_REQUIRE_INIT();
 
@@ -601,7 +588,7 @@ GLFWAPI void glfwSwapInterval(int interval)
     window->context.swapInterval(interval);
 }
 
-GLFWAPI int glfwExtensionSupported(const char* extension)
+int glfwExtensionSupported(const char* extension)
 {
     assert(extension != NULL);
 
@@ -665,7 +652,7 @@ GLFWAPI int glfwExtensionSupported(const char* extension)
     return window->context.extensionSupported(extension);
 }
 
-GLFWAPI GLFWglproc glfwGetProcAddress(const char* procname)
+GLFWglproc glfwGetProcAddress(const char* procname)
 {
     assert(procname != NULL);
 

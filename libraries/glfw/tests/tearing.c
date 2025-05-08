@@ -153,7 +153,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     }
 }
 
-int main(int argc, char** argv)
+int main(void)
 {
     unsigned long frame_count = 0;
     double last_time, current_time;

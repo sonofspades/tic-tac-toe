@@ -297,7 +297,7 @@ nk_glfw3_new_frame(void)
     int i;
     double x, y;
     struct nk_context *ctx = &glfw.ctx;
-    struct GLFWwindow *win = glfw.win;
+    GLFWwindow *win = glfw.win;
 
     glfwGetWindowSize(win, &glfw.width, &glfw.height);
     glfwGetFramebufferSize(win, &glfw.display_width, &glfw.display_height);

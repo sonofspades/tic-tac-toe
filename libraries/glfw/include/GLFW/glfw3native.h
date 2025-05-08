@@ -124,7 +124,7 @@ extern "C" {
  *
  *  @ingroup native
  */
-GLFWAPI const char* glfwGetWin32Adapter(GLFWmonitor* monitor);
+const char* glfwGetWin32Adapter(GLFWmonitor* monitor);
 
 /*! @brief Returns the display device name of the specified monitor.
  *
@@ -142,7 +142,7 @@ GLFWAPI const char* glfwGetWin32Adapter(GLFWmonitor* monitor);
  *
  *  @ingroup native
  */
-GLFWAPI const char* glfwGetWin32Monitor(GLFWmonitor* monitor);
+const char* glfwGetWin32Monitor(GLFWmonitor* monitor);
 
 /*! @brief Returns the `HWND` of the specified window.
  *
@@ -167,34 +167,7 @@ GLFWAPI const char* glfwGetWin32Monitor(GLFWmonitor* monitor);
  *
  *  @ingroup native
  */
-GLFWAPI HWND glfwGetWin32Window(GLFWwindow* window);
-#endif
-
-#if defined(GLFW_EXPOSE_NATIVE_WGL)
-/*! @brief Returns the `HGLRC` of the specified window.
- *
- *  @return The `HGLRC` of the specified window, or `NULL` if an
- *  [error](@ref error_handling) occurred.
- *
- *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED, @ref
- *  GLFW_PLATFORM_UNAVAILABLE and @ref GLFW_NO_WINDOW_CONTEXT.
- *
- *  @remark The `HDC` associated with the window can be queried with the
- *  [GetDC](https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getdc)
- *  function.
- *  @code
- *  HDC dc = GetDC(glfwGetWin32Window(window));
- *  @endcode
- *  This DC is private and does not need to be released.
- *
- *  @thread_safety This function may be called from any thread.  Access is not
- *  synchronized.
- *
- *  @since Added in version 3.0.
- *
- *  @ingroup native
- */
-GLFWAPI HGLRC glfwGetWGLContext(GLFWwindow* window);
+HWND glfwGetWin32Window(GLFWwindow* window);
 #endif
 
 #ifdef __cplusplus

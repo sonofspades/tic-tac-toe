@@ -27,11 +27,10 @@
 
 #include "internal.h"
 
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include <stdarg.h>
-#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 // NOTE: The global variables below comprise all mutable global data in GLFW
 //       Any other mutable global variable is a bug
@@ -76,8 +75,6 @@ static void* defaultReallocate(void* block, size_t size, void* user)
 //
 static void terminate(void)
 {
-    int i;
-
     memset(&_glfw.callbacks, 0, sizeof(_glfw.callbacks));
 
     while (_glfw.windowListHead)
@@ -86,7 +83,7 @@ static void terminate(void)
     while (_glfw.cursorListHead)
         glfwDestroyCursor((GLFWcursor*) _glfw.cursorListHead);
 
-    for (i = 0;  i < _glfw.monitorCount;  i++)
+    for (int i = 0;  i < _glfw.monitorCount;  i++)
     {
         _GLFWmonitor* monitor = _glfw.monitors[i];
         if (monitor->originalRamp.size)
@@ -115,7 +112,6 @@ static void terminate(void)
 
     memset(&_glfw, 0, sizeof(_glfw));
 }
-
 
 //////////////////////////////////////////////////////////////////////////
 //////                       GLFW internal API                      //////
@@ -152,59 +148,6 @@ size_t _glfwEncodeUTF8(char* s, uint32_t codepoint)
     return count;
 }
 
-// Splits and translates a text/uri-list into separate file paths
-// NOTE: This function destroys the provided string
-//
-char** _glfwParseUriList(char* text, int* count)
-{
-    const char* prefix = "file://";
-    char** paths = NULL;
-    char* line;
-
-    *count = 0;
-
-    while ((line = strtok(text, "\r\n")))
-    {
-        char* path;
-
-        text = NULL;
-
-        if (line[0] == '#')
-            continue;
-
-        if (strncmp(line, prefix, strlen(prefix)) == 0)
-        {
-            line += strlen(prefix);
-            // TODO: Validate hostname
-            while (*line != '/')
-                line++;
-        }
-
-        (*count)++;
-
-        path = _glfw_calloc(strlen(line) + 1, 1);
-        paths = _glfw_realloc(paths, *count * sizeof(char*));
-        paths[*count - 1] = path;
-
-        while (*line)
-        {
-            if (line[0] == '%' && line[1] && line[2])
-            {
-                const char digits[3] = { line[1], line[2], '\0' };
-                *path = (char) strtol(digits, NULL, 16);
-                line += 2;
-            }
-            else
-                *path = *line;
-
-            path++;
-            line++;
-        }
-    }
-
-    return paths;
-}
-
 char* _glfw_strdup(const char* source)
 {
     const size_t length = strlen(source);
@@ -227,22 +170,17 @@ void* _glfw_calloc(size_t count, size_t size)
 {
     if (count && size)
     {
-        void* block;
-
         if (count > SIZE_MAX / size)
         {
             _glfwInputError(GLFW_INVALID_VALUE, "Allocation size overflow");
             return NULL;
         }
 
-        block = _glfw.allocator.allocate(count * size, _glfw.allocator.user);
+        void* block = _glfw.allocator.allocate(count * size, _glfw.allocator.user);
         if (block)
             return memset(block, 0, count * size);
-        else
-        {
-            _glfwInputError(GLFW_OUT_OF_MEMORY, NULL);
-            return NULL;
-        }
+        _glfwInputError(GLFW_OUT_OF_MEMORY, NULL);
+        return NULL;
     }
     else
         return NULL;
@@ -255,19 +193,19 @@ void* _glfw_realloc(void* block, size_t size)
         void* resized = _glfw.allocator.reallocate(block, size, _glfw.allocator.user);
         if (resized)
             return resized;
-        else
-        {
-            _glfwInputError(GLFW_OUT_OF_MEMORY, NULL);
-            return NULL;
-        }
+
+        _glfwInputError(GLFW_OUT_OF_MEMORY, NULL);
+
+        return NULL;
     }
-    else if (block)
+
+    if (block)
     {
         _glfw_free(block);
         return NULL;
     }
-    else
-        return _glfw_calloc(1, size);
+
+    return _glfw_calloc(1, size);
 }
 
 void _glfw_free(void* block)
@@ -275,7 +213,6 @@ void _glfw_free(void* block)
     if (block)
         _glfw.allocator.deallocate(block, _glfw.allocator.user);
 }
-
 
 //////////////////////////////////////////////////////////////////////////
 //////                         GLFW event API                       //////
@@ -359,7 +296,7 @@ void _glfwInputError(int code, const char* format, ...)
 //////                        GLFW public API                       //////
 //////////////////////////////////////////////////////////////////////////
 
-GLFWAPI int glfwInit(void)
+int glfwInit(void)
 {
     if (_glfw.initialized)
         return GLFW_TRUE;
@@ -403,7 +340,7 @@ GLFWAPI int glfwInit(void)
     return GLFW_TRUE;
 }
 
-GLFWAPI void glfwTerminate(void)
+void glfwTerminate(void)
 {
     if (!_glfw.initialized)
         return;
@@ -411,7 +348,7 @@ GLFWAPI void glfwTerminate(void)
     terminate();
 }
 
-GLFWAPI void glfwInitHint(int hint, int value)
+void glfwInitHint(int hint, int value)
 {
     switch (hint)
     {
@@ -423,7 +360,7 @@ GLFWAPI void glfwInitHint(int hint, int value)
     _glfwInputError(GLFW_INVALID_ENUM, "Invalid init hint 0x%08X", hint);
 }
 
-GLFWAPI void glfwInitAllocator(const GLFWallocator* allocator)
+void glfwInitAllocator(const GLFWallocator* allocator)
 {
     if (allocator)
     {
@@ -436,7 +373,7 @@ GLFWAPI void glfwInitAllocator(const GLFWallocator* allocator)
         memset(&_glfwInitAllocator, 0, sizeof(GLFWallocator));
 }
 
-GLFWAPI int glfwGetError(const char** description)
+int glfwGetError(const char** description)
 {
     _GLFWerror* error;
     int code = GLFW_NO_ERROR;
@@ -460,7 +397,7 @@ GLFWAPI int glfwGetError(const char** description)
     return code;
 }
 
-GLFWAPI GLFWerrorfun glfwSetErrorCallback(GLFWerrorfun cbfun)
+GLFWerrorfun glfwSetErrorCallback(GLFWerrorfun cbfun)
 {
     _GLFW_SWAP(GLFWerrorfun, _glfwErrorCallback, cbfun);
     return cbfun;

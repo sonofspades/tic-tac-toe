@@ -96,13 +96,13 @@ static float star(int x, int y, float t)
 
 static GLFWcursor* create_cursor_frame(float t)
 {
-    int i = 0, x, y;
+    int i = 0;
     unsigned char buffer[64 * 64 * 4];
     const GLFWimage image = { 64, 64, buffer };
 
-    for (y = 0;  y < image.width;  y++)
+    for (int y = 0;  y < image.width;  y++)
     {
-        for (x = 0;  x < image.height;  x++)
+        for (int x = 0;  x < image.height;  x++)
         {
             buffer[i++] = 255;
             buffer[i++] = 255;
@@ -116,13 +116,13 @@ static GLFWcursor* create_cursor_frame(float t)
 
 static GLFWcursor* create_tracking_cursor(void)
 {
-    int i = 0, x, y;
+    int i = 0;
     unsigned char buffer[32 * 32 * 4];
     const GLFWimage image = { 32, 32, buffer };
 
-    for (y = 0;  y < image.width;  y++)
+    for (int y = 0;  y < image.width;  y++)
     {
-        for (x = 0;  x < image.height;  x++)
+        for (int x = 0;  x < image.height;  x++)
         {
             if (x == 7 || y == 7)
             {
@@ -146,9 +146,7 @@ static GLFWcursor* create_tracking_cursor(void)
 
 static void cursor_position_callback(GLFWwindow* window, double x, double y)
 {
-    printf("%0.3f: Cursor position: %f %f (%+f %+f)\n",
-           glfwGetTime(),
-           x, y, x - cursor_x, y - cursor_y);
+    printf("%0.3f: Cursor position: %f %f (%+f %+f)\n", glfwGetTime(), x, y, x - cursor_x, y - cursor_y);
 
     cursor_x = x;
     cursor_y = y;
@@ -327,10 +325,9 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 int main(void)
 {
     int i;
-    GLFWwindow* window;
     GLFWcursor* star_cursors[CURSOR_FRAME_COUNT];
     GLFWcursor* current_frame = NULL;
-    GLuint vertex_buffer, vertex_shader, fragment_shader, program;
+    GLuint vertex_buffer, program;
     GLint mvp_location, vpos_location;
 
     glfwSetErrorCallback(error_callback);
@@ -376,7 +373,7 @@ int main(void)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
-    window = glfwCreateWindow(640, 480, "Cursor Test", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(640, 480, "Cursor Test", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -389,11 +386,11 @@ int main(void)
     glGenBuffers(1, &vertex_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
 
-    vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+    GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex_shader, 1, &vertex_shader_text, NULL);
     glCompileShader(vertex_shader);
 
-    fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+    GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragment_shader, 1, &fragment_shader_text, NULL);
     glCompileShader(fragment_shader);
 

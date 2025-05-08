@@ -48,7 +48,7 @@
 #include <stdlib.h>
 #include <limits.h>
 
-int main(int argc, char** argv)
+int main(void)
 {
     int windowed_x, windowed_y, windowed_width, windowed_height;
     int last_xpos = INT_MIN, last_ypos = INT_MIN;

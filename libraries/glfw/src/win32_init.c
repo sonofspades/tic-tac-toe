@@ -29,10 +29,7 @@
 
 #if defined(_GLFW_WIN32)
 
-#include <stdlib.h>
-
-static const GUID _glfw_GUID_DEVINTERFACE_HID =
-    {0x4d1e55b2,0xf16f,0x11cf,{0x88,0xcb,0x00,0x11,0x11,0x00,0x00,0x30}};
+static const GUID _glfw_GUID_DEVINTERFACE_HID = { 0x4d1e55b2,0xf16f,0x11cf, { 0x88,0xcb,0x00,0x11,0x11,0x00,0x00,0x30 } };
 
 #define GUID_DEVINTERFACE_HID _glfw_GUID_DEVINTERFACE_HID
 
@@ -51,8 +48,7 @@ static GLFWbool loadLibraries(void)
     _glfw.win32.user32.instance = _glfwPlatformLoadModule("user32.dll");
     if (!_glfw.win32.user32.instance)
     {
-        _glfwInputErrorWin32(GLFW_PLATFORM_ERROR,
-                             "Win32: Failed to load user32.dll");
+        _glfwInputErrorWin32(GLFW_PLATFORM_ERROR, "Win32: Failed to load user32.dll");
         return GLFW_FALSE;
     }
 
@@ -285,8 +281,7 @@ static GLFWbool createHelperWindow(void)
     _glfw.win32.helperWindowClass = RegisterClassExW(&wc);
     if (!_glfw.win32.helperWindowClass)
     {
-        _glfwInputErrorWin32(GLFW_PLATFORM_ERROR,
-                             "Win32: Failed to register helper window class");
+        _glfwInputErrorWin32(GLFW_PLATFORM_ERROR, "Win32: Failed to register helper window class");
         return GLFW_FALSE;
     }
 
@@ -302,8 +297,7 @@ static GLFWbool createHelperWindow(void)
 
     if (!_glfw.win32.helperWindowHandle)
     {
-        _glfwInputErrorWin32(GLFW_PLATFORM_ERROR,
-                             "Win32: Failed to create helper window");
+        _glfwInputErrorWin32(GLFW_PLATFORM_ERROR, "Win32: Failed to create helper window");
         return GLFW_FALSE;
     }
 
@@ -342,7 +336,7 @@ static GLFWbool createHelperWindow(void)
 //
 WCHAR* _glfwCreateWideStringFromUTF8Win32(const char* source)
 {
-    int count = MultiByteToWideChar(CP_UTF8, 0, source, -1, NULL, 0);
+    const int count = MultiByteToWideChar(CP_UTF8, 0, source, -1, NULL, 0);
     if (!count)
     {
         _glfwInputErrorWin32(GLFW_PLATFORM_ERROR,
@@ -354,8 +348,7 @@ WCHAR* _glfwCreateWideStringFromUTF8Win32(const char* source)
 
     if (!MultiByteToWideChar(CP_UTF8, 0, source, -1, target, count))
     {
-        _glfwInputErrorWin32(GLFW_PLATFORM_ERROR,
-                             "Win32: Failed to convert string from UTF-8");
+        _glfwInputErrorWin32(GLFW_PLATFORM_ERROR, "Win32: Failed to convert string from UTF-8");
         _glfw_free(target);
         return NULL;
     }
@@ -367,11 +360,10 @@ WCHAR* _glfwCreateWideStringFromUTF8Win32(const char* source)
 //
 char* _glfwCreateUTF8FromWideStringWin32(const WCHAR* source)
 {
-    int size = WideCharToMultiByte(CP_UTF8, 0, source, -1, NULL, 0, NULL, NULL);
+    const int size = WideCharToMultiByte(CP_UTF8, 0, source, -1, NULL, 0, NULL, NULL);
     if (!size)
     {
-        _glfwInputErrorWin32(GLFW_PLATFORM_ERROR,
-                             "Win32: Failed to convert string to UTF-8");
+        _glfwInputErrorWin32(GLFW_PLATFORM_ERROR, "Win32: Failed to convert string to UTF-8");
         return NULL;
     }
 
@@ -379,8 +371,7 @@ char* _glfwCreateUTF8FromWideStringWin32(const WCHAR* source)
 
     if (!WideCharToMultiByte(CP_UTF8, 0, source, -1, target, size, NULL, NULL))
     {
-        _glfwInputErrorWin32(GLFW_PLATFORM_ERROR,
-                             "Win32: Failed to convert string to UTF-8");
+        _glfwInputErrorWin32(GLFW_PLATFORM_ERROR, "Win32: Failed to convert string to UTF-8");
         _glfw_free(target);
         return NULL;
     }
@@ -407,62 +398,6 @@ void _glfwInputErrorWin32(int error, const char* description)
     WideCharToMultiByte(CP_UTF8, 0, buffer, -1, message, sizeof(message), NULL, NULL);
 
     _glfwInputError(error, "%s: %s", description, message);
-}
-
-// Updates key names according to the current keyboard layout
-//
-void _glfwUpdateKeyNamesWin32(void)
-{
-    int key;
-    BYTE state[256] = {0};
-
-    memset(_glfw.win32.keynames, 0, sizeof(_glfw.win32.keynames));
-
-    for (key = GLFW_KEY_SPACE;  key <= GLFW_KEY_LAST;  key++)
-    {
-        UINT vk;
-        int scancode, length;
-        WCHAR chars[16];
-
-        scancode = _glfw.win32.scancodes[key];
-        if (scancode == -1)
-            continue;
-
-        if (key >= GLFW_KEY_KP_0 && key <= GLFW_KEY_KP_ADD)
-        {
-            const UINT vks[] = {
-                VK_NUMPAD0,  VK_NUMPAD1,  VK_NUMPAD2, VK_NUMPAD3,
-                VK_NUMPAD4,  VK_NUMPAD5,  VK_NUMPAD6, VK_NUMPAD7,
-                VK_NUMPAD8,  VK_NUMPAD9,  VK_DECIMAL, VK_DIVIDE,
-                VK_MULTIPLY, VK_SUBTRACT, VK_ADD
-            };
-
-            vk = vks[key - GLFW_KEY_KP_0];
-        }
-        else
-            vk = MapVirtualKeyW(scancode, MAPVK_VSC_TO_VK);
-
-        length = ToUnicode(vk, scancode, state,
-                           chars, sizeof(chars) / sizeof(WCHAR),
-                           0);
-
-        if (length == -1)
-        {
-            // This is a dead key, so we need a second simulated key press
-            // to make it output its own character (usually a diacritic)
-            length = ToUnicode(vk, scancode, state,
-                               chars, sizeof(chars) / sizeof(WCHAR),
-                               0);
-        }
-
-        if (length < 1)
-            continue;
-
-        WideCharToMultiByte(CP_UTF8, 0, chars, 1,
-                            _glfw.win32.keynames[key],
-                            sizeof(_glfw.win32.keynames[key]),
-                            NULL, NULL);
-    }
 }
 
 // Replacement for IsWindowsVersionOrGreater, as we cannot rely on the
@@ -512,7 +447,6 @@ GLFWbool _glfwConnectWin32(int platformID, _GLFWplatform* platform)
         .createStandardCursor = _glfwCreateStandardCursorWin32,
         .destroyCursor = _glfwDestroyCursorWin32,
         .setCursor = _glfwSetCursorWin32,
-        .getScancodeName = _glfwGetScancodeNameWin32,
         .getKeyScancode = _glfwGetKeyScancodeWin32,
         .setClipboardString = _glfwSetClipboardStringWin32,
         .getClipboardString = _glfwGetClipboardStringWin32,
@@ -542,7 +476,6 @@ GLFWbool _glfwConnectWin32(int platformID, _GLFWplatform* platform)
         .maximizeWindow = _glfwMaximizeWindowWin32,
         .showWindow = _glfwShowWindowWin32,
         .hideWindow = _glfwHideWindowWin32,
-        .requestWindowAttention = _glfwRequestWindowAttentionWin32,
         .focusWindow = _glfwFocusWindowWin32,
         .setWindowMonitor = _glfwSetWindowMonitorWin32,
         .windowFocused = _glfwWindowFocusedWin32,
@@ -554,10 +487,7 @@ GLFWbool _glfwConnectWin32(int platformID, _GLFWplatform* platform)
         .setWindowDecorated = _glfwSetWindowDecoratedWin32,
         .setWindowFloating = _glfwSetWindowFloatingWin32,
         .setWindowMousePassthrough = _glfwSetWindowMousePassthroughWin32,
-        .pollEvents = _glfwPollEventsWin32,
-        .waitEvents = _glfwWaitEventsWin32,
-        .waitEventsTimeout = _glfwWaitEventsTimeoutWin32,
-        .postEmptyEvent = _glfwPostEmptyEventWin32
+        .pollEvents = _glfwPollEventsWin32
     };
 
     *platform = win32;
@@ -570,7 +500,6 @@ int _glfwInitWin32(void)
         return GLFW_FALSE;
 
     createKeyTables();
-    _glfwUpdateKeyNamesWin32();
 
     if (_glfwIsWindows10Version1703OrGreaterWin32())
         SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);

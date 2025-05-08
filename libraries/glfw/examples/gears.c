@@ -53,15 +53,13 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
   GLint teeth, GLfloat tooth_depth)
 {
   GLint i;
-  GLfloat r0, r1, r2;
-  GLfloat angle, da;
-  GLfloat u, v, len;
+  GLfloat angle;
 
-  r0 = inner_radius;
-  r1 = outer_radius - tooth_depth / 2.f;
-  r2 = outer_radius + tooth_depth / 2.f;
+  const GLfloat r0 = inner_radius;
+  GLfloat r1 = outer_radius - tooth_depth / 2.f;
+  GLfloat r2 = outer_radius + tooth_depth / 2.f;
 
-  da = 2.f * (float) M_PI / teeth / 4.f;
+  GLfloat da = 2.f * (float)M_PI / teeth / 4.f;
 
   glShadeModel(GL_FLAT);
 
@@ -128,9 +126,9 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
 
     glVertex3f(r1 * (float) cos(angle), r1 * (float) sin(angle), width * 0.5f);
     glVertex3f(r1 * (float) cos(angle), r1 * (float) sin(angle), -width * 0.5f);
-    u = r2 * (float) cos(angle + da) - r1 * (float) cos(angle);
-    v = r2 * (float) sin(angle + da) - r1 * (float) sin(angle);
-    len = (float) sqrt(u * u + v * v);
+    GLfloat u = r2 * (float)cos(angle + da) - r1 * (float)cos(angle);
+    GLfloat v = r2 * (float)sin(angle + da) - r1 * (float)sin(angle);
+    GLfloat len = (float)sqrt(u * u + v * v);
     u /= len;
     v /= len;
     glNormal3f(v, -u, 0.0);
@@ -254,7 +252,7 @@ void reshape( GLFWwindow* window, int width, int height )
   zfar  = 30.0f;
   xmax  = znear * 0.5f;
 
-  glViewport( 0, 0, (GLint) width, (GLint) height );
+  glViewport( 0, 0, width, height );
   glMatrixMode( GL_PROJECTION );
   glLoadIdentity();
   glFrustum( -xmax, xmax, -xmax*h, xmax*h, znear, zfar );
@@ -302,7 +300,7 @@ static void init(void)
 
 
 /* program entry */
-int main(int argc, char *argv[])
+int main(void)
 {
     GLFWwindow* window;
     int width, height;

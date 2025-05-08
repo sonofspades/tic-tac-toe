@@ -76,7 +76,6 @@ int main(void)
 {
     int result;
     thrd_t thread;
-    GLFWwindow* window;
 
     srand((unsigned int) time(NULL));
 
@@ -85,7 +84,7 @@ int main(void)
     if (!glfwInit())
         exit(EXIT_FAILURE);
 
-    window = glfwCreateWindow(640, 480, "Empty Event Test", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(640, 480, "Empty Event Test", NULL, NULL);
     if (!window)
     {
         glfwTerminate();

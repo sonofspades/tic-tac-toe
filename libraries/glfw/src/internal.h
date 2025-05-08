@@ -209,7 +209,6 @@ struct _GLFWfbconfig
     int         samples;
     GLFWbool    sRGB;
     GLFWbool    doublebuffer;
-    GLFWbool    transparent;
     uintptr_t   handle;
 };
 
@@ -366,7 +365,6 @@ struct _GLFWplatform
     GLFWbool (*createStandardCursor)(_GLFWcursor*,int);
     void (*destroyCursor)(_GLFWcursor*);
     void (*setCursor)(_GLFWwindow*,_GLFWcursor*);
-    const char* (*getScancodeName)(int);
     int (*getKeyScancode)(int);
     void (*setClipboardString)(const char*);
     const char* (*getClipboardString)(void);
@@ -398,7 +396,6 @@ struct _GLFWplatform
     void (*maximizeWindow)(_GLFWwindow*);
     void (*showWindow)(_GLFWwindow*);
     void (*hideWindow)(_GLFWwindow*);
-    void (*requestWindowAttention)(_GLFWwindow*);
     void (*focusWindow)(_GLFWwindow*);
     void (*setWindowMonitor)(_GLFWwindow*,_GLFWmonitor*,int,int,int,int,int);
     GLFWbool (*windowFocused)(_GLFWwindow*);
@@ -411,9 +408,6 @@ struct _GLFWplatform
     void (*setWindowFloating)(_GLFWwindow*,GLFWbool);
     void (*setWindowMousePassthrough)(_GLFWwindow*,GLFWbool);
     void (*pollEvents)(void);
-    void (*waitEvents)(void);
-    void (*waitEventsTimeout)(double);
-    void (*postEmptyEvent)(void);
 };
 
 // Library global data

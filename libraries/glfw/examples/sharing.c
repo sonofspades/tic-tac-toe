@@ -73,7 +73,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
         glfwSetWindowShouldClose(window, GLFW_TRUE);
 }
 
-int main(int argc, char** argv)
+int main(void)
 {
     GLFWwindow* windows[2];
     GLuint texture, program, vertex_buffer;

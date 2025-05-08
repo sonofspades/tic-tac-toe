@@ -69,8 +69,7 @@ static void chart_ramp_array(struct nk_context* nk,
                                color, nk_rgb(255, 255, 255),
                                count, 0, 65535))
     {
-        int i;
-        for (i = 0;  i < count;  i++)
+        for (int i = 0;  i < count;  i++)
         {
             char buffer[1024];
             if (nk_chart_push(nk, values[i]))
@@ -85,12 +84,10 @@ static void chart_ramp_array(struct nk_context* nk,
     }
 }
 
-int main(int argc, char** argv)
+int main(void)
 {
     GLFWmonitor* monitor = NULL;
-    GLFWwindow* window;
     GLFWgammaramp orig_ramp;
-    struct nk_context* nk;
     struct nk_font_atlas* atlas;
     float gamma_value = 1.f;
 
@@ -104,7 +101,7 @@ int main(int argc, char** argv)
     glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
     glfwWindowHint(GLFW_WIN32_KEYBOARD_MENU, GLFW_TRUE);
 
-    window = glfwCreateWindow(800, 400, "Gamma Test", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(800, 400, "Gamma Test", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -133,7 +130,7 @@ int main(int argc, char** argv)
     gladLoadGL(glfwGetProcAddress);
     glfwSwapInterval(1);
 
-    nk = nk_glfw3_init(window, NK_GLFW3_INSTALL_CALLBACKS);
+    struct nk_context* nk = nk_glfw3_init(window, NK_GLFW3_INSTALL_CALLBACKS);
     nk_glfw3_font_stash_begin(&atlas);
     nk_glfw3_font_stash_end();
 
@@ -142,10 +139,9 @@ int main(int argc, char** argv)
     while (!glfwWindowShouldClose(window))
     {
         int width, height;
-        struct nk_rect area;
 
         glfwGetWindowSize(window, &width, &height);
-        area = nk_rect(0.f, 0.f, (float) width, (float) height);
+        struct nk_rect area = nk_rect(0.f, 0.f, (float)width, (float)height);
         nk_window_set_bounds(nk, "", area);
 
         glClear(GL_COLOR_BUFFER_BIT);

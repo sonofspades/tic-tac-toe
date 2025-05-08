@@ -940,11 +940,10 @@ static int physics_thread_main(void* arg)
 // main
 //========================================================================
 
-int main(int argc, char** argv)
+int main(void)
 {
     int ch, width, height;
     thrd_t physics_thread = 0;
-    GLFWwindow* window;
     GLFWmonitor* monitor = NULL;
 
     if (!glfwInit())
@@ -984,7 +983,7 @@ int main(int argc, char** argv)
         height = 480;
     }
 
-    window = glfwCreateWindow(width, height, "Particle Engine", monitor, NULL);
+    GLFWwindow* window = glfwCreateWindow(width, height, "Particle Engine", monitor, NULL);
     if (!window)
     {
         fprintf(stderr, "Failed to create GLFW window\n");

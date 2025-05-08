@@ -218,7 +218,7 @@ void reshape( GLFWwindow* window, int w, int h )
 {
    mat4x4 projection, view;
 
-   glViewport( 0, 0, (GLsizei)w, (GLsizei)h );
+   glViewport( 0, 0, w, h );
 
    glMatrixMode( GL_PROJECTION );
    mat4x4_perspective( projection,

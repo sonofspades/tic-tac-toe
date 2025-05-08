@@ -38,12 +38,6 @@ you have used GLFW 2 in the past, there is a [transition
 guide](https://www.glfw.org/docs/latest/moving.html) for moving to the GLFW
 3 API.
 
-GLFW exists because of the contributions of [many people](CONTRIBUTORS.md)
-around the world, whether by reporting bugs, providing community support, adding
-features, reviewing or testing code, debugging, proofreading docs, suggesting
-features or fixing bugs.
-
-
 ## Compiling GLFW
 
 GLFW is written primarily in C99, with parts of macOS support being written in
@@ -119,23 +113,6 @@ guide](https://github.com/glfw/glfw/blob/master/docs/CONTRIBUTING.md) for
 information on what to include when reporting a bug.
 
 
-## Changelog since 3.4
-
- - Added `GLFW_UNLIMITED_MOUSE_BUTTONS` input mode that allows mouse buttons beyond
-   the limit of the mouse button tokens to be reported (#2423)
- - Updated minimum CMake version to 3.16 (#2541)
- - [Cocoa] Added `QuartzCore` framework as link-time dependency
- - [Cocoa] Removed support for OS X 10.10 Yosemite and earlier (#2506)
- - [Wayland] Bugfix: The fractional scaling related objects were not destroyed
- - [Wayland] Bugfix: `glfwInit` would segfault on compositor with no seat (#2517)
- - [Wayland] Bugfix: A drag entering a non-GLFW surface could cause a segfault
- - [X11] Bugfix: Running without a WM could trigger an assert (#2593,#2601,#2631)
- - [Null] Added Vulkan 'window' surface creation via `VK_EXT_headless_surface`
- - [Null] Added EGL context creation on Mesa via `EGL_MESA_platform_surfaceless`
- - [EGL] Allowed native access on Wayland with `GLFW_CONTEXT_CREATION_API` set to
-   `GLFW_NATIVE_CONTEXT_API` (#2518)
-
-
 ## Contact
 
 On [glfw.org](https://www.glfw.org/) you can find the latest version of GLFW, as
@@ -150,4 +127,3 @@ request, please file it in the
 
 Finally, if you're interested in helping out with the development of GLFW or
 porting it to your favorite platform, join us on the forum or GitHub.
-

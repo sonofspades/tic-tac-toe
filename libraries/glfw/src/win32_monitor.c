@@ -30,7 +30,6 @@
 #if defined(_GLFW_WIN32)
 
 #include <assert.h>
-#include <string.h>
 #include <wchar.h>
 
 // Callback for EnumDisplayMonitors in createMonitor
@@ -523,12 +522,11 @@ void _glfwSetGammaRampWin32(_GLFWmonitor* monitor, const GLFWgammaramp* ramp)
     DeleteDC(dc);
 }
 
-
 //////////////////////////////////////////////////////////////////////////
 //////                        GLFW native API                       //////
 //////////////////////////////////////////////////////////////////////////
 
-GLFWAPI const char* glfwGetWin32Adapter(GLFWmonitor* handle)
+const char* glfwGetWin32Adapter(GLFWmonitor* handle)
 {
     _GLFW_REQUIRE_INIT_OR_RETURN(NULL);
 
@@ -544,7 +542,7 @@ GLFWAPI const char* glfwGetWin32Adapter(GLFWmonitor* handle)
     return monitor->win32.publicAdapterName;
 }
 
-GLFWAPI const char* glfwGetWin32Monitor(GLFWmonitor* handle)
+const char* glfwGetWin32Monitor(GLFWmonitor* handle)
 {
     _GLFW_REQUIRE_INIT_OR_RETURN(NULL);
 
@@ -561,4 +559,3 @@ GLFWAPI const char* glfwGetWin32Monitor(GLFWmonitor* handle)
 }
 
 #endif // _GLFW_WIN32
-

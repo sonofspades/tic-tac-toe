@@ -96,7 +96,7 @@ static void usage(void)
     printf("Usage: msaa [-h] [-s SAMPLES]\n");
 }
 
-int main(int argc, char** argv)
+int main(void)
 {
     int ch, samples = 4;
     GLFWwindow* window;

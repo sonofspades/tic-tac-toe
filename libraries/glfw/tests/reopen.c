@@ -99,7 +99,7 @@ static void close_window(GLFWwindow* window)
     printf("Closing window took %0.3f seconds\n", glfwGetTime() - base);
 }
 
-int main(int argc, char** argv)
+int main(void)
 {
     int count = 0;
     double base;

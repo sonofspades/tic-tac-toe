@@ -198,7 +198,7 @@ static GLFWwindow* create_window(GLFWmonitor* monitor)
     return window;
 }
 
-int main(int argc, char** argv)
+int main(void)
 {
     int ch, i, window_count;
     int fullscreen = GLFW_FALSE, all_monitors = GLFW_FALSE;

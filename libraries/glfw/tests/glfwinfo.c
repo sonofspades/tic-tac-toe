@@ -348,7 +348,7 @@ static void print_platform(void)
     }
 }
 
-int main(int argc, char** argv)
+int main(void)
 {
     int ch;
     bool list_extensions = false, list_layers = false;
