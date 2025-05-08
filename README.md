@@ -22,4 +22,3 @@ Check out the full game description on [Wikipedia](https://en.wikipedia.org/wiki
 - [ ] Create a Physics class?
 - [ ] Create a GL Pipeline class
 - [ ] Make use of Uniform buffers
-- [ ] Create a Commands class

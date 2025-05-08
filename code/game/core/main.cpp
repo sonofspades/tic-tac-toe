@@ -1,16 +1,3 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-#include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
-#include <assimp/scene.h>
-
-#include <btBulletCollisionCommon.h>
-
 #include "opengl/constants/commands.hpp"
 
 #include <opengl/commands.hpp>
@@ -421,7 +408,7 @@ auto main() -> int
         if (is_editor)
         {
             opengl::Commands::clear(0.5f, 0.5f, 0.5f, 1.0f);
-            opengl::Commands::clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            opengl::Commands::clear(opengl::constants::color_buffer | opengl::constants::depth_buffer);
 
             glUniform3fv(3, 1, glm::value_ptr(glm::vec3(0.0f, 1.0f, 0.0f)));
 
