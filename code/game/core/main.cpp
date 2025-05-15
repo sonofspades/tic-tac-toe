@@ -391,7 +391,6 @@ auto main() -> int
 
     debug_vao.attribute(position_attribute);
 
-    opengl::Pipeline::enable(GL_SCISSOR_TEST);
     opengl::Pipeline::enable(GL_DEPTH_TEST);
 
     glm::vec3    x_color { 1.0f, 0.8392156862745098f, 0.22745098039215686f };
