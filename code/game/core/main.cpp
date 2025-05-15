@@ -1,7 +1,9 @@
-#include "opengl/constants/commands.hpp"
-
+#include <opengl/buffer.hpp>
 #include <opengl/commands.hpp>
 #include <opengl/functions.hpp>
+#include <opengl/vertex_array.hpp>
+
+#include <opengl/constants/commands.hpp>
 
 auto vertex_stage_text =
 "#version 450\n"
@@ -155,12 +157,12 @@ auto main() -> int
         }
     });
 
-    glfwSetMouseButtonCallback(window, [](GLFWwindow* window_ptr, const int button, const int action, const int) -> void
+    glfwSetMouseButtonCallback(window, [](const int button, const int action, const int) -> void
     {
         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && !is_end)
         {
                                    double x,  y;
-            glfwGetCursorPos(window_ptr, &x, &y);
+            //glfwGetCursorPos(window_ptr, &x, &y); // TODO fix this with the callback maybe?
 
             constexpr glm::vec4 viewport { 0.0f, 0.0f, window_width, window_height };
 
@@ -221,6 +223,8 @@ auto main() -> int
     glAttachShader(shader, frag_stage);
     glLinkProgram(shader);
 
+    constexpr core::vertex_array::attribute position_attribute { 0, 3, GL_FLOAT, 0 };
+
     std::vector<glm::vec3> o_vertices;
     std::vector<uint32_t>  o_elements;
 
@@ -245,21 +249,20 @@ auto main() -> int
         o_elements.push_back(face.mIndices[2]);
     }
 
-    uint32_t o_vao, o_vbo, o_ebo;
+    opengl::Buffer o_vbo;
+    o_vbo.create();
+    o_vbo.storage(core::buffer::make_data(o_vertices));
 
-    glGenVertexArrays(1, &o_vao);
-    glBindVertexArray(o_vao);
+    opengl::Buffer o_ebo;
+    o_ebo.create();
+    o_ebo.storage(core::buffer::make_data(o_elements));
 
-    glGenBuffers(1, &o_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, o_vbo);
-    glBufferData(GL_ARRAY_BUFFER, o_vertices.size() * sizeof(glm::vec3), o_vertices.data(), GL_STATIC_DRAW);
+    opengl::VertexArray o_vao;
+    o_vao.create();
+    o_vao.attach_vertices(o_vbo, sizeof(glm::vec3));
+    o_vao.attach_elements(o_ebo);
 
-    glGenBuffers(1, &o_ebo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, o_ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, o_elements.size() * sizeof(uint32_t), o_elements.data(), GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), nullptr);
-    glEnableVertexAttribArray(0);
+    o_vao.attribute(position_attribute);
 
     std::vector<glm::vec3> x_vertices;
     std::vector<uint32_t>  x_elements;
@@ -418,7 +421,7 @@ auto main() -> int
         else
         {
             opengl::Commands::clear(0.42745098039215684f, 0.8823529411764706f, 0.8235294117647058f, 1.0f);
-            opengl::Commands::clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            opengl::Commands::clear(opengl::constants::color_buffer | opengl::constants::depth_buffer);
         }
 
         glUniform3fv(3, 1, glm::value_ptr(grid_color));
@@ -448,7 +451,8 @@ auto main() -> int
                 {
                     glUniform3fv(3, 1, glm::value_ptr(o_color));
 
-                    glBindVertexArray(o_vao);
+                    o_vao.bind();
+
                     opengl::Commands::draw_elements(opengl::constants::triangles, o_elements.size());
                 }
             }
@@ -457,14 +461,15 @@ auto main() -> int
         glfwSwapBuffers(window);
     }
 
-    glDeleteVertexArrays(1, &o_vao);
+    o_vao.destroy();
+    o_vbo.destroy();
+    o_ebo.destroy();
+
     glDeleteVertexArrays(1, &x_vao);
 
     glDeleteVertexArrays(1, &grid_vao);
     glDeleteVertexArrays(1, &debug_vao);
 
-    glDeleteBuffers(1, &o_vbo);
-    glDeleteBuffers(1, &o_ebo);
     glDeleteBuffers(1, &x_vbo);
     glDeleteBuffers(1, &x_ebo);
 

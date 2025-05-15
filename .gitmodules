@@ -1,3 +1,6 @@
 [submodule "modules/graphics"]
 	path = modules/graphics
 	url = https://github.com/sonofspades/graphics-module.git
+[submodule "modules/resources"]
+	path = modules/resources
+	url = https://github.com/sonofspades/resources-module.git
