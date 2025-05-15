@@ -1,6 +1,7 @@
 #include <opengl/buffer.hpp>
 #include <opengl/commands.hpp>
 #include <opengl/functions.hpp>
+#include <opengl/pipeline.hpp>
 #include <opengl/vertex_array.hpp>
 
 #include <opengl/constants/commands.hpp>
@@ -225,10 +226,10 @@ auto main() -> int
 
     constexpr core::vertex_array::attribute position_attribute { 0, 3, GL_FLOAT, 0 };
 
+    Assimp::Importer o_importer;
+
     std::vector<glm::vec3> o_vertices;
     std::vector<uint32_t>  o_elements;
-
-    Assimp::Importer o_importer;
 
     const auto o_scene = o_importer.ReadFile("o.obj", 0);
     const auto o_mesh  = o_scene->mMeshes[0];
@@ -264,10 +265,10 @@ auto main() -> int
 
     o_vao.attribute(position_attribute);
 
+    Assimp::Importer x_importer;
+
     std::vector<glm::vec3> x_vertices;
     std::vector<uint32_t>  x_elements;
-
-    Assimp::Importer x_importer;
 
     const auto x_scene = x_importer.ReadFile("x.obj", 0);
     const auto x_mesh  = x_scene->mMeshes[0];
@@ -288,26 +289,25 @@ auto main() -> int
         x_elements.push_back(face.mIndices[2]);
     }
 
-    uint32_t x_vao, x_vbo, x_ebo;
+    opengl::Buffer x_vbo;
+    x_vbo.create();
+    x_vbo.storage(core::buffer::make_data(x_vertices));
 
-    glGenVertexArrays(1, &x_vao);
-    glBindVertexArray(x_vao);
+    opengl::Buffer x_ebo;
+    x_ebo.create();
+    x_ebo.storage(core::buffer::make_data(x_elements));
 
-    glGenBuffers(1, &x_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, x_vbo);
-    glBufferData(GL_ARRAY_BUFFER, x_vertices.size() * sizeof(glm::vec3), x_vertices.data(), GL_STATIC_DRAW);
+    opengl::VertexArray x_vao;
+    x_vao.create();
+    x_vao.attach_vertices(x_vbo, sizeof(glm::vec3));
+    x_vao.attach_elements(x_ebo);
 
-    glGenBuffers(1, &x_ebo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, x_ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * x_elements.size(), x_elements.data(), GL_STATIC_DRAW);
+    x_vao.attribute(position_attribute);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), nullptr);
-    glEnableVertexAttribArray(0);
+    Assimp::Importer grid_importer;
 
     std::vector<glm::vec3> grid_vertices;
     std::vector<uint32_t>  grid_elements;
-
-    Assimp::Importer grid_importer;
 
     const auto grid_scene = grid_importer.ReadFile("grid.obj", 0);
     const auto grid_mesh  = grid_scene->mMeshes[0];
@@ -328,21 +328,20 @@ auto main() -> int
         grid_elements.push_back(face.mIndices[2]);
     }
 
-    uint32_t grid_vao, grid_vbo, grid_ebo;
+    opengl::Buffer grid_vbo;
+    grid_vbo.create();
+    grid_vbo.storage(core::buffer::make_data(grid_vertices));
 
-    glGenVertexArrays(1, &grid_vao);
-    glBindVertexArray(grid_vao);
+    opengl::Buffer grid_ebo;
+    grid_ebo.create();
+    grid_ebo.storage(core::buffer::make_data(grid_elements));
 
-    glGenBuffers(1, &grid_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, grid_vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * grid_vertices.size(), grid_vertices.data(), GL_STATIC_DRAW);
+    opengl::VertexArray grid_vao;
+    grid_vao.create();
+    grid_vao.attach_vertices(grid_vbo, sizeof(glm::vec3));
+    grid_vao.attach_elements(grid_ebo);
 
-    glGenBuffers(1, &grid_ebo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, grid_ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * grid_elements.size(), grid_elements.data(), GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-    glEnableVertexAttribArray(0);
+    grid_vao.attribute(position_attribute);
 
     constexpr auto tile_size = 1.5f;
 
@@ -350,6 +349,8 @@ auto main() -> int
 
     world = new btCollisionWorld(new btCollisionDispatcher(new btDefaultCollisionConfiguration()), new btDbvtBroadphase(), new btDefaultCollisionConfiguration());
     world->setDebugDrawer(new PhysicsDebug());
+
+    auto tile_shape = std::make_unique<btBoxShape>(btVector3(0.5f, 0.5f, 0.105f));
 
     for (auto row = 0; row < 3; row++)
     {
@@ -362,10 +363,8 @@ auto main() -> int
             transform.setIdentity();
             transform.setOrigin(btVector3(x, y, 0.0f));
 
-            btCollisionShape* tile_shape = new btBoxShape(btVector3(0.5f, 0.5f, 0.105f));
-
             auto tile_object = new btCollisionObject();
-            tile_object->setCollisionShape(tile_shape);
+            tile_object->setCollisionShape(tile_shape.get());
             tile_object->setWorldTransform(transform);
             tile_object->setUserIndex(row);
             tile_object->setUserIndex2(col);
@@ -376,20 +375,18 @@ auto main() -> int
 
     world->debugDrawWorld();
 
-    uint32_t debug_vao, debug_vbo;
+    opengl::Buffer debug_vbo;
+    debug_vbo.create();
+    debug_vbo.storage(core::buffer::make_data(debug_vertices));
 
-    glGenVertexArrays(1, &debug_vao);
-    glBindVertexArray(debug_vao);
+    opengl::VertexArray debug_vao;
+    debug_vao.create();
+    debug_vao.attach_vertices(debug_vbo, sizeof(glm::vec3));
 
-    glGenBuffers(1, &debug_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, debug_vbo);
-    glBufferData(GL_ARRAY_BUFFER, debug_vertices.size() * sizeof(glm::vec3), debug_vertices.data(), GL_STATIC_DRAW);
+    debug_vao.attribute(position_attribute);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), nullptr);
-    glEnableVertexAttribArray(0);
-
-    glEnable(GL_SCISSOR_TEST);
-    glEnable(GL_DEPTH_TEST);
+    opengl::Pipeline::enable(GL_SCISSOR_TEST);
+    opengl::Pipeline::enable(GL_DEPTH_TEST);
 
     glm::vec3    x_color { 1.0f, 0.8392156862745098f, 0.22745098039215686f };
     glm::vec3    o_color { 0.9686274509803922f, 0.35294117647058826f, 0.35294117647058826f };
@@ -415,7 +412,8 @@ auto main() -> int
 
             glUniform3fv(3, 1, glm::value_ptr(glm::vec3(0.0f, 1.0f, 0.0f)));
 
-            glBindVertexArray(debug_vao);
+            debug_vao.bind();
+
             opengl::Commands::draw_vertices(opengl::constants::lines, debug_vertices.size());
         }
         else
@@ -426,7 +424,8 @@ auto main() -> int
 
         glUniform3fv(3, 1, glm::value_ptr(grid_color));
 
-        glBindVertexArray(grid_vao);
+        grid_vao.bind();
+
         opengl::Commands::draw_elements(opengl::constants::triangles, grid_elements.size());
 
         for (auto row = 0; row < 3; row++)
@@ -444,7 +443,8 @@ auto main() -> int
                 {
                     glUniform3fv(3, 1, glm::value_ptr(x_color));
 
-                    glBindVertexArray(x_vao);
+                    x_vao.bind();
+
                     opengl::Commands::draw_elements(opengl::constants::triangles, x_elements.size());
                 }
                 else if (tiles[row][col] == tile_o)
@@ -465,18 +465,16 @@ auto main() -> int
     o_vbo.destroy();
     o_ebo.destroy();
 
-    glDeleteVertexArrays(1, &x_vao);
+    x_vao.destroy();
+    x_vbo.destroy();
+    x_ebo.destroy();
 
-    glDeleteVertexArrays(1, &grid_vao);
-    glDeleteVertexArrays(1, &debug_vao);
+    grid_vao.destroy();
+    grid_vbo.destroy();
+    grid_ebo.destroy();
 
-    glDeleteBuffers(1, &x_vbo);
-    glDeleteBuffers(1, &x_ebo);
-
-    glDeleteBuffers(1, &grid_vbo);
-    glDeleteBuffers(1, &grid_ebo);
-
-    glDeleteBuffers(1, &debug_vbo);
+    debug_vao.destroy();
+    debug_vbo.destroy();
 
     glDeleteShader(vert_stage);
     glDeleteShader(frag_stage);
