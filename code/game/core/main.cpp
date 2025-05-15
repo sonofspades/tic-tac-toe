@@ -117,6 +117,9 @@ auto check_win(const int32_t type) ->  void
 
 auto main() -> int
 {
+    static auto cursor_x = 0.0f;
+    static auto cursor_y = 0.0f;
+
     static auto window_closed = false;
 
     constexpr auto window_width  = 1000;
@@ -158,17 +161,20 @@ auto main() -> int
         }
     });
 
+    glfwSetCursorPosCallback(window, [](const double x, const double y) -> void
+    {
+        cursor_x = x;
+        cursor_y = y;
+    });
+
     glfwSetMouseButtonCallback(window, [](const int button, const int action, const int) -> void
     {
         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && !is_end)
         {
-                                   double x,  y;
-            //glfwGetCursorPos(window_ptr, &x, &y); // TODO fix this with the callback maybe?
-
             constexpr glm::vec4 viewport { 0.0f, 0.0f, window_width, window_height };
 
-            auto start = glm::unProject(glm::vec3(x, window_height - y, -1.0f), view, proj, viewport);
-            auto end   = glm::unProject(glm::vec3(x, window_height - y,  1.0f), view, proj, viewport);
+            auto start = glm::unProject(glm::vec3(cursor_x, window_height - cursor_y, -1.0f), view, proj, viewport);
+            auto end   = glm::unProject(glm::vec3(cursor_x, window_height - cursor_y,  1.0f), view, proj, viewport);
                  end   = start + glm::normalize(end - start) * 1000.0f;
 
             const btVector3 from(start.x, start.y, start.z);
