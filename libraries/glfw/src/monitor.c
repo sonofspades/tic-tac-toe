@@ -115,10 +115,7 @@ void _glfwInputMonitor(_GLFWmonitor* monitor, int action, int placement)
     }
     else if (action == GLFW_DISCONNECTED)
     {
-        int i;
-        _GLFWwindow* window;
-
-        for (window = _glfw.windowListHead;  window;  window = window->next)
+        for (_GLFWwindow* window = _glfw.windowListHead;  window;  window = window->next)
         {
             if (window->monitor == monitor)
             {
@@ -130,7 +127,7 @@ void _glfwInputMonitor(_GLFWmonitor* monitor, int action, int placement)
             }
         }
 
-        for (i = 0;  i < _glfw.monitorCount;  i++)
+        for (int i = 0;  i < _glfw.monitorCount;  i++)
         {
             if (_glfw.monitors[i] == monitor)
             {
@@ -282,7 +279,7 @@ void _glfwSplitBPP(int bpp, int* red, int* green, int* blue)
     // Convert "bits per pixel" to red, green & blue sizes
 
     *red = *green = *blue = bpp / 3;
-    int delta = bpp - (*red * 3);
+    const int delta = bpp - (*red * 3);
     if (delta >= 1)
         *green = *green + 1;
 

@@ -538,21 +538,6 @@ void glfwSetWindowPos(GLFWwindow* handle, int xpos, int ypos)
     _glfw.platform.setWindowPos(window, xpos, ypos);
 }
 
-void glfwGetWindowSize(GLFWwindow* handle, int* width, int* height)
-{
-    if (width)
-        *width = 0;
-    if (height)
-        *height = 0;
-
-    _GLFW_REQUIRE_INIT();
-
-    _GLFWwindow* window = (_GLFWwindow*) handle;
-    assert(window != NULL);
-
-    _glfw.platform.getWindowSize(window, width, height);
-}
-
 void glfwSetWindowSize(GLFWwindow* handle, int width, int height)
 {
     assert(width >= 0);
@@ -642,21 +627,6 @@ void glfwSetWindowAspectRatio(GLFWwindow* handle, int numer, int denom)
         return;
 
     _glfw.platform.setWindowAspectRatio(window, numer, denom);
-}
-
-void glfwGetFramebufferSize(GLFWwindow* handle, int* width, int* height)
-{
-    if (width)
-        *width = 0;
-    if (height)
-        *height = 0;
-
-    _GLFW_REQUIRE_INIT();
-
-    _GLFWwindow* window = (_GLFWwindow*) handle;
-    assert(window != NULL);
-
-    _glfw.platform.getFramebufferSize(window, width, height);
 }
 
 void glfwGetWindowFrameSize(GLFWwindow* handle, int* left, int* top, int* right, int* bottom)

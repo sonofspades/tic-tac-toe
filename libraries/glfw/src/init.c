@@ -373,30 +373,6 @@ void glfwInitAllocator(const GLFWallocator* allocator)
         memset(&_glfwInitAllocator, 0, sizeof(GLFWallocator));
 }
 
-int glfwGetError(const char** description)
-{
-    _GLFWerror* error;
-    int code = GLFW_NO_ERROR;
-
-    if (description)
-        *description = NULL;
-
-    if (_glfw.initialized)
-        error = _glfwPlatformGetTls(&_glfw.errorSlot);
-    else
-        error = &_glfwMainThreadError;
-
-    if (error)
-    {
-        code = error->code;
-        error->code = GLFW_NO_ERROR;
-        if (description && code)
-            *description = error->description;
-    }
-
-    return code;
-}
-
 GLFWerrorfun glfwSetErrorCallback(GLFWerrorfun cbfun)
 {
     _GLFW_SWAP(GLFWerrorfun, _glfwErrorCallback, cbfun);

@@ -1753,99 +1753,8 @@ typedef struct GLFWallocator
  * GLFW API functions
  *************************************************************************/
 
-/*! @brief Initializes the GLFW library.
- *
- *  This function initializes the GLFW library.  Before most GLFW functions can
- *  be used, GLFW must be initialized, and before an application terminates GLFW
- *  should be terminated in order to free any resources allocated during or
- *  after initialization.
- *
- *  If this function fails, it calls @ref glfwTerminate before returning.  If it
- *  succeeds, you should call @ref glfwTerminate before the application exits.
- *
- *  Additional calls to this function after successful initialization but before
- *  termination will return `GLFW_TRUE` immediately.
- *
- *  The @ref GLFW_PLATFORM init hint controls which platforms are considered during
- *  initialization.  This also depends on which platforms the library was compiled to
- *  support.
- *
- *  @return `GLFW_TRUE` if successful, or `GLFW_FALSE` if an
- *  [error](@ref error_handling) occurred.
- *
- *  @errors Possible errors include @ref GLFW_PLATFORM_UNAVAILABLE and @ref
- *  GLFW_PLATFORM_ERROR.
- *
- *  @remark @macos This function will change the current directory of the
- *  application to the `Contents/Resources` subdirectory of the application's
- *  bundle, if present.  This can be disabled with the @ref
- *  GLFW_COCOA_CHDIR_RESOURCES init hint.
- *
- *  @remark @macos This function will create the main menu and dock icon for the
- *  application.  If GLFW finds a `MainMenu.nib` it is loaded and assumed to
- *  contain a menu bar.  Otherwise a minimal menu bar is created manually with
- *  common commands like Hide, Quit and About.  The About entry opens a minimal
- *  about dialog with information from the application's bundle.  The menu bar
- *  and dock icon can be disabled entirely with the @ref GLFW_COCOA_MENUBAR init
- *  hint.
- *
- *  @remark __Wayland, X11:__ If the library was compiled with support for both
- *  Wayland and X11, and the @ref GLFW_PLATFORM init hint is set to
- *  `GLFW_ANY_PLATFORM`, the `XDG_SESSION_TYPE` environment variable affects
- *  which platform is picked.  If the environment variable is not set, or is set
- *  to something other than `wayland` or `x11`, the regular detection mechanism
- *  will be used instead.
- *
- *  @remark @x11 This function will set the `LC_CTYPE` category of the
- *  application locale according to the current environment if that category is
- *  still "C".  This is because the "C" locale breaks Unicode text input.
- *
- *  @thread_safety This function must only be called from the main thread.
- *
- *  @sa @ref intro_init
- *  @sa @ref glfwInitHint
- *  @sa @ref glfwInitAllocator
- *  @sa @ref glfwTerminate
- *
- *  @since Added in version 1.0.
- *
- *  @ingroup init
- */
-int glfwInit(void);
-
-/*! @brief Terminates the GLFW library.
- *
- *  This function destroys all remaining windows and cursors, restores any
- *  modified gamma ramps and frees any other allocated resources.  Once this
- *  function is called, you must again call @ref glfwInit successfully before
- *  you will be able to use most GLFW functions.
- *
- *  If GLFW has been successfully initialized, this function should be called
- *  before the application exits.  If initialization fails, there is no need to
- *  call this function, as it is called by @ref glfwInit before it returns
- *  failure.
- *
- *  This function has no effect if GLFW is not initialized.
- *
- *  @errors Possible errors include @ref GLFW_PLATFORM_ERROR.
- *
- *  @remark This function may be called before @ref glfwInit.
- *
- *  @warning The contexts of any remaining windows must not be current on any
- *  other thread when this function is called.
- *
- *  @reentrancy This function must not be called from a callback.
- *
- *  @thread_safety This function must only be called from the main thread.
- *
- *  @sa @ref intro_init
- *  @sa @ref glfwInit
- *
- *  @since Added in version 1.0.
- *
- *  @ingroup init
- */
-void glfwTerminate(void);
+int  glfwInit();
+void glfwTerminate();
 
 /*! @brief Sets the specified init hint to the desired value.
  *
@@ -1910,37 +1819,6 @@ void glfwInitHint(int hint, int value);
  */
 void glfwInitAllocator(const GLFWallocator* allocator);
 
-/*! @brief Returns and clears the last error for the calling thread.
- *
- *  This function returns and clears the [error code](@ref errors) of the last
- *  error that occurred on the calling thread, and optionally a UTF-8 encoded
- *  human-readable description of it.  If no error has occurred since the last
- *  call, it returns @ref GLFW_NO_ERROR (zero) and the description pointer is
- *  set to `NULL`.
- *
- *  @param[in] description Where to store the error description pointer, or `NULL`.
- *  @return The last error code for the calling thread, or @ref GLFW_NO_ERROR
- *  (zero).
- *
- *  @errors None.
- *
- *  @pointer_lifetime The returned string is allocated and freed by GLFW.  You
- *  should not free it yourself.  It is guaranteed to be valid only until the
- *  next error occurs or the library is terminated.
- *
- *  @remark This function may be called before @ref glfwInit.
- *
- *  @thread_safety This function may be called from any thread.
- *
- *  @sa @ref error_handling
- *  @sa @ref glfwSetErrorCallback
- *
- *  @since Added in version 3.3.
- *
- *  @ingroup init
- */
-int glfwGetError(const char** description);
-
 /*! @brief Sets the error callback.
  *
  *  This function sets the error callback, which is called with an error code
@@ -1986,27 +1864,6 @@ int glfwGetError(const char** description);
  *  @ingroup init
  */
 GLFWerrorfun glfwSetErrorCallback(GLFWerrorfun callback);
-
-/*! @brief Returns the currently selected platform.
- *
- *  This function returns the platform that was selected during initialization.  The
- *  returned value will be one of `GLFW_PLATFORM_WIN32`, `GLFW_PLATFORM_COCOA`,
- *  `GLFW_PLATFORM_WAYLAND`, `GLFW_PLATFORM_X11` or `GLFW_PLATFORM_NULL`.
- *
- *  @return The currently selected platform, or zero if an error occurred.
- *
- *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED.
- *
- *  @thread_safety This function may be called from any thread.
- *
- *  @sa @ref platform
- *  @sa @ref glfwPlatformSupported
- *
- *  @since Added in version 3.4.
- *
- *  @ingroup init
- */
-int glfwGetPlatform(void);
 
 /*! @brief Returns whether the library includes support for the specified platform.
  *
@@ -2487,216 +2344,8 @@ void glfwDefaultWindowHints(void);
  */
 void glfwWindowHint(int hint, int value);
 
-/*! @brief Sets the specified window hint to the desired value.
- *
- *  This function sets hints for the next call to @ref glfwCreateWindow.  The
- *  hints, once set, retain their values until changed by a call to this
- *  function or @ref glfwDefaultWindowHints, or until the library is terminated.
- *
- *  Only string type hints can be set with this function.  Integer value hints
- *  are set with @ref glfwWindowHint.
- *
- *  This function does not check whether the specified hint values are valid.
- *  If you set hints to invalid values this will instead be reported by the next
- *  call to @ref glfwCreateWindow.
- *
- *  Some hints are platform specific.  These may be set on any platform but they
- *  will only affect their specific platform.  Other platforms will ignore them.
- *  Setting these hints requires no platform specific headers or functions.
- *
- *  @param[in] hint The [window hint](@ref window_hints) to set.
- *  @param[in] value The new value of the window hint.
- *
- *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED and @ref
- *  GLFW_INVALID_ENUM.
- *
- *  @pointer_lifetime The specified string is copied before this function
- *  returns.
- *
- *  @thread_safety This function must only be called from the main thread.
- *
- *  @sa @ref window_hints
- *  @sa @ref glfwWindowHint
- *  @sa @ref glfwDefaultWindowHints
- *
- *  @since Added in version 3.3.
- *
- *  @ingroup window
- */
-void glfwWindowHintString(int hint, const char* value);
-
-/*! @brief Creates a window and its associated context.
- *
- *  This function creates a window and its associated OpenGL or OpenGL ES
- *  context.  Most of the options controlling how the window and its context
- *  should be created are specified with [window hints](@ref window_hints).
- *
- *  Successful creation does not change which context is current.  Before you
- *  can use the newly created context, you need to
- *  [make it current](@ref context_current).  For information about the `share`
- *  parameter, see @ref context_sharing.
- *
- *  The created window, framebuffer and context may differ from what you
- *  requested, as not all parameters and hints are
- *  [hard constraints](@ref window_hints_hard).  This includes the size of the
- *  window, especially for full screen windows.  To query the actual attributes
- *  of the created window, framebuffer and context, see @ref
- *  glfwGetWindowAttrib, @ref glfwGetWindowSize and @ref glfwGetFramebufferSize.
- *
- *  To create a full screen window, you need to specify the monitor the window
- *  will cover.  If no monitor is specified, the window will be windowed mode.
- *  Unless you have a way for the user to choose a specific monitor, it is
- *  recommended that you pick the primary monitor.  For more information on how
- *  to query connected monitors, see @ref monitor_monitors.
- *
- *  For full screen windows, the specified size becomes the resolution of the
- *  window's _desired video mode_.  As long as a full screen window is not
- *  iconified, the supported video mode most closely matching the desired video
- *  mode is set for the specified monitor.  For more information about full
- *  screen windows, including the creation of so called _windowed full screen_
- *  or _borderless full screen_ windows, see @ref window_windowed_full_screen.
- *
- *  Once you have created the window, you can switch it between windowed and
- *  full screen mode with @ref glfwSetWindowMonitor.  This will not affect its
- *  OpenGL or OpenGL ES context.
- *
- *  By default, newly created windows use the placement recommended by the
- *  window system.  To create the window at a specific position, set the @ref
- *  GLFW_POSITION_X and @ref GLFW_POSITION_Y window hints before creation.  To
- *  restore the default behavior, set either or both hints back to
- *  `GLFW_ANY_POSITION`.
- *
- *  As long as at least one full screen window is not iconified, the screensaver
- *  is prohibited from starting.
- *
- *  Window systems put limits on window sizes.  Very large or very small window
- *  dimensions may be overridden by the window system on creation.  Check the
- *  actual [size](@ref window_size) after creation.
- *
- *  The [swap interval](@ref buffer_swap) is not set during window creation and
- *  the initial value may vary depending on driver settings and defaults.
- *
- *  @param[in] width The desired width, in screen coordinates, of the window.
- *  This must be greater than zero.
- *  @param[in] height The desired height, in screen coordinates, of the window.
- *  This must be greater than zero.
- *  @param[in] title The initial, UTF-8 encoded window title.
- *  @param[in] monitor The monitor to use for full screen mode, or `NULL` for
- *  windowed mode.
- *  @param[in] share The window whose context to share resources with, or `NULL`
- *  to not share resources.
- *  @return The handle of the created window, or `NULL` if an
- *  [error](@ref error_handling) occurred.
- *
- *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED, @ref
- *  GLFW_INVALID_ENUM, @ref GLFW_INVALID_VALUE, @ref GLFW_API_UNAVAILABLE, @ref
- *  GLFW_VERSION_UNAVAILABLE, @ref GLFW_FORMAT_UNAVAILABLE, @ref
- *  GLFW_NO_WINDOW_CONTEXT and @ref GLFW_PLATFORM_ERROR.
- *
- *  @remark @win32 Window creation will fail if the Microsoft GDI software
- *  OpenGL implementation is the only one available.
- *
- *  @remark @win32 If the executable has an icon resource named `GLFW_ICON,` it
- *  will be set as the initial icon for the window.  If no such icon is present,
- *  the `IDI_APPLICATION` icon will be used instead.  To set a different icon,
- *  see @ref glfwSetWindowIcon.
- *
- *  @remark @win32 The context to share resources with must not be current on
- *  any other thread.
- *
- *  @remark @macos The OS only supports core profile contexts for OpenGL
- *  versions 3.2 and later.  Before creating an OpenGL context of version 3.2 or
- *  later you must set the [GLFW_OPENGL_PROFILE](@ref GLFW_OPENGL_PROFILE_hint)
- *  hint accordingly.  OpenGL 3.0 and 3.1 contexts are not supported at all
- *  on macOS.
- *
- *  @remark @macos The GLFW window has no icon, as it is not a document
- *  window, but the dock icon will be the same as the application bundle's icon.
- *  For more information on bundles, see the
- *  [Bundle Programming Guide][bundle-guide] in the Mac Developer Library.
- *
- *  [bundle-guide]: https://developer.apple.com/library/mac/documentation/CoreFoundation/Conceptual/CFBundles/
- *
- *  @remark @macos The window frame will not be rendered at full resolution on
- *  Retina displays unless the
- *  [GLFW_SCALE_FRAMEBUFFER](@ref GLFW_SCALE_FRAMEBUFFER_hint)
- *  hint is `GLFW_TRUE` and the `NSHighResolutionCapable` key is enabled in the
- *  application bundle's `Info.plist`.  For more information, see
- *  [High Resolution Guidelines for OS X][hidpi-guide] in the Mac Developer
- *  Library.  The GLFW test and example programs use a custom `Info.plist`
- *  template for this, which can be found as `CMake/Info.plist.in` in the source
- *  tree.
- *
- *  [hidpi-guide]: https://developer.apple.com/library/mac/documentation/GraphicsAnimation/Conceptual/HighResolutionOSX/Explained/Explained.html
- *
- *  @remark @macos When activating frame autosaving with
- *  [GLFW_COCOA_FRAME_NAME](@ref GLFW_COCOA_FRAME_NAME_hint), the specified
- *  window size and position may be overridden by previously saved values.
- *
- *  @remark @wayland GLFW uses [libdecor][] where available to create its window
- *  decorations.  This in turn uses server-side XDG decorations where available
- *  and provides high quality client-side decorations on compositors like GNOME.
- *  If both XDG decorations and libdecor are unavailable, GLFW falls back to
- *  a very simple set of window decorations that only support moving, resizing
- *  and the window manager's right-click menu.
- *
- *  [libdecor]: https://gitlab.freedesktop.org/libdecor/libdecor
- *
- *  @remark @x11 Some window managers will not respect the placement of
- *  initially hidden windows.
- *
- *  @remark @x11 Due to the asynchronous nature of X11, it may take a moment for
- *  a window to reach its requested state.  This means you may not be able to
- *  query the final size, position or other attributes directly after window
- *  creation.
- *
- *  @remark @x11 The class part of the `WM_CLASS` window property will by
- *  default be set to the window title passed to this function.  The instance
- *  part will use the contents of the `RESOURCE_NAME` environment variable, if
- *  present and not empty, or fall back to the window title.  Set the
- *  [GLFW_X11_CLASS_NAME](@ref GLFW_X11_CLASS_NAME_hint) and
- *  [GLFW_X11_INSTANCE_NAME](@ref GLFW_X11_INSTANCE_NAME_hint) window hints to
- *  override this.
- *
- *  @thread_safety This function must only be called from the main thread.
- *
- *  @sa @ref window_creation
- *  @sa @ref glfwDestroyWindow
- *
- *  @since Added in version 3.0.  Replaces `glfwOpenWindow`.
- *
- *  @ingroup window
- */
 GLFWwindow* glfwCreateWindow(int width, int height, const char* title, GLFWmonitor* monitor);
-
-/*! @brief Destroys the specified window and its context.
- *
- *  This function destroys the specified window and its context.  On calling
- *  this function, no further callbacks will be called for that window.
- *
- *  If the context of the specified window is current on the main thread, it is
- *  detached before being destroyed.
- *
- *  @param[in] window The window to destroy.
- *
- *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED and @ref
- *  GLFW_PLATFORM_ERROR.
- *
- *  @note The context of the specified window must not be current on any other
- *  thread when this function is called.
- *
- *  @reentrancy This function must not be called from a callback.
- *
- *  @thread_safety This function must only be called from the main thread.
- *
- *  @sa @ref window_creation
- *  @sa @ref glfwCreateWindow
- *
- *  @since Added in version 3.0.  Replaces `glfwCloseWindow`.
- *
- *  @ingroup window
- */
-void glfwDestroyWindow(GLFWwindow* window);
+void        glfwDestroyWindow(GLFWwindow* window);
 
 /*! @brief Returns the title of the specified window.
  *
@@ -2872,36 +2521,6 @@ void glfwGetWindowPos(GLFWwindow* window, int* xpos, int* ypos);
  */
 void glfwSetWindowPos(GLFWwindow* window, int xpos, int ypos);
 
-/*! @brief Retrieves the size of the content area of the specified window.
- *
- *  This function retrieves the size, in screen coordinates, of the content area
- *  of the specified window.  If you wish to retrieve the size of the
- *  framebuffer of the window in pixels, see @ref glfwGetFramebufferSize.
- *
- *  Any or all of the size arguments may be `NULL`.  If an error occurs, all
- *  non-`NULL` size arguments will be set to zero.
- *
- *  @param[in] window The window whose size to retrieve.
- *  @param[out] width Where to store the width, in screen coordinates, of the
- *  content area, or `NULL`.
- *  @param[out] height Where to store the height, in screen coordinates, of the
- *  content area, or `NULL`.
- *
- *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED and @ref
- *  GLFW_PLATFORM_ERROR.
- *
- *  @thread_safety This function must only be called from the main thread.
- *
- *  @sa @ref window_size
- *  @sa @ref glfwSetWindowSize
- *
- *  @since Added in version 1.0.
- *  @glfw3 Added window handle parameter.
- *
- *  @ingroup window
- */
-void glfwGetWindowSize(GLFWwindow* window, int* width, int* height);
-
 /*! @brief Sets the size limits of the specified window.
  *
  *  This function sets the size limits of the content area of the specified
@@ -3025,35 +2644,6 @@ void glfwSetWindowAspectRatio(GLFWwindow* window, int numer, int denom);
  *  @ingroup window
  */
 void glfwSetWindowSize(GLFWwindow* window, int width, int height);
-
-/*! @brief Retrieves the size of the framebuffer of the specified window.
- *
- *  This function retrieves the size, in pixels, of the framebuffer of the
- *  specified window.  If you wish to retrieve the size of the window in screen
- *  coordinates, see @ref glfwGetWindowSize.
- *
- *  Any or all of the size arguments may be `NULL`.  If an error occurs, all
- *  non-`NULL` size arguments will be set to zero.
- *
- *  @param[in] window The window whose framebuffer to query.
- *  @param[out] width Where to store the width, in pixels, of the framebuffer,
- *  or `NULL`.
- *  @param[out] height Where to store the height, in pixels, of the framebuffer,
- *  or `NULL`.
- *
- *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED and @ref
- *  GLFW_PLATFORM_ERROR.
- *
- *  @thread_safety This function must only be called from the main thread.
- *
- *  @sa @ref window_fbsize
- *  @sa @ref glfwSetFramebufferSizeCallback
- *
- *  @since Added in version 3.0.
- *
- *  @ingroup window
- */
-void glfwGetFramebufferSize(GLFWwindow* window, int* width, int* height);
 
 /*! @brief Retrieves the size of the frame of the window.
  *
@@ -3209,58 +2799,7 @@ void glfwRestoreWindow(GLFWwindow* window);
  */
 void glfwMaximizeWindow(GLFWwindow* window);
 
-/*! @brief Makes the specified window visible.
- *
- *  This function makes the specified window visible if it was previously
- *  hidden.  If the window is already visible or is in full screen mode, this
- *  function does nothing.
- *
- *  By default, windowed mode windows are focused when shown
- *  Set the [GLFW_FOCUS_ON_SHOW](@ref GLFW_FOCUS_ON_SHOW_hint) window hint
- *  to change this behavior for all newly created windows, or change the
- *  behavior for an existing window with @ref glfwSetWindowAttrib.
- *
- *  @param[in] window The window to make visible.
- *
- *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED and @ref
- *  GLFW_PLATFORM_ERROR.
- *
- *  @remark @wayland Because Wayland wants every frame of the desktop to be
- *  complete, this function does not immediately make the window visible.
- *  Instead it will become visible the next time the window framebuffer is
- *  updated after this call.
- *
- *  @thread_safety This function must only be called from the main thread.
- *
- *  @sa @ref window_hide
- *  @sa @ref glfwHideWindow
- *
- *  @since Added in version 3.0.
- *
- *  @ingroup window
- */
 void glfwShowWindow(GLFWwindow* window);
-
-/*! @brief Hides the specified window.
- *
- *  This function hides the specified window if it was previously visible.  If
- *  the window is already hidden or is in full screen mode, this function does
- *  nothing.
- *
- *  @param[in] window The window to hide.
- *
- *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED and @ref
- *  GLFW_PLATFORM_ERROR.
- *
- *  @thread_safety This function must only be called from the main thread.
- *
- *  @sa @ref window_hide
- *  @sa @ref glfwShowWindow
- *
- *  @since Added in version 3.0.
- *
- *  @ingroup window
- */
 void glfwHideWindow(GLFWwindow* window);
 
 /*! @brief Brings the specified window to front and sets input focus.
