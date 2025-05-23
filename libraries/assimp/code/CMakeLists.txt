@@ -389,23 +389,6 @@ ADD_ASSIMP_IMPORTER( FBX
   AssetLib/FBX/FBXCommon.h
 )
 
-if (NOT ASSIMP_NO_EXPORT)
-
-  ADD_ASSIMP_EXPORTER( OBJ
-    AssetLib/Obj/ObjExporter.h
-    AssetLib/Obj/ObjExporter.cpp)
-
-  if ((NOT ASSIMP_NO_EXPORT) AND ASSIMP_BUILD_M3D_EXPORTER)
-      ADD_ASSIMP_EXPORTER(M3D
-              AssetLib/M3D/M3DExporter.cpp)
-  endif () # if (ASSIMP_BUILD_M3D_EXPORTER)
-
-  ADD_ASSIMP_EXPORTER( PBRT
-    Pbrt/PbrtExporter.h
-    Pbrt/PbrtExporter.cpp)
-
-endif()
-
 SET( PostProcessing_SRCS
   PostProcessing/CalcTangentsProcess.cpp
   PostProcessing/CalcTangentsProcess.h
@@ -471,22 +454,6 @@ SET( PostProcessing_SRCS
   PostProcessing/SplitByBoneCountProcess.h
 )
 SOURCE_GROUP( PostProcessing FILES ${PostProcessing_SRCS})
-
-ADD_ASSIMP_IMPORTER( TERRAGEN
-  AssetLib/Terragen/TerragenLoader.cpp
-  AssetLib/Terragen/TerragenLoader.h
-)
-
-ADD_ASSIMP_IMPORTER( USD
-  AssetLib/USD/USDLoader.cpp
-  AssetLib/USD/USDLoader.h
-  AssetLib/USD/USDLoaderImplTinyusdz.cpp
-  AssetLib/USD/USDLoaderImplTinyusdz.h
-  AssetLib/USD/USDLoaderImplTinyusdzHelper.cpp
-  AssetLib/USD/USDLoaderImplTinyusdzHelper.h
-  AssetLib/USD/USDLoaderUtil.cpp
-  AssetLib/USD/USDLoaderUtil.h
-)
 
 SET(glTFCommon_src
   AssetLib/glTFCommon/glTFCommon.h

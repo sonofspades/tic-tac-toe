@@ -46,26 +46,20 @@ directly (unless you are adding new loaders), instead use the
 corresponding preprocessor flag to selectively disable formats.
 */
 
+#include <cstdlib>
+#include <vector>
 #include <assimp/anim.h>
 #include <assimp/BaseImporter.h>
-#include <vector>
-#include <cstdlib>
 
 // ------------------------------------------------------------------------------------------------
 // Importers
 // (include_new_importers_here)
 // ------------------------------------------------------------------------------------------------
-#if !defined(ASSIMP_BUILD_NO_USD_IMPORTER)
-#include "AssetLib/USD/USDLoader.h"
-#endif
 #ifndef ASSIMP_BUILD_NO_OBJ_IMPORTER
 #include "AssetLib/Obj/ObjFileImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_COLLADA_IMPORTER
 #include "AssetLib/Collada/ColladaLoader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_TERRAGEN_IMPORTER
-#include "AssetLib/Terragen/TerragenLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
 #include "AssetLib/FBX/FBXImporter.h"
@@ -100,18 +94,12 @@ void GetImporterInstanceList(std::vector<BaseImporter *> &out) {
     // Add an instance of each worker class here
     // (register_new_importers_here)
     // ----------------------------------------------------------------------------
-    out.reserve(64);
-#if !defined(ASSIMP_BUILD_NO_USD_IMPORTER)
-    out.push_back(new USDImporter());
-#endif
+    out.reserve(6);
 #if (!defined ASSIMP_BUILD_NO_OBJ_IMPORTER)
     out.push_back(new ObjFileImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_COLLADA_IMPORTER)
     out.push_back(new ColladaLoader());
-#endif
-#if (!defined ASSIMP_BUILD_NO_TERRAGEN_IMPORTER)
-    out.push_back(new TerragenImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_FBX_IMPORTER)
     out.push_back(new FBXImporter());
@@ -122,9 +110,6 @@ void GetImporterInstanceList(std::vector<BaseImporter *> &out) {
 #if (!defined ASSIMP_BUILD_NO_GLTF_IMPORTER && !defined ASSIMP_BUILD_NO_GLTF2_IMPORTER)
     out.push_back(new glTF2Importer());
 #endif
-#if (!defined ASSIMP_BUILD_NO_C4D_IMPORTER)
-    out.push_back(new C4DImporter());
-#endif
 }
 
 /** will delete all registered importers. */
@@ -134,5 +119,4 @@ void DeleteImporterInstanceList(std::vector<BaseImporter *> &deleteList) {
         deleteList[i] = nullptr;
     } //for
 }
-
 } // namespace Assimp

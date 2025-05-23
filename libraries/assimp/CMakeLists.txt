@@ -41,45 +41,6 @@ SET(CMAKE_POLICY_DEFAULT_CMP0092 NEW)
 CMAKE_MINIMUM_REQUIRED( VERSION 3.22 )
 
 #================================================================================#
-#                    Model formats not enabled by default
-#
-#    3rd party projects may not adhere to strict standards enforced by assimp,
-#    in which case those formats must be opt-in; otherwise the 3rd party code
-#    would fail assimp CI checks
-#================================================================================#
-# M3D format import support (assimp integration no longer supported by M3D format author)
-# User may override these in their CMake script to provide M3D import/export support
-# (M3D importer/exporter was disabled for assimp release 5.1 or later)
-option(ASSIMP_BUILD_M3D_IMPORTER "Enable M3D file import" off)
-option(ASSIMP_BUILD_M3D_EXPORTER "Enable M3D file export" off)
-
-# Experimental USD importer: disabled, need to opt-in
-# Note: assimp github PR automatic checks will fail the PR due to compiler warnings in
-# the external, 3rd party tinyusdz code which isn't technically part of the PR since it's
-# auto-cloned during build; so MUST disable the feature or the PR will be rejected
-option(ASSIMP_BUILD_USD_IMPORTER "Enable USD file import" off)
-option(ASSIMP_BUILD_USD_VERBOSE_LOGS "Enable verbose USD import debug logging" off)
-
-# VRML (.wrl/.x3dv) file import support by leveraging X3D importer and 3rd party file
-# format converter to convert .wrl/.x3dv files to X3D-compatible .xml
-# (Need to make this opt-in because 3rd party code triggers lots of CI code quality warnings)
-option(ASSIMP_BUILD_VRML_IMPORTER "Enable VRML (.wrl/.x3dv) file import" off)
-#--------------------------------------------------------------------------------#
-#                  Internal impl for optional model formats
-#--------------------------------------------------------------------------------#
-# Internal/private M3D logic
-if (NOT ASSIMP_BUILD_M3D_IMPORTER)
-    ADD_DEFINITIONS( -DASSIMP_BUILD_NO_M3D_IMPORTER)
-endif () # if (not ASSIMP_BUILD_M3D_IMPORTER)
-if (NOT ASSIMP_BUILD_M3D_EXPORTER)
-    ADD_DEFINITIONS( -DASSIMP_BUILD_NO_M3D_EXPORTER)
-endif () # if (not ASSIMP_BUILD_M3D_EXPORTER)
-
-# Internal/private VRML logic
-if (NOT ASSIMP_BUILD_VRML_IMPORTER)
-    ADD_DEFINITIONS( -DASSIMP_BUILD_NO_VRML_IMPORTER)
-endif () # if (not ASSIMP_BUILD_VRML_IMPORTER)
-#================================================================================#
 
 option(ASSIMP_BUILD_USE_CCACHE "Use ccache to speed up compilation." on)
 
@@ -121,10 +82,6 @@ OPTION( ASSIMP_DOUBLE_PRECISION
 )
 OPTION( ASSIMP_OPT_BUILD_PACKAGES
   "Set to ON to generate CPack configuration files and packaging targets"
-  OFF
-)
-OPTION( ASSIMP_ANDROID_JNIIOSYSTEM
-  "Android JNI IOSystem support is active"
   OFF
 )
 OPTION( ASSIMP_NO_EXPORT
@@ -293,17 +250,6 @@ SET(LIBASSIMP_COMPONENT     "libassimp${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_M
 SET(LIBASSIMP-DEV_COMPONENT "libassimp${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR}.${ASSIMP_VERSION_PATCH}-dev" )
 SET(CPACK_COMPONENTS_ALL assimp-bin ${LIBASSIMP_COMPONENT} ${LIBASSIMP-DEV_COMPONENT} assimp-dev)
 SET(ASSIMP_LIBRARY_SUFFIX "" CACHE STRING "Suffix to append to library names")
-
-IF( UNIX )
-  # Use GNUInstallDirs for Unix predefined directories
-  INCLUDE(GNUInstallDirs)
-  # Ensure that we do not run into issues like http://www.tcm.phy.cam.ac.uk/sw/inodes64.html on 32 bit Linux
-  IF(NOT ${OPERATING_SYSTEM} MATCHES "Android")
-    IF ( CMAKE_SIZEOF_VOID_P EQUAL 4) # only necessary for 32-bit Linux
-      ADD_DEFINITIONS(-D_FILE_OFFSET_BITS=64 )
-    ENDIF()
-  ENDIF()
-ENDIF()
 
 # Grouped compiler settings ########################################
 IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT MINGW AND NOT HAIKU)
@@ -521,10 +467,6 @@ if(ASSIMP_INSTALL)
       COMPONENT ${LIBASSIMP-DEV_COMPONENT}
   )
 endif()
-
-IF( ASSIMP_BUILD_DOCS )
-  ADD_SUBDIRECTORY(doc)
-ENDIF()
 
 # Search for external dependencies, and build them from source if not found
 # Search for zlib
@@ -814,57 +756,6 @@ CONFIGURE_FILE(
   ${CMAKE_CURRENT_LIST_DIR}/include/assimp/config.h.in
   ${CMAKE_CURRENT_BINARY_DIR}/include/assimp/config.h
 )
-
-IF ( ASSIMP_INSTALL )
-  IF(CMAKE_CPACK_COMMAND AND UNIX AND ASSIMP_OPT_BUILD_PACKAGES)
-    # Packing information
-    SET(CPACK_PACKAGE_NAME                    "assimp{ASSIMP_VERSION_MAJOR}.{ASSIMP_VERSION_MINOR}")
-    SET(CPACK_PACKAGE_CONTACT "" CACHE STRING "Package maintainer and PGP signer.")
-    SET(CPACK_PACKAGE_VENDOR                  "https://github.com/assimp")
-    SET(CPACK_PACKAGE_DISPLAY_NAME            "Assimp ${ASSIMP_VERSION}")
-    SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY     " - Open Asset Import Library ${ASSIMP_VERSION}")
-    SET(CPACK_PACKAGE_VERSION                 "${ASSIMP_VERSION}.${ASSIMP_PACKAGE_VERSION}" )
-    SET(CPACK_PACKAGE_VERSION_MAJOR           "${ASSIMP_VERSION_MAJOR}")
-    SET(CPACK_PACKAGE_VERSION_MINOR           "${ASSIMP_VERSION_MINOR}")
-    SET(CPACK_PACKAGE_VERSION_PATCH           "${ASSIMP_VERSION_PATCH}")
-    SET(CPACK_PACKAGE_INSTALL_DIRECTORY       "assimp${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR}")
-    SET(CPACK_RESOURCE_FILE_LICENSE           "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
-
-    STRING(TOUPPER ${LIBASSIMP_COMPONENT}     "LIBASSIMP_COMPONENT_UPPER")
-    STRING(TOUPPER ${LIBASSIMP-DEV_COMPONENT} "LIBASSIMP-DEV_COMPONENT_UPPER")
-
-    SET(CPACK_COMPONENT_ASSIMP-BIN_DISPLAY_NAME                       "tools")
-    SET(CPACK_COMPONENT_ASSIMP-BIN_DEPENDS                            "${LIBASSIMP_COMPONENT}" )
-    SET(CPACK_COMPONENT_${LIBASSIMP_COMPONENT_UPPER}_DISPLAY_NAME     "libraries")
-    SET(CPACK_COMPONENT_${LIBASSIMP-DEV_COMPONENT_UPPER}_DISPLAY_NAME "common headers and installs")
-    SET(CPACK_COMPONENT_${LIBASSIMP-DEV_COMPONENT_UPPER}_DEPENDS $    "{LIBASSIMP_COMPONENT}" )
-    SET(CPACK_COMPONENT_ASSIMP-DEV_DISPLAY_NAME                       "${CPACK_COMPONENT_${LIBASSIMP-DEV_COMPONENT}_DISPLAY_NAME}" )
-    SET(CPACK_COMPONENT_ASSIMP-DEV_DEPENDS                            "${LIBASSIMP-DEV_COMPONENT}" )
-    SET(CPACK_DEBIAN_BUILD_DEPENDS debhelper cmake zlib1g-dev pkg-config)
-
-    # debian
-    SET(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
-    SET(CPACK_DEBIAN_CMAKE_OPTIONS    "-DBUILD_ASSIMP_SAMPLES:BOOL=${ASSIMP_BUILD_SAMPLES}")
-    SET(CPACK_DEBIAN_PACKAGE_SECTION  "libs" )
-    SET(CPACK_DEBIAN_PACKAGE_DEPENDS  "${CPACK_COMPONENTS_ALL}")
-    SET(CPACK_DEBIAN_PACKAGE_SUGGESTS)
-    SET(CPACK_DEBIAN_PACKAGE_NAME     "assimp")
-    SET(CPACK_DEBIAN_PACKAGE_REMOVE_SOURCE_FILES contrib/gtest contrib/zlib workspaces test doc obj samples packaging)
-    SET(CPACK_DEBIAN_PACKAGE_SOURCE_COPY svn export --force)
-    SET(CPACK_DEBIAN_CHANGELOG)
-    execute_process(COMMAND lsb_release -is
-      OUTPUT_VARIABLE _lsb_distribution OUTPUT_STRIP_TRAILING_WHITESPACE
-      RESULT_VARIABLE _lsb_release_failed)
-    SET(CPACK_DEBIAN_DISTRIBUTION_NAME ${_lsb_distribution} CACHE STRING "Name of the distrubiton")
-    STRING(TOLOWER ${CPACK_DEBIAN_DISTRIBUTION_NAME} CPACK_DEBIAN_DISTRIBUTION_NAME)
-    IF( ${CPACK_DEBIAN_DISTRIBUTION_NAME} STREQUAL "ubuntu" )
-      SET(CPACK_DEBIAN_DISTRIBUTION_RELEASES lucid maverick natty oneiric precise CACHE STRING "Release code-names of the distrubiton release")
-    ENDIF()
-    SET(DPUT_HOST "" CACHE STRING "PPA repository to upload the debian sources")
-    INCLUDE(CPack)
-    INCLUDE(DebSourcePPA)
-  ENDIF()
-ENDIF()
 
 if(WIN32)
   if (CMAKE_SIZEOF_VOID_P EQUAL 8)
