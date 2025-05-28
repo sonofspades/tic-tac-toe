@@ -1,30 +1,18 @@
+#include <core/file.hpp>
+
 #include <opengl/buffer.hpp>
 #include <opengl/commands.hpp>
 #include <opengl/functions.hpp>
 #include <opengl/pipeline.hpp>
+#include <opengl/shader.hpp>
 #include <opengl/vertex_array.hpp>
 
+#include <opengl/constants/buffer.hpp>
 #include <opengl/constants/commands.hpp>
+#include <opengl/constants/pipeline.hpp>
+#include <opengl/constants/shader.hpp>
 
-auto vertex_stage_text =
-"#version 450\n"
-"layout (location = 0) in vec3 position;\n"
-"layout (location = 0) uniform mat4 proj;\n"
-"layout (location = 1) uniform mat4 view;\n"
-"layout (location = 2) uniform mat4 model;\n"
-"void main()\n"
-"{\n"
-"    gl_Position = proj * view * model * vec4(position, 1.0);\n"
-"}\n";
-
-auto fragment_stage_text =
-"#version 450\n"
-"out vec4 color;\n"
-"layout (location = 3) uniform vec3 u_color;\n"
-"void main()\n"
-"{\n"
-"    color = vec4(u_color, 1.0);\n"
-"}\n";
+#include <shaders/converter.hpp>
 
 std::vector<glm::vec3> debug_vertices;
 
@@ -117,6 +105,8 @@ auto check_win(const int32_t type) ->  void
 
 auto main() -> int
 {
+    shaders::Converter::convert("../../resources/shaders", "./");
+
     static auto cursor_x = 0.0f;
     static auto cursor_y = 0.0f;
 
@@ -213,24 +203,25 @@ auto main() -> int
 
     glfwMakeContextCurrent(window);
 
-    gladLoadGL();
-
     opengl::Functions::init();
 
-    const auto vert_stage = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vert_stage, 1, &vertex_stage_text, nullptr);
-    glCompileShader(vert_stage);
+    opengl::ShaderStage base_shader_vert;
+    base_shader_vert.type(opengl::constants::vertex_shader);
+    base_shader_vert.create();
+    base_shader_vert.source(core::File::read("default_base_shader.vert", std::ios::binary));
 
-    const auto frag_stage = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(frag_stage, 1, &fragment_stage_text, nullptr);
-    glCompileShader(frag_stage);
+    opengl::ShaderStage base_shader_frag;
+    base_shader_frag.type(opengl::constants::fragment_shader);
+    base_shader_frag.create();
+    base_shader_frag.source(core::File::read("default_base_shader.frag", std::ios::binary));
 
-    const auto shader = glCreateProgram();
-    glAttachShader(shader, vert_stage);
-    glAttachShader(shader, frag_stage);
-    glLinkProgram(shader);
+    opengl::Shader base_shader;
+    base_shader.create();
+    base_shader.attach(base_shader_vert);
+    base_shader.attach(base_shader_frag);
+    base_shader.link();
 
-    constexpr core::vertex_array::attribute position_attribute { 0, 3, GL_FLOAT, 0 };
+    constexpr core::vertex_array::attribute position_attribute { 0, 3, opengl::constants::float_type, 0 };
 
     Assimp::Importer o_importer;
 
@@ -242,14 +233,14 @@ auto main() -> int
 
     for (auto i = 0; i < o_mesh->mNumVertices; i++)
     {
-        auto vertex = o_mesh->mVertices[i];
+        const auto& vertex = o_mesh->mVertices[i];
 
         o_vertices.emplace_back(vertex.x, vertex.y, vertex.z);
     }
 
     for (auto i = 0; i < o_mesh->mNumFaces; i++)
     {
-        const auto face = o_mesh->mFaces[i];
+        const auto& face = o_mesh->mFaces[i];
 
         o_elements.push_back(face.mIndices[0]);
         o_elements.push_back(face.mIndices[1]);
@@ -281,14 +272,14 @@ auto main() -> int
 
     for (auto i = 0; i < x_mesh->mNumVertices; i++)
     {
-        auto vertex = x_mesh->mVertices[i];
+        const auto& vertex = x_mesh->mVertices[i];
 
         x_vertices.emplace_back(vertex.x, vertex.y, vertex.z);
     }
 
     for (auto i = 0; i < x_mesh->mNumFaces; i++)
     {
-        const auto face = x_mesh->mFaces[i];
+        const auto& face = x_mesh->mFaces[i];
 
         x_elements.push_back(face.mIndices[0]);
         x_elements.push_back(face.mIndices[1]);
@@ -320,14 +311,14 @@ auto main() -> int
 
     for (auto i = 0; i < grid_mesh->mNumVertices; i++)
     {
-        auto vertex = grid_mesh->mVertices[i];
+        const auto& vertex = grid_mesh->mVertices[i];
 
         grid_vertices.emplace_back(vertex.x, vertex.y, vertex.z);
     }
 
     for (auto i = 0; i < grid_mesh->mNumFaces; i++)
     {
-        const auto face = grid_mesh->mFaces[i];
+        const auto& face = grid_mesh->mFaces[i];
 
         grid_elements.push_back(face.mIndices[0]);
         grid_elements.push_back(face.mIndices[1]);
@@ -349,9 +340,34 @@ auto main() -> int
 
     grid_vao.attribute(position_attribute);
 
-    constexpr auto tile_size = 1.5f;
-
     proj = glm::perspective(glm::radians(60.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.1f, 100.0f);
+    view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -4.0f));
+
+    glm::mat4 model { 1.0f };
+
+    glm::vec3 material_albedo { 1.0f };
+
+    std::vector camera_uniforms
+    {
+        view, proj
+    };
+
+    opengl::Buffer transform_ubo;
+    transform_ubo.create();
+    transform_ubo.storage(core::buffer::make_data(&model), opengl::constants::dynamic_draw);
+    transform_ubo.bind_base(opengl::constants::uniform_buffer, core::buffer::transform);
+
+    opengl::Buffer camera_ubo;
+    camera_ubo.create();
+    camera_ubo.storage(core::buffer::make_data(camera_uniforms), opengl::constants::dynamic_draw);
+    camera_ubo.bind_base(opengl::constants::uniform_buffer, core::buffer::camera);
+
+    opengl::Buffer material_ubo;
+    material_ubo.create();
+    material_ubo.storage(core::buffer::make_data(&material_albedo), opengl::constants::dynamic_draw);
+    material_ubo.bind_base(opengl::constants::uniform_buffer, core::buffer::material);
+
+    constexpr auto tile_size = 1.5f;
 
     world = new btCollisionWorld(new btCollisionDispatcher(new btDefaultCollisionConfiguration()), new btDbvtBroadphase(), new btDefaultCollisionConfiguration());
     world->setDebugDrawer(new PhysicsDebug());
@@ -391,7 +407,8 @@ auto main() -> int
 
     debug_vao.attribute(position_attribute);
 
-    opengl::Pipeline::enable(GL_DEPTH_TEST);
+    opengl::Pipeline::enable(opengl::constants::depth_test);
+    opengl::Pipeline::enable(opengl::constants::cull_face);
 
     glm::vec3    x_color { 1.0f, 0.8392156862745098f, 0.22745098039215686f };
     glm::vec3    o_color { 0.9686274509803922f, 0.35294117647058826f, 0.35294117647058826f };
@@ -401,21 +418,19 @@ auto main() -> int
     {
         glfwPollEvents();
 
-        glUseProgram(shader);
+        base_shader.bind();
 
-             view  = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -4.0f));
-        auto model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f,  0.0f));
+        model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f,  0.0f));
 
-        glUniformMatrix4fv(2, 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(proj));
-        glUniformMatrix4fv(1, 1, GL_FALSE, glm::value_ptr(view));
+        transform_ubo.update(core::buffer::make_data(&model));
 
         if (is_editor)
         {
             opengl::Commands::clear(0.5f, 0.5f, 0.5f, 1.0f);
             opengl::Commands::clear(opengl::constants::color_buffer | opengl::constants::depth_buffer);
 
-            glUniform3fv(3, 1, glm::value_ptr(glm::vec3(0.0f, 1.0f, 0.0f)));
+            material_albedo = glm::vec3(0.0f, 1.0f, 0.0f);
+            material_ubo.update(core::buffer::make_data(&material_albedo));
 
             debug_vao.bind();
 
@@ -427,7 +442,8 @@ auto main() -> int
             opengl::Commands::clear(opengl::constants::color_buffer | opengl::constants::depth_buffer);
         }
 
-        glUniform3fv(3, 1, glm::value_ptr(grid_color));
+        material_albedo = glm::vec3(0.0f, 1.0f, 0.0f);
+        material_ubo.update(core::buffer::make_data(&grid_color));
 
         grid_vao.bind();
 
@@ -442,11 +458,11 @@ auto main() -> int
 
                 model = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, 0.0f));
 
-                glUniformMatrix4fv(2, 1, GL_FALSE, glm::value_ptr(model));
+                transform_ubo.update(core::buffer::make_data(&model));
 
                 if (tiles[row][col] == tile_x)
                 {
-                    glUniform3fv(3, 1, glm::value_ptr(x_color));
+                    material_ubo.update(core::buffer::make_data(&x_color));
 
                     x_vao.bind();
 
@@ -454,7 +470,7 @@ auto main() -> int
                 }
                 else if (tiles[row][col] == tile_o)
                 {
-                    glUniform3fv(3, 1, glm::value_ptr(o_color));
+                    material_ubo.update(core::buffer::make_data(&o_color));
 
                     o_vao.bind();
 
@@ -481,10 +497,10 @@ auto main() -> int
     debug_vao.destroy();
     debug_vbo.destroy();
 
-    glDeleteShader(vert_stage);
-    glDeleteShader(frag_stage);
+    base_shader_vert.destroy();
+    base_shader_frag.destroy();
 
-    glDeleteProgram(shader);
+    base_shader.destroy();
 
     glfwDestroyWindow(window);
     glfwTerminate();
