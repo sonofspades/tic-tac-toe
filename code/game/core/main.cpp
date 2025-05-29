@@ -340,12 +340,12 @@ auto main() -> int32_t
 
     grid_vao.attribute(position_attribute);
 
-    proj = glm::perspective(glm::radians(60.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.1f, 100.0f);
-    view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -4.0f));
-
     glm::mat4 model { 1.0f };
 
     glm::vec3 material_albedo { 1.0f };
+
+    proj = glm::perspective(glm::radians(60.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.1f, 100.0f);
+    view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -4.0f));
 
     std::vector camera_uniforms
     {
