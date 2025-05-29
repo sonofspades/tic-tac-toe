@@ -103,9 +103,9 @@ auto check_win(const int32_t type) ->  void
     is_end = check_diagonals(type);
 }
 
-auto main() -> int
+auto main() -> int32_t
 {
-    shaders::Converter::convert("../../resources/shaders", "./");
+    shaders::Converter::convert("../../resources/shaders", ".");
 
     static auto cursor_x = 0.0f;
     static auto cursor_y = 0.0f;
@@ -196,7 +196,7 @@ auto main() -> int
         }
     });
 
-    glfwSetWindowCloseCallback(window, []() -> void
+    glfwSetWindowCloseCallback(window, []
     {
         window_closed = true;
     });
