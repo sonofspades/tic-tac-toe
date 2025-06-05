@@ -14,30 +14,6 @@
 
 #include <shaders/converter.hpp>
 
-std::vector<glm::vec3> debug_vertices;
-
-class PhysicsDebug : public btIDebugDraw
-{
-public:
-    void drawLine(const btVector3& from, const btVector3& to, const btVector3& color) override
-    {
-        debug_vertices.emplace_back(from.x(), from.y(), from.z());
-        debug_vertices.emplace_back(to.x(), to.y(), to.z());
-    }
-
-    void clearLines() override
-    {
-        debug_vertices.clear();
-    }
-
-    void drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color) override { }
-    void reportErrorWarning(const char* warningString) override { }
-    void setDebugMode(int debugMode) override { }
-    int  getDebugMode() const override { return DBG_DrawWireframe; }
-};
-
-auto is_editor = false;
-
 int32_t tiles[3][3] { };
 auto x_turn = true;
 auto is_end = false;
@@ -107,13 +83,13 @@ auto main() -> int32_t
 {
     shaders::Converter::convert("../../resources/shaders", ".");
 
-    static auto cursor_x = 0.0f;
-    static auto cursor_y = 0.0f;
-
-    static auto window_closed = false;
-
     constexpr auto window_width  = 1000;
     constexpr auto window_height = 1000;
+
+       static auto window_closed = false;
+
+       static auto cursor_x = 0.0f;
+       static auto cursor_y = 0.0f;
 
     if (glfwInit() != GLFW_TRUE)
     {
@@ -138,11 +114,6 @@ auto main() -> int32_t
 
             x_turn = true;
             is_end = false;
-        }
-
-        if (key == GLFW_KEY_TAB && action == GLFW_PRESS)
-        {
-            is_editor = !is_editor;
         }
 
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
@@ -370,7 +341,6 @@ auto main() -> int32_t
     constexpr auto tile_size = 1.5f;
 
     world = new btCollisionWorld(new btCollisionDispatcher(new btDefaultCollisionConfiguration()), new btDbvtBroadphase(), new btDefaultCollisionConfiguration());
-    world->setDebugDrawer(new PhysicsDebug());
 
     auto tile_shape = std::make_unique<btBoxShape>(btVector3(0.5f, 0.5f, 0.105f));
 
@@ -395,18 +365,6 @@ auto main() -> int32_t
         }
     }
 
-    world->debugDrawWorld();
-
-    opengl::Buffer debug_vbo;
-    debug_vbo.create();
-    debug_vbo.storage(core::buffer::make_data(debug_vertices));
-
-    opengl::VertexArray debug_vao;
-    debug_vao.create();
-    debug_vao.attach_vertices(debug_vbo, sizeof(glm::vec3));
-
-    debug_vao.attribute(position_attribute);
-
     opengl::Pipeline::enable(opengl::constants::depth_test);
     opengl::Pipeline::enable(opengl::constants::cull_face);
 
@@ -424,23 +382,8 @@ auto main() -> int32_t
 
         transform_ubo.update(core::buffer::make_data(&model));
 
-        if (is_editor)
-        {
-            opengl::Commands::clear(0.5f, 0.5f, 0.5f, 1.0f);
-            opengl::Commands::clear(opengl::constants::color_buffer | opengl::constants::depth_buffer);
-
-            material_albedo = glm::vec3(0.0f, 1.0f, 0.0f);
-            material_ubo.update(core::buffer::make_data(&material_albedo));
-
-            debug_vao.bind();
-
-            opengl::Commands::draw_vertices(opengl::constants::lines, debug_vertices.size());
-        }
-        else
-        {
-            opengl::Commands::clear(0.42745098039215684f, 0.8823529411764706f, 0.8235294117647058f, 1.0f);
-            opengl::Commands::clear(opengl::constants::color_buffer | opengl::constants::depth_buffer);
-        }
+        opengl::Commands::clear(0.42745098039215684f, 0.8823529411764706f, 0.8235294117647058f, 1.0f);
+        opengl::Commands::clear(opengl::constants::color_buffer | opengl::constants::depth_buffer);
 
         material_albedo = glm::vec3(0.0f, 1.0f, 0.0f);
         material_ubo.update(core::buffer::make_data(&grid_color));
@@ -493,9 +436,6 @@ auto main() -> int32_t
     grid_vao.destroy();
     grid_vbo.destroy();
     grid_ebo.destroy();
-
-    debug_vao.destroy();
-    debug_vbo.destroy();
 
     base_shader_vert.destroy();
     base_shader_frag.destroy();
