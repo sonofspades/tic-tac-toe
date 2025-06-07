@@ -14,6 +14,8 @@
 
 #include <shaders/converter.hpp>
 
+#include "piece_type.hpp"
+
 int32_t tiles[3][3] { };
 auto x_turn = true;
 auto is_end = false;
@@ -22,13 +24,6 @@ btCollisionWorld* world;
 
 glm::mat4 view;
 glm::mat4 proj;
-
-enum tile_type
-{
-    tile_empty,
-    tile_x,
-    tile_o
-};
 
 auto check_row(const int32_t row, const int32_t type) -> bool
 {
@@ -108,7 +103,7 @@ auto main() -> int32_t
             {
                 for (auto col = 0; col < 3; col++)
                 {
-                    tiles[row][col] = tile_empty;
+                    tiles[row][col] = piece_empty;
                 }
             }
 
@@ -148,17 +143,17 @@ auto main() -> int32_t
                 const auto row = result.m_collisionObject->getUserIndex();
                 const auto col = result.m_collisionObject->getUserIndex2();
 
-                if (tiles[row][col] == tile_empty)
+                if (tiles[row][col] == piece_empty)
                 {
                     if (x_turn)
                     {
-                        tiles[row][col] = tile_x;
-                        check_win(tile_x);
+                        tiles[row][col] = piece_x;
+                        check_win(piece_x);
                     }
                     else
                     {
-                        tiles[row][col] = tile_o;
-                        check_win(tile_o);
+                        tiles[row][col] = piece_o;
+                        check_win(piece_o);
                     }
 
                     x_turn = !x_turn;
@@ -403,7 +398,7 @@ auto main() -> int32_t
 
                 transform_ubo.update(core::buffer::make_data(&model));
 
-                if (tiles[row][col] == tile_x)
+                if (tiles[row][col] == piece_x)
                 {
                     material_ubo.update(core::buffer::make_data(&x_color));
 
@@ -411,7 +406,7 @@ auto main() -> int32_t
 
                     opengl::Commands::draw_elements(opengl::constants::triangles, x_elements.size());
                 }
-                else if (tiles[row][col] == tile_o)
+                else if (tiles[row][col] == piece_o)
                 {
                     material_ubo.update(core::buffer::make_data(&o_color));
 
