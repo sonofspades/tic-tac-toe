@@ -189,13 +189,14 @@ auto main() -> int32_t
 
     constexpr core::vertex_array::attribute position_attribute { 0, 3, opengl::constants::float_type, 0 };
 
-    Assimp::Importer o_importer;
+    Assimp::Importer pieces_importer;
 
     std::vector<glm::vec3> o_vertices;
     std::vector<uint32_t>  o_elements;
 
-    const auto o_scene = o_importer.ReadFile("o.obj", 0);
-    const auto o_mesh  = o_scene->mMeshes[0];
+    const auto pieces = pieces_importer.ReadFile("grid_pieces.obj", 0);
+    const auto o_mesh = pieces->mMeshes[1];
+    const auto x_mesh = pieces->mMeshes[0];
 
     for (auto i = 0; i < o_mesh->mNumVertices; i++)
     {
@@ -228,13 +229,8 @@ auto main() -> int32_t
 
     o_vao.attribute(position_attribute);
 
-    Assimp::Importer x_importer;
-
     std::vector<glm::vec3> x_vertices;
     std::vector<uint32_t>  x_elements;
-
-    const auto x_scene = x_importer.ReadFile("x.obj", 0);
-    const auto x_mesh  = x_scene->mMeshes[0];
 
     for (auto i = 0; i < x_mesh->mNumVertices; i++)
     {
@@ -247,9 +243,9 @@ auto main() -> int32_t
     {
         const auto& face = x_mesh->mFaces[i];
 
-        x_elements.push_back(face.mIndices[0]);
-        x_elements.push_back(face.mIndices[1]);
-        x_elements.push_back(face.mIndices[2]);
+        x_elements.emplace_back(face.mIndices[0]);
+        x_elements.emplace_back(face.mIndices[1]);
+        x_elements.emplace_back(face.mIndices[2]);
     }
 
     opengl::Buffer x_vbo;
@@ -286,9 +282,9 @@ auto main() -> int32_t
     {
         const auto& face = grid_mesh->mFaces[i];
 
-        grid_elements.push_back(face.mIndices[0]);
-        grid_elements.push_back(face.mIndices[1]);
-        grid_elements.push_back(face.mIndices[2]);
+        grid_elements.emplace_back(face.mIndices[0]);
+        grid_elements.emplace_back(face.mIndices[1]);
+        grid_elements.emplace_back(face.mIndices[2]);
     }
 
     opengl::Buffer grid_vbo;
