@@ -367,17 +367,15 @@ auto main() -> int32_t
     {
         glfwPollEvents();
 
-        base_shader.bind();
-
-        model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f,  0.0f));
-
-        transform_ubo.update(core::buffer::make_data(&model));
-
         opengl::Commands::clear(0.42745098039215684f, 0.8823529411764706f, 0.8235294117647058f, 1.0f);
         opengl::Commands::clear(opengl::constants::color_buffer | opengl::constants::depth_buffer);
 
-        material_albedo = glm::vec3(0.0f, 1.0f, 0.0f);
-        material_ubo.update(core::buffer::make_data(&grid_color));
+        base_shader.bind();
+
+        model = glm::mat4(1.0f);
+
+        transform_ubo.update(core::buffer::make_data(&model));
+         material_ubo.update(core::buffer::make_data(&grid_color));
 
         grid_vao.bind();
 
