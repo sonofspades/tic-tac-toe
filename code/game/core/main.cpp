@@ -209,9 +209,9 @@ auto main() -> int32_t
     {
         const auto& face = o_mesh->mFaces[i];
 
-        o_elements.push_back(face.mIndices[0]);
-        o_elements.push_back(face.mIndices[1]);
-        o_elements.push_back(face.mIndices[2]);
+        o_elements.emplace_back(face.mIndices[0]);
+        o_elements.emplace_back(face.mIndices[1]);
+        o_elements.emplace_back(face.mIndices[2]);
     }
 
     opengl::Buffer o_vbo;
