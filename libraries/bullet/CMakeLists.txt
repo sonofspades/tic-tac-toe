@@ -457,7 +457,6 @@ ELSE()
 	ENDIF()
 ENDIF()
 
-
 IF(INSTALL_LIBS)
 	#INSTALL of other files requires CMake 2.6
 	IF(BUILD_EXTRAS)
