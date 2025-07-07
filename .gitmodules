@@ -4,3 +4,6 @@
 [submodule "modules/resources"]
 	path = modules/resources
 	url = https://github.com/sonofspades/resources-module.git
+[submodule "modules/shaders"]
+	path = modules/shaders
+	url = https://github.com/sonofspades/shaders-module.git

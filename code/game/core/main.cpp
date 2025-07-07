@@ -1,5 +1,3 @@
-#include <core/file.hpp>
-
 #include <opengl/buffer.hpp>
 #include <opengl/commands.hpp>
 #include <opengl/functions.hpp>
@@ -12,11 +10,12 @@
 #include <opengl/constants/pipeline.hpp>
 #include <opengl/constants/shader.hpp>
 
-#include <shaders/converter.hpp>
+#include <core/file.hpp>
+#include <core/shaders_converter.hpp>
 
 #include "piece_type.hpp"
 
-int32_t tiles[3][3] { };
+piece_type tiles[3][3] { };
 auto x_turn = true;
 auto is_end = false;
 
@@ -76,7 +75,7 @@ auto check_win(const int32_t type) ->  void
 
 auto main() -> int32_t
 {
-    shaders::Converter::convert("../../resources/shaders", ".");
+    core::ShadersConverter::convert(SHADERS_MODULE_PATH, "./shaders");
 
     constexpr auto window_width  = 1000;
     constexpr auto window_height = 1000;
@@ -103,7 +102,7 @@ auto main() -> int32_t
             {
                 for (auto col = 0; col < 3; col++)
                 {
-                    tiles[row][col] = piece_empty;
+                    tiles[row][col] = piece_type::empty;
                 }
             }
 
@@ -143,17 +142,17 @@ auto main() -> int32_t
                 const auto row = result.m_collisionObject->getUserIndex();
                 const auto col = result.m_collisionObject->getUserIndex2();
 
-                if (tiles[row][col] == piece_empty)
+                if (tiles[row][col] == piece_type::empty)
                 {
                     if (x_turn)
                     {
-                        tiles[row][col] = piece_x;
-                        check_win(piece_x);
+                        tiles[row][col] = piece_type::x;
+                        check_win(piece_type::x);
                     }
                     else
                     {
-                        tiles[row][col] = piece_o;
-                        check_win(piece_o);
+                        tiles[row][col] = piece_type::o;
+                        check_win(piece_type::o);
                     }
 
                     x_turn = !x_turn;
@@ -174,12 +173,12 @@ auto main() -> int32_t
     opengl::ShaderStage base_shader_vert;
     base_shader_vert.type(opengl::constants::vertex_shader);
     base_shader_vert.create();
-    base_shader_vert.source(core::File::read("base_shader.vert", std::ios::binary));
+    base_shader_vert.source(core::File::read("shaders/base_shader.vert", std::ios::binary));
 
     opengl::ShaderStage base_shader_frag;
     base_shader_frag.type(opengl::constants::fragment_shader);
     base_shader_frag.create();
-    base_shader_frag.source(core::File::read("base_shader.frag", std::ios::binary));
+    base_shader_frag.source(core::File::read("shaders/base_shader.frag", std::ios::binary));
 
     opengl::Shader base_shader;
     base_shader.create();
@@ -392,7 +391,7 @@ auto main() -> int32_t
 
                 transform_ubo.update(core::buffer::make_data(&model));
 
-                if (tiles[row][col] == piece_x)
+                if (tiles[row][col] == piece_type::x)
                 {
                     material_ubo.update(core::buffer::make_data(&x_color));
 
@@ -400,7 +399,7 @@ auto main() -> int32_t
 
                     opengl::Commands::draw_elements(opengl::constants::triangles, x_elements.size());
                 }
-                else if (tiles[row][col] == piece_o)
+                else if (tiles[row][col] == piece_type::o)
                 {
                     material_ubo.update(core::buffer::make_data(&o_color));
 
