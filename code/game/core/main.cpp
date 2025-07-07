@@ -13,9 +13,10 @@
 #include <core/file.hpp>
 #include <core/shaders_converter.hpp>
 
-#include "piece_type.hpp"
+#include "board.hpp"
 
-piece_type tiles[3][3] { };
+Board board;
+
 auto x_turn = true;
 auto is_end = false;
 
@@ -26,26 +27,26 @@ glm::mat4 proj;
 
 auto check_row(const int32_t row, const int32_t type) -> bool
 {
-    return tiles[row][0] == type &&
-           tiles[row][1] == type &&
-           tiles[row][2] == type;
+    return board.pieces[row][0].type == type &&
+           board.pieces[row][1].type == type &&
+           board.pieces[row][2].type == type;
 }
 
 auto check_col(const int32_t col, const int32_t type) -> bool
 {
-    return tiles[0][col] == type &&
-           tiles[1][col] == type &&
-           tiles[2][col] == type;
+    return board.pieces[0][col].type == type &&
+           board.pieces[1][col].type == type &&
+           board.pieces[2][col].type == type;
 }
 
 auto check_diagonals(const int32_t type) -> bool
 {
-    return tiles[0][0] == type &&
-           tiles[1][1] == type &&
-           tiles[2][2] == type ||
-           tiles[0][2] == type &&
-           tiles[1][1] == type &&
-           tiles[2][0] == type;
+    return board.pieces[0][0].type == type &&
+           board.pieces[1][1].type == type &&
+           board.pieces[2][2].type == type ||
+           board.pieces[0][2].type == type &&
+           board.pieces[1][1].type == type &&
+           board.pieces[2][0].type == type;
 }
 
 auto check_win(const int32_t type) ->  void
@@ -102,7 +103,7 @@ auto main() -> int32_t
             {
                 for (auto col = 0; col < 3; col++)
                 {
-                    tiles[row][col] = piece_type::empty;
+                    board.pieces[row][col].type = piece_type::empty;
                 }
             }
 
@@ -142,16 +143,16 @@ auto main() -> int32_t
                 const auto row = result.m_collisionObject->getUserIndex();
                 const auto col = result.m_collisionObject->getUserIndex2();
 
-                if (tiles[row][col] == piece_type::empty)
+                if (board.pieces[row][col].type == piece_type::empty)
                 {
                     if (x_turn)
                     {
-                        tiles[row][col] = piece_type::x;
+                        board.pieces[row][col].type = piece_type::x;
                         check_win(piece_type::x);
                     }
                     else
                     {
-                        tiles[row][col] = piece_type::o;
+                        board.pieces[row][col].type = piece_type::o;
                         check_win(piece_type::o);
                     }
 
@@ -391,7 +392,7 @@ auto main() -> int32_t
 
                 transform_ubo.update(core::buffer::make_data(&model));
 
-                if (tiles[row][col] == piece_type::x)
+                if (board.pieces[row][col].type == piece_type::x)
                 {
                     material_ubo.update(core::buffer::make_data(&x_color));
 
@@ -399,7 +400,7 @@ auto main() -> int32_t
 
                     opengl::Commands::draw_elements(opengl::constants::triangles, x_elements.size());
                 }
-                else if (tiles[row][col] == piece_type::o)
+                else if (board.pieces[row][col].type == piece_type::o)
                 {
                     material_ubo.update(core::buffer::make_data(&o_color));
 
