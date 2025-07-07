@@ -25,13 +25,6 @@ btCollisionWorld* world;
 glm::mat4 view;
 glm::mat4 proj;
 
-auto check_row(const int32_t row, const int32_t type) -> bool
-{
-    return board.pieces[row][0].type == type &&
-           board.pieces[row][1].type == type &&
-           board.pieces[row][2].type == type;
-}
-
 auto check_col(const int32_t col, const int32_t type) -> bool
 {
     return board.pieces[0][col].type == type &&
@@ -53,7 +46,7 @@ auto check_win(const int32_t type) ->  void
 {
     for (auto row = 0; row < 3; row++)
     {
-        is_end = check_row(row, type);
+        is_end = board.check_row(row, static_cast<piece_type>(type));
 
         if (is_end)
         {
@@ -342,6 +335,8 @@ auto main() -> int32_t
             const auto x = -tile_size + col * tile_size;
             const auto y =  tile_size - row * tile_size;
 
+            board.pieces[row][col].position = { x, y, 0.0f };
+
             btTransform transform;
             transform.setIdentity();
             transform.setOrigin(btVector3(x, y, 0.0f));
@@ -385,14 +380,13 @@ auto main() -> int32_t
         {
             for (auto col = 0; col < 3; col++)
             {
-                const auto x = -tile_size + col * tile_size;
-                const auto y =  tile_size - row * tile_size;
+                const auto& piece = board.pieces[row][col];
 
-                model = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, 0.0f));
+                model = glm::translate(glm::mat4(1.0f), piece.position);
 
                 transform_ubo.update(core::buffer::make_data(&model));
 
-                if (board.pieces[row][col].type == piece_type::x)
+                if (piece.type == x)
                 {
                     material_ubo.update(core::buffer::make_data(&x_color));
 
@@ -400,7 +394,7 @@ auto main() -> int32_t
 
                     opengl::Commands::draw_elements(opengl::constants::triangles, x_elements.size());
                 }
-                else if (board.pieces[row][col].type == piece_type::o)
+                else if (piece.type == o)
                 {
                     material_ubo.update(core::buffer::make_data(&o_color));
 
