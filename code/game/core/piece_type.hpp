@@ -2,7 +2,7 @@
 
 enum piece_type
 {
-    empty,
+    none,
     x,
     o
 };

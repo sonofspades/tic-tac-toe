@@ -25,13 +25,6 @@ btCollisionWorld* world;
 glm::mat4 view;
 glm::mat4 proj;
 
-auto check_col(const int32_t col, const int32_t type) -> bool
-{
-    return board.pieces[0][col].type == type &&
-           board.pieces[1][col].type == type &&
-           board.pieces[2][col].type == type;
-}
-
 auto check_diagonals(const int32_t type) -> bool
 {
     return board.pieces[0][0].type == type &&
@@ -56,7 +49,7 @@ auto check_win(const int32_t type) ->  void
 
     for (auto col = 0; col < 3; col++)
     {
-        is_end = check_col(col, type);
+        is_end = board.check_col(col, static_cast<piece_type>(type));
 
         if (is_end)
         {
@@ -96,7 +89,7 @@ auto main() -> int32_t
             {
                 for (auto col = 0; col < 3; col++)
                 {
-                    board.pieces[row][col].type = piece_type::empty;
+                    board.pieces[row][col].type = piece_type::none;
                 }
             }
 
@@ -136,7 +129,7 @@ auto main() -> int32_t
                 const auto row = result.m_collisionObject->getUserIndex();
                 const auto col = result.m_collisionObject->getUserIndex2();
 
-                if (board.pieces[row][col].type == piece_type::empty)
+                if (board.pieces[row][col].type == piece_type::none)
                 {
                     if (x_turn)
                     {
@@ -322,18 +315,18 @@ auto main() -> int32_t
     material_ubo.storage(core::buffer::make_data(&material_albedo), opengl::constants::dynamic_draw);
     material_ubo.bind_base(opengl::constants::uniform_buffer, core::buffer::material);
 
-    constexpr auto tile_size = 1.5f;
-
     world = new btCollisionWorld(new btCollisionDispatcher(new btDefaultCollisionConfiguration()), new btDbvtBroadphase(), new btDefaultCollisionConfiguration());
 
     auto tile_shape = std::make_unique<btBoxShape>(btVector3(0.5f, 0.5f, 0.105f));
 
     for (auto row = 0; row < 3; row++)
     {
+        constexpr auto   tile_size = 1.5f;
+        const auto  x = -tile_size + row * tile_size;
+
         for (auto col = 0; col < 3; col++)
         {
-            const auto x = -tile_size + col * tile_size;
-            const auto y =  tile_size - row * tile_size;
+            const auto y = tile_size - col * tile_size;
 
             board.pieces[row][col].position = { x, y, 0.0f };
 
@@ -380,13 +373,13 @@ auto main() -> int32_t
         {
             for (auto col = 0; col < 3; col++)
             {
-                const auto& piece = board.pieces[row][col];
+                const auto& [piece_position, piece_type] = board.pieces[row][col];
 
-                model = glm::translate(glm::mat4(1.0f), piece.position);
+                model = glm::translate(glm::mat4(1.0f), piece_position);
 
                 transform_ubo.update(core::buffer::make_data(&model));
 
-                if (piece.type == x)
+                if (piece_type == x)
                 {
                     material_ubo.update(core::buffer::make_data(&x_color));
 
@@ -394,7 +387,7 @@ auto main() -> int32_t
 
                     opengl::Commands::draw_elements(opengl::constants::triangles, x_elements.size());
                 }
-                else if (piece.type == o)
+                else if (piece_type == o)
                 {
                     material_ubo.update(core::buffer::make_data(&o_color));
 
