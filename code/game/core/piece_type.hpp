@@ -1,6 +1,6 @@
 #pragma once
 
-enum piece_type
+enum class piece_type
 {
     none,
     x,

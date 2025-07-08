@@ -5,6 +5,8 @@
 class Board
 {
 public:
+    auto reset() -> void;
+
     auto check_win(int32_t row, int32_t col, piece_type type) -> bool;
 
     auto check_row(int32_t row, piece_type type) const -> bool;

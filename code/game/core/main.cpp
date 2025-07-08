@@ -25,7 +25,7 @@ btCollisionWorld* world;
 glm::mat4 view;
 glm::mat4 proj;
 
-auto check_diagonals(const int32_t type) -> bool
+auto check_diagonals(const piece_type type) -> bool
 {
     return board.pieces[0][0].type == type &&
            board.pieces[1][1].type == type &&
@@ -35,11 +35,11 @@ auto check_diagonals(const int32_t type) -> bool
            board.pieces[2][0].type == type;
 }
 
-auto check_win(const int32_t type) ->  void
+auto check_win(const piece_type type) ->  void
 {
     for (auto row = 0; row < 3; row++)
     {
-        is_end = board.check_row(row, static_cast<piece_type>(type));
+        is_end = board.check_row(row, type);
 
         if (is_end)
         {
@@ -49,7 +49,7 @@ auto check_win(const int32_t type) ->  void
 
     for (auto col = 0; col < 3; col++)
     {
-        is_end = board.check_col(col, static_cast<piece_type>(type));
+        is_end = board.check_col(col, type);
 
         if (is_end)
         {
@@ -85,13 +85,7 @@ auto main() -> int32_t
     {
         if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
         {
-            for (auto row = 0; row < 3; row++)
-            {
-                for (auto col = 0; col < 3; col++)
-                {
-                    board.pieces[row][col].type = piece_type::none;
-                }
-            }
+            board.reset();
 
             x_turn = true;
             is_end = false;
@@ -379,7 +373,7 @@ auto main() -> int32_t
 
                 transform_ubo.update(core::buffer::make_data(&model));
 
-                if (piece_type == x)
+                if (piece_type == piece_type::x)
                 {
                     material_ubo.update(core::buffer::make_data(&x_color));
 
@@ -387,7 +381,7 @@ auto main() -> int32_t
 
                     opengl::Commands::draw_elements(opengl::constants::triangles, x_elements.size());
                 }
-                else if (piece_type == o)
+                else if (piece_type == piece_type::o)
                 {
                     material_ubo.update(core::buffer::make_data(&o_color));
 

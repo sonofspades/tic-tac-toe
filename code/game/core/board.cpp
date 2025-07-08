@@ -1,5 +1,16 @@
 #include "board.hpp"
 
+auto Board::reset() -> void
+{
+    for (auto row = 0; row < 3; row++)
+    {
+        for (auto col = 0; col < 3; col++)
+        {
+            pieces[row][col].type = piece_type::none;
+        }
+    }
+}
+
 auto Board::check_row(const int32_t row, const piece_type type) const -> bool
 {
     return pieces[row][0].type == type &&
