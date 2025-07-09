@@ -20,10 +20,10 @@ Board board;
 auto x_turn = true;
 auto is_end = false;
 
-btCollisionWorld* world;
-
 glm::mat4 view;
 glm::mat4 proj;
+
+btCollisionWorld* bt_world;
 
 auto check_diagonals(const piece_type type) -> bool
 {
@@ -64,10 +64,10 @@ auto main() -> int32_t
 {
     core::ShadersConverter::convert(SHADERS_MODULE_PATH, "./shaders");
 
-    constexpr auto window_width  = 1000;
-    constexpr auto window_height = 1000;
+    constexpr auto window_width  { 1000 };
+    constexpr auto window_height { 1000 };
 
-       static auto window_closed = false;
+       static auto window_closed { false };
 
        static auto cursor_x = 0.0f;
        static auto cursor_y = 0.0f;
@@ -117,7 +117,7 @@ auto main() -> int32_t
             const btVector3   to(  end.x,   end.y,   end.z);
 
             btCollisionWorld::ClosestRayResultCallback result(from, to);
-                                               world->rayTest(from, to, result);
+                                               bt_world->rayTest(from, to, result);
             if (result.hasHit())
             {
                 const auto row = result.m_collisionObject->getUserIndex();
@@ -174,7 +174,7 @@ auto main() -> int32_t
     std::vector<glm::vec3> o_vertices;
     std::vector<uint32_t>  o_elements;
 
-    const auto pieces = pieces_importer.ReadFile("grid_pieces.obj", 0);
+    const auto pieces = pieces_importer.ReadFile("models/grid_pieces.obj", 0);
     const auto o_mesh = pieces->mMeshes[1];
     const auto x_mesh = pieces->mMeshes[0];
 
@@ -248,7 +248,7 @@ auto main() -> int32_t
     std::vector<glm::vec3> grid_vertices;
     std::vector<uint32_t>  grid_elements;
 
-    const auto grid_scene = grid_importer.ReadFile("grid.obj", 0);
+    const auto grid_scene = grid_importer.ReadFile("models/grid.obj", 0);
     const auto grid_mesh  = grid_scene->mMeshes[0];
 
     for (auto i = 0; i < grid_mesh->mNumVertices; i++)
@@ -309,32 +309,33 @@ auto main() -> int32_t
     material_ubo.storage(core::buffer::make_data(&material_albedo), opengl::constants::dynamic_draw);
     material_ubo.bind_base(opengl::constants::uniform_buffer, core::buffer::material);
 
-    world = new btCollisionWorld(new btCollisionDispatcher(new btDefaultCollisionConfiguration()), new btDbvtBroadphase(), new btDefaultCollisionConfiguration());
+    auto bt_default_configuration = new btDefaultCollisionConfiguration();
+         bt_world = new btCollisionWorld(new btCollisionDispatcher(bt_default_configuration), new btDbvtBroadphase(), bt_default_configuration);
 
     auto tile_shape = std::make_unique<btBoxShape>(btVector3(0.5f, 0.5f, 0.105f));
 
     for (auto row = 0; row < 3; row++)
     {
-        constexpr auto   tile_size = 1.5f;
-        const auto  x = -tile_size + row * tile_size;
+        constexpr auto       piece_size = 1.5f;
+        const     auto  x = -piece_size + row * piece_size;
 
         for (auto col = 0; col < 3; col++)
         {
-            const auto y = tile_size - col * tile_size;
+            const auto y = piece_size - col * piece_size;
 
             board.pieces[row][col].position = { x, y, 0.0f };
 
-            btTransform transform;
-            transform.setIdentity();
-            transform.setOrigin(btVector3(x, y, 0.0f));
+            btTransform bt_transform;
+            bt_transform.setIdentity();
+            bt_transform.setOrigin(btVector3(x, y, 0.0f));
 
-            auto tile_object = new btCollisionObject();
-            tile_object->setCollisionShape(tile_shape.get());
-            tile_object->setWorldTransform(transform);
-            tile_object->setUserIndex(row);
-            tile_object->setUserIndex2(col);
+            auto bt_collision_object = new btCollisionObject();
+            bt_collision_object->setCollisionShape(tile_shape.get());
+            bt_collision_object->setWorldTransform(bt_transform);
+            bt_collision_object->setUserIndex(row);
+            bt_collision_object->setUserIndex2(col);
 
-            world->addCollisionObject(tile_object);
+            bt_world->addCollisionObject(bt_collision_object);
         }
     }
 

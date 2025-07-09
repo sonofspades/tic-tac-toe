@@ -1,6 +1,12 @@
+[submodule "modules/common"]
+	path = modules/common
+	url = https://github.com/sonofspades/common-module.git
 [submodule "modules/graphics"]
 	path = modules/graphics
 	url = https://github.com/sonofspades/graphics-module.git
+[submodule "modules/platforms"]
+    path = modules/platforms
+    url = https://github.com/sonofspades/platforms-module.git
 [submodule "modules/resources"]
 	path = modules/resources
 	url = https://github.com/sonofspades/resources-module.git
