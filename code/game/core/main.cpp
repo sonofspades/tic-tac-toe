@@ -23,8 +23,6 @@ auto is_end = false;
 glm::mat4 view;
 glm::mat4 proj;
 
-btCollisionWorld* bt_world;
-
 auto check_diagonals(const piece_type type) -> bool
 {
     return board.pieces[0][0].type == type &&
@@ -72,6 +70,8 @@ auto main() -> int32_t
        static auto cursor_x = 0.0f;
        static auto cursor_y = 0.0f;
 
+       static btCollisionWorld* bt_world { };
+
     if (glfwInit() != GLFW_TRUE)
     {
         return -1;
@@ -80,6 +80,11 @@ auto main() -> int32_t
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
     const auto window = glfwCreateWindow(window_width, window_height, "Tic-Tac-Toe", nullptr);
+
+    if (window == nullptr)
+    {
+        return -1;
+    }
 
     glfwSetKeyCallback(window, [](const int key, int, const int action, int) -> void
     {
