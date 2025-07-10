@@ -23,41 +23,6 @@ auto is_end = false;
 glm::mat4 view;
 glm::mat4 proj;
 
-auto check_diagonals(const piece_type type) -> bool
-{
-    return board.pieces[0][0].type == type &&
-           board.pieces[1][1].type == type &&
-           board.pieces[2][2].type == type ||
-           board.pieces[0][2].type == type &&
-           board.pieces[1][1].type == type &&
-           board.pieces[2][0].type == type;
-}
-
-auto check_win(const piece_type type) ->  void
-{
-    for (auto row = 0; row < 3; row++)
-    {
-        is_end = board.check_row(row, type);
-
-        if (is_end)
-        {
-            return;
-        }
-    }
-
-    for (auto col = 0; col < 3; col++)
-    {
-        is_end = board.check_col(col, type);
-
-        if (is_end)
-        {
-            return;
-        }
-    }
-
-    is_end = check_diagonals(type);
-}
-
 auto main() -> int32_t
 {
     core::ShadersConverter::convert(SHADERS_MODULE_PATH, "./shaders");
@@ -70,7 +35,7 @@ auto main() -> int32_t
        static auto cursor_x = 0.0f;
        static auto cursor_y = 0.0f;
 
-       static btCollisionWorld* bt_world { };
+       static std::unique_ptr<btCollisionWorld> bt_world;
 
     if (glfwInit() != GLFW_TRUE)
     {
@@ -132,13 +97,13 @@ auto main() -> int32_t
                 {
                     if (x_turn)
                     {
-                        board.pieces[row][col].type = piece_type::x;
-                        check_win(piece_type::x);
+                                 board.pieces[row][col].type = piece_type::x;
+                        is_end = board.check_win(row, col, piece_type::x);
                     }
                     else
                     {
                         board.pieces[row][col].type = piece_type::o;
-                        check_win(piece_type::o);
+                        is_end = board.check_win(row, col, piece_type::o);
                     }
 
                     x_turn = !x_turn;
@@ -315,7 +280,7 @@ auto main() -> int32_t
     material_ubo.bind_base(opengl::constants::uniform_buffer, core::buffer::material);
 
     auto bt_default_configuration = new btDefaultCollisionConfiguration();
-         bt_world = new btCollisionWorld(new btCollisionDispatcher(bt_default_configuration), new btDbvtBroadphase(), bt_default_configuration);
+         bt_world = std::make_unique<btCollisionWorld>(new btCollisionDispatcher(bt_default_configuration), new btDbvtBroadphase(), bt_default_configuration);
 
     auto tile_shape = std::make_unique<btBoxShape>(btVector3(0.5f, 0.5f, 0.105f));
 
@@ -379,21 +344,30 @@ auto main() -> int32_t
 
                 transform_ubo.update(core::buffer::make_data(&model));
 
-                if (piece_type == piece_type::x)
+                switch (piece_type)
                 {
-                    material_ubo.update(core::buffer::make_data(&x_color));
+                    case piece_type::x:
+                    {
+                        x_vao.bind();
 
-                    x_vao.bind();
+                        material_ubo.update(core::buffer::make_data(&x_color));
 
-                    opengl::Commands::draw_elements(opengl::constants::triangles, x_elements.size());
-                }
-                else if (piece_type == piece_type::o)
-                {
-                    material_ubo.update(core::buffer::make_data(&o_color));
+                        opengl::Commands::draw_elements(opengl::constants::triangles, x_elements.size());
 
-                    o_vao.bind();
+                        break;
+                    }
+                    case piece_type::o:
+                    {
+                        o_vao.bind();
 
-                    opengl::Commands::draw_elements(opengl::constants::triangles, o_elements.size());
+                        material_ubo.update(core::buffer::make_data(&o_color));
+
+                        opengl::Commands::draw_elements(opengl::constants::triangles, o_elements.size());
+
+                        break;
+                    }
+                    default:
+                        break;
                 }
             }
         }
