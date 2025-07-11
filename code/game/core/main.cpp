@@ -25,7 +25,7 @@ glm::mat4 proj;
 
 auto main() -> int32_t
 {
-    core::ShadersConverter::convert(SHADERS_MODULE_PATH, "./shaders");
+    core::ShadersConverter::convert(SHADERS_MODULE_PATH, "shaders");
 
     constexpr auto window_width  { 1000 };
     constexpr auto window_height { 1000 };
@@ -60,11 +60,6 @@ auto main() -> int32_t
             x_turn = true;
             is_end = false;
         }
-
-        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        {
-            window_closed = true;
-        }
     });
 
     glfwSetCursorPosCallback(window, [](const double x, const double y) -> void
@@ -87,7 +82,7 @@ auto main() -> int32_t
             const btVector3   to(  end.x,   end.y,   end.z);
 
             btCollisionWorld::ClosestRayResultCallback result(from, to);
-                                               bt_world->rayTest(from, to, result);
+                                            bt_world->rayTest(from, to, result);
             if (result.hasHit())
             {
                 const auto row = result.m_collisionObject->getUserIndex();
@@ -312,9 +307,9 @@ auto main() -> int32_t
     opengl::Pipeline::enable(opengl::constants::depth_test);
     opengl::Pipeline::enable(opengl::constants::cull_face);
 
-    glm::vec3    x_color { 1.0f, 0.8392156862745098f, 0.22745098039215686f };
+    glm::vec3    x_color { 1.0f,                0.8392156862745098f,  0.22745098039215686f };
     glm::vec3    o_color { 0.9686274509803922f, 0.35294117647058826f, 0.35294117647058826f };
-    glm::vec3 grid_color { 1.0f, 0.6627450980392157f, 0.3333333333333333f };
+    glm::vec3 grid_color { 1.0f,                0.6627450980392157f,  0.3333333333333333f };
 
     opengl::Commands::clear(0.42745098039215684f, 0.8823529411764706f, 0.8235294117647058f);
 
