@@ -51,7 +51,7 @@ auto main() -> int32_t
         return -1;
     }
 
-    glfwSetKeyCallback(window, [](const int key, int, const int action, int) -> void
+    glfwSetKeyCallback(window, [](const int32_t key, const int32_t action, int) -> void
     {
         if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
         {
@@ -316,11 +316,12 @@ auto main() -> int32_t
     glm::vec3    o_color { 0.9686274509803922f, 0.35294117647058826f, 0.35294117647058826f };
     glm::vec3 grid_color { 1.0f, 0.6627450980392157f, 0.3333333333333333f };
 
+    opengl::Commands::clear(0.42745098039215684f, 0.8823529411764706f, 0.8235294117647058f);
+
     while (!window_closed)
     {
         glfwPollEvents();
 
-        opengl::Commands::clear(0.42745098039215684f, 0.8823529411764706f, 0.8235294117647058f, 1.0f);
         opengl::Commands::clear(opengl::constants::color_buffer | opengl::constants::depth_buffer);
 
         base_shader.bind();
