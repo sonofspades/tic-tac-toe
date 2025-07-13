@@ -11,6 +11,7 @@
 #include <opengl/constants/shader.hpp>
 
 #include <core/file.hpp>
+#include <core/geometry.hpp>
 #include <core/shaders_converter.hpp>
 
 #include "board.hpp"
@@ -134,11 +135,11 @@ auto main() -> int32_t
 
     constexpr core::vertex_array::attribute position_attribute { 0, 3, opengl::constants::float_type, 0 };
 
-    Assimp::Importer pieces_importer;
+    core::geometry<glm::vec3, core::primitive::triangle>    o_geometry;
+    core::geometry<glm::vec3, core::primitive::triangle>    x_geometry;
+    core::geometry<glm::vec3, core::primitive::triangle> grid_geometry;
 
-    std::vector<glm::vec3> o_vertices;
-    std::vector<uint32_t>  o_elements;
-
+       Assimp::Importer pieces_importer;
     const auto pieces = pieces_importer.ReadFile("models/grid_pieces.obj", 0);
     const auto o_mesh = pieces->mMeshes[1];
     const auto x_mesh = pieces->mMeshes[0];
@@ -147,25 +148,23 @@ auto main() -> int32_t
     {
         const auto& vertex = o_mesh->mVertices[i];
 
-        o_vertices.emplace_back(vertex.x, vertex.y, vertex.z);
+        o_geometry.vertices.emplace_back(vertex.x, vertex.y, vertex.z);
     }
 
     for (auto i = 0; i < o_mesh->mNumFaces; i++)
     {
         const auto& face = o_mesh->mFaces[i];
 
-        o_elements.emplace_back(face.mIndices[0]);
-        o_elements.emplace_back(face.mIndices[1]);
-        o_elements.emplace_back(face.mIndices[2]);
+        o_geometry.elements.emplace_back(face.mIndices[0], face.mIndices[1], face.mIndices[2]);
     }
 
     opengl::Buffer o_vbo;
     o_vbo.create();
-    o_vbo.storage(core::buffer::make_data(o_vertices));
+    o_vbo.storage(core::buffer::make_data(o_geometry.vertices));
 
     opengl::Buffer o_ebo;
     o_ebo.create();
-    o_ebo.storage(core::buffer::make_data(o_elements));
+    o_ebo.storage(core::buffer::make_data(o_geometry.elements));
 
     opengl::VertexArray o_vao;
     o_vao.create();
@@ -174,32 +173,27 @@ auto main() -> int32_t
 
     o_vao.attribute(position_attribute);
 
-    std::vector<glm::vec3> x_vertices;
-    std::vector<uint32_t>  x_elements;
-
     for (auto i = 0; i < x_mesh->mNumVertices; i++)
     {
         const auto& vertex = x_mesh->mVertices[i];
 
-        x_vertices.emplace_back(vertex.x, vertex.y, vertex.z);
+        x_geometry.vertices.emplace_back(vertex.x, vertex.y, vertex.z);
     }
 
     for (auto i = 0; i < x_mesh->mNumFaces; i++)
     {
         const auto& face = x_mesh->mFaces[i];
 
-        x_elements.emplace_back(face.mIndices[0]);
-        x_elements.emplace_back(face.mIndices[1]);
-        x_elements.emplace_back(face.mIndices[2]);
+        x_geometry.elements.emplace_back(face.mIndices[0], face.mIndices[1], face.mIndices[2]);
     }
 
     opengl::Buffer x_vbo;
     x_vbo.create();
-    x_vbo.storage(core::buffer::make_data(x_vertices));
+    x_vbo.storage(core::buffer::make_data(x_geometry.vertices));
 
     opengl::Buffer x_ebo;
     x_ebo.create();
-    x_ebo.storage(core::buffer::make_data(x_elements));
+    x_ebo.storage(core::buffer::make_data(x_geometry.elements));
 
     opengl::VertexArray x_vao;
     x_vao.create();
@@ -208,11 +202,7 @@ auto main() -> int32_t
 
     x_vao.attribute(position_attribute);
 
-    Assimp::Importer grid_importer;
-
-    std::vector<glm::vec3> grid_vertices;
-    std::vector<uint32_t>  grid_elements;
-
+           Assimp::Importer grid_importer;
     const auto grid_scene = grid_importer.ReadFile("models/grid.obj", 0);
     const auto grid_mesh  = grid_scene->mMeshes[0];
 
@@ -220,25 +210,23 @@ auto main() -> int32_t
     {
         const auto& vertex = grid_mesh->mVertices[i];
 
-        grid_vertices.emplace_back(vertex.x, vertex.y, vertex.z);
+        grid_geometry.vertices.emplace_back(vertex.x, vertex.y, vertex.z);
     }
 
     for (auto i = 0; i < grid_mesh->mNumFaces; i++)
     {
         const auto& face = grid_mesh->mFaces[i];
 
-        grid_elements.emplace_back(face.mIndices[0]);
-        grid_elements.emplace_back(face.mIndices[1]);
-        grid_elements.emplace_back(face.mIndices[2]);
+        grid_geometry.elements.emplace_back(face.mIndices[0], face.mIndices[1], face.mIndices[2]);
     }
 
     opengl::Buffer grid_vbo;
     grid_vbo.create();
-    grid_vbo.storage(core::buffer::make_data(grid_vertices));
+    grid_vbo.storage(core::buffer::make_data(grid_geometry.vertices));
 
     opengl::Buffer grid_ebo;
     grid_ebo.create();
-    grid_ebo.storage(core::buffer::make_data(grid_elements));
+    grid_ebo.storage(core::buffer::make_data(grid_geometry.elements));
 
     opengl::VertexArray grid_vao;
     grid_vao.create();
@@ -328,7 +316,7 @@ auto main() -> int32_t
 
         grid_vao.bind();
 
-        opengl::Commands::draw_elements(opengl::constants::triangles, grid_elements.size());
+        opengl::Commands::draw_elements(opengl::constants::triangles, grid_geometry.elements.size() * core::primitive::triangle::elements);
 
         for (auto row = 0; row < 3; row++)
         {
@@ -348,7 +336,7 @@ auto main() -> int32_t
 
                         material_ubo.update(core::buffer::make_data(&x_color));
 
-                        opengl::Commands::draw_elements(opengl::constants::triangles, x_elements.size());
+                        opengl::Commands::draw_elements(opengl::constants::triangles, x_geometry.elements.size() * core::primitive::triangle::elements);
 
                         break;
                     }
@@ -358,7 +346,7 @@ auto main() -> int32_t
 
                         material_ubo.update(core::buffer::make_data(&o_color));
 
-                        opengl::Commands::draw_elements(opengl::constants::triangles, o_elements.size());
+                        opengl::Commands::draw_elements(opengl::constants::triangles, o_geometry.elements.size() * core::primitive::triangle::elements);
 
                         break;
                     }
