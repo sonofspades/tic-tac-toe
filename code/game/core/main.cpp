@@ -16,13 +16,8 @@
 
 #include "board.hpp"
 
-Board board;
-
 auto x_turn = true;
 auto is_end = false;
-
-glm::mat4 view;
-glm::mat4 proj;
 
 auto main() -> int32_t
 {
@@ -52,6 +47,8 @@ auto main() -> int32_t
         return -1;
     }
 
+    static Board board;
+
     glfwSetKeyCallback(window, [](const int32_t key, const int32_t action, int) -> void
     {
         if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
@@ -69,14 +66,20 @@ auto main() -> int32_t
         cursor_y = y;
     });
 
+    static core::data::camera camera_data
+    {
+        glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -4.0f)),
+        glm::perspective(glm::radians(60.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.1f, 100.0f)
+    };
+
     glfwSetMouseButtonCallback(window, [](const int button, const int action, const int) -> void
     {
         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && !is_end)
         {
             constexpr glm::vec4 viewport { 0.0f, 0.0f, window_width, window_height };
 
-            auto start = glm::unProject(glm::vec3(cursor_x, window_height - cursor_y, -1.0f), view, proj, viewport);
-            auto end   = glm::unProject(glm::vec3(cursor_x, window_height - cursor_y,  1.0f), view, proj, viewport);
+            auto start = glm::unProject(glm::vec3(cursor_x, window_height - cursor_y, -1.0f), camera_data.view, camera_data.proj, viewport);
+            auto end   = glm::unProject(glm::vec3(cursor_x, window_height - cursor_y,  1.0f), camera_data.view, camera_data.proj, viewport);
                  end   = start + glm::normalize(end - start) * 1000.0f;
 
             const btVector3 from(start.x, start.y, start.z);
@@ -239,14 +242,6 @@ auto main() -> int32_t
 
     glm::vec3 material_albedo { 1.0f };
 
-    proj = glm::perspective(glm::radians(60.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.1f, 100.0f);
-    view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -4.0f));
-
-    std::vector camera_uniforms
-    {
-        view, proj
-    };
-
     opengl::Buffer transform_ubo;
     transform_ubo.create();
     transform_ubo.storage(core::buffer::make_data(&model), opengl::constants::dynamic_draw);
@@ -254,7 +249,7 @@ auto main() -> int32_t
 
     opengl::Buffer camera_ubo;
     camera_ubo.create();
-    camera_ubo.storage(core::buffer::make_data(camera_uniforms), opengl::constants::dynamic_draw);
+    camera_ubo.storage(core::buffer::make_data(&camera_data), opengl::constants::dynamic_draw);
     camera_ubo.bind_base(opengl::constants::uniform_buffer, core::buffer::camera);
 
     opengl::Buffer material_ubo;
