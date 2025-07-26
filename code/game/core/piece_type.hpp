@@ -1,8 +1,11 @@
 #pragma once
 
-enum class piece_type
+namespace core
 {
-    none,
-    x,
-    o
-};
+    enum class piece_type
+    {
+        none,
+        x,
+        o
+    };
+}

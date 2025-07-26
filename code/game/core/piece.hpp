@@ -2,11 +2,15 @@
 
 #include "piece_type.hpp"
 
-struct piece
+namespace core
 {
-     glm::vec3 position;
-    piece_type type { };
+    struct piece
+    {
+        piece_type type;
 
-    // TODO move the position a little closer to the center
-    // TODO make the winner row/column white? and maybe blinking
-};
+         glm::vec3 position;
+
+        // TODO move the position a little closer to the center
+        // TODO make the winner row/column white? and maybe blinking
+    };
+}

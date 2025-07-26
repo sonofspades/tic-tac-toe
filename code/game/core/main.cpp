@@ -11,7 +11,6 @@
 #include <opengl/constants/shader.hpp>
 
 #include <core/file.hpp>
-#include <core/geometry.hpp>
 #include <core/shaders_converter.hpp>
 
 #include "board.hpp"
@@ -33,6 +32,8 @@ auto main() -> int32_t
 
        static std::unique_ptr<btCollisionWorld> bt_world;
 
+      static core::Board board;
+
     if (glfwInit() != GLFW_TRUE)
     {
         return -1;
@@ -46,8 +47,6 @@ auto main() -> int32_t
     {
         return -1;
     }
-
-    static Board board;
 
     glfwSetKeyCallback(window, [](const int32_t key, const int32_t action, int) -> void
     {
@@ -89,20 +88,23 @@ auto main() -> int32_t
                                             bt_world->rayTest(from, to, result);
             if (result.hasHit())
             {
-                const auto row = result.m_collisionObject->getUserIndex();
-                const auto col = result.m_collisionObject->getUserIndex2();
-
-                if (board.pieces[row][col].type == piece_type::none)
+                core::data::grid_position position
                 {
-                    if (x_turn)
+                    result.m_collisionObject->getUserIndex(),
+                    result.m_collisionObject->getUserIndex2()
+                };
+
+                if (board.at(position).type == core::piece_type::none)
+                {
+                    if (x_turn) // TODO make some piece type variable and use the code just once
                     {
-                                 board.pieces[row][col].type = piece_type::x;
-                        is_end = board.check_win(row, col, piece_type::x);
+                                 board.at(position).type = core::piece_type::x;
+                        is_end = board.check_win(position, core::piece_type::x);
                     }
                     else
                     {
-                        board.pieces[row][col].type = piece_type::o;
-                        is_end = board.check_win(row, col, piece_type::o);
+                                 board.at(position).type = core::piece_type::o;
+                        is_end = board.check_win(position, core::piece_type::o);
                     }
 
                     x_turn = !x_turn;
@@ -138,9 +140,9 @@ auto main() -> int32_t
 
     constexpr core::vertex_array::attribute position_attribute { 0, 3, opengl::constants::float_type, 0 };
 
-    core::geometry<glm::vec3, core::primitive::triangle>    o_geometry;
-    core::geometry<glm::vec3, core::primitive::triangle>    x_geometry;
-    core::geometry<glm::vec3, core::primitive::triangle> grid_geometry;
+    core::data::geometry<glm::vec3, core::primitive::triangle>    o_geometry;
+    core::data::geometry<glm::vec3, core::primitive::triangle>    x_geometry;
+    core::data::geometry<glm::vec3, core::primitive::triangle> grid_geometry;
 
        Assimp::Importer pieces_importer;
     const auto pieces = pieces_importer.ReadFile("models/grid_pieces.obj", 0);
@@ -262,16 +264,16 @@ auto main() -> int32_t
 
     auto tile_shape = std::make_unique<btBoxShape>(btVector3(0.5f, 0.5f, 0.105f));
 
-    for (auto row = 0; row < 3; row++)
+    for (auto row = 0; row < core::Board::rows(); row++)
     {
         constexpr auto       piece_size = 1.5f;
         const     auto  x = -piece_size + row * piece_size;
 
-        for (auto col = 0; col < 3; col++)
+        for (auto col = 0; col < core::Board::cols(); col++)
         {
             const auto y = piece_size - col * piece_size;
 
-            board.pieces[row][col].position = { x, y, 0.0f };
+            board.at({ row, col }).position = { x, y, 0.0f };
 
             btTransform bt_transform;
             bt_transform.setIdentity();
@@ -313,41 +315,36 @@ auto main() -> int32_t
 
         opengl::Commands::draw_elements(opengl::constants::triangles, grid_geometry.elements.size() * core::primitive::triangle::elements);
 
-        for (auto row = 0; row < 3; row++)
+        for (auto& [piece_type, piece_position] : board)
         {
-            for (auto col = 0; col < 3; col++)
+            model = glm::translate(glm::mat4(1.0f), piece_position);
+
+            transform_ubo.update(core::buffer::make_data(&model));
+
+            switch (piece_type)
             {
-                const auto& [piece_position, piece_type] = board.pieces[row][col];
-
-                model = glm::translate(glm::mat4(1.0f), piece_position);
-
-                transform_ubo.update(core::buffer::make_data(&model));
-
-                switch (piece_type)
+                case core::piece_type::x:
                 {
-                    case piece_type::x:
-                    {
-                        x_vao.bind();
+                    material_ubo.update(core::buffer::make_data(&x_color));
 
-                        material_ubo.update(core::buffer::make_data(&x_color));
+                    x_vao.bind();
 
-                        opengl::Commands::draw_elements(opengl::constants::triangles, x_geometry.elements.size() * core::primitive::triangle::elements);
+                    opengl::Commands::draw_elements(opengl::constants::triangles, x_geometry.elements.size() * core::primitive::triangle::elements);
 
-                        break;
-                    }
-                    case piece_type::o:
-                    {
-                        o_vao.bind();
-
-                        material_ubo.update(core::buffer::make_data(&o_color));
-
-                        opengl::Commands::draw_elements(opengl::constants::triangles, o_geometry.elements.size() * core::primitive::triangle::elements);
-
-                        break;
-                    }
-                    default:
-                        break;
+                    break;
                 }
+                case core::piece_type::o:
+                {
+                    material_ubo.update(core::buffer::make_data(&o_color));
+
+                    o_vao.bind();
+
+                    opengl::Commands::draw_elements(opengl::constants::triangles, o_geometry.elements.size() * core::primitive::triangle::elements);
+
+                    break;
+                }
+                default:
+                    break;
             }
         }
 
